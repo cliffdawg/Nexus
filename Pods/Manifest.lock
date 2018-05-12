@@ -1,0 +1,38 @@
+PODS:
+  - ChameleonFramework/Default (2.1.0)
+  - ChameleonFramework/Swift (2.1.0):
+    - ChameleonFramework/Default
+  - Hero (1.0.1)
+  - HGPlaceholders (0.2.6)
+  - IQKeyboardManagerSwift (5.0.7)
+  - PanelKit (2.0.1)
+  - TextFieldEffects (1.4.0)
+  - TinyConstraints (3.1.0)
+  - ViewAnimator (1.0.2)
+  - Whisper (6.0.2)
+
+DEPENDENCIES:
+  - ChameleonFramework/Swift
+  - Hero
+  - HGPlaceholders
+  - IQKeyboardManagerSwift
+  - PanelKit
+  - TextFieldEffects
+  - TinyConstraints
+  - ViewAnimator
+  - Whisper
+
+SPEC CHECKSUMS:
+  ChameleonFramework: d21a3cc247abfe5e37609a283a8238b03575cf64
+  Hero: cee286821578e170d8c0c9c9cda7897357401112
+  HGPlaceholders: b05be87025781e6fe9f7739d3529f2209b92ed80
+  IQKeyboardManagerSwift: 30fb3a61de1af53a95e02b80fb54ed0a19d5ede5
+  PanelKit: d05cecac1ab39af375b56ff21c7b5a9915a3eb5b
+  TextFieldEffects: 4ee41b5216e674d55fb6ac25107bf1af7629176f
+  TinyConstraints: 4721a4b303c799328867078ade6560e152df54d1
+  ViewAnimator: d7b18e0be98e05807f61ad886a36363727209377
+  Whisper: 169760fc4bab0abf24d5529f9276f95c25cf1025
+
+PODFILE CHECKSUM: 9772c5832ca3ad673667a634c0f2de91959a0693
+
+COCOAPODS: 1.1.1
