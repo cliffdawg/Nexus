@@ -23,11 +23,21 @@ class CustomImage: UIView {
     let border = 15
     var bordering = false
     
-    var id: String!
+    var id = UIDevice.current.identifierForVendor?.uuidString
+    var uniqueID = ""
     
     var delegate: DrawLineDelegate!
     
     var type = ""
+    
+    var note = ""
+    
+    var specific = ""
+    
+    var image: UIImage!
+    
+    var imageFrame: UIImageView!
+    var noteFrame: UITextView!
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -43,14 +53,16 @@ class CustomImage: UIView {
         let redValue = CGFloat(Int(arc4random() % 255)) / 255.0
         
         self.backgroundColor = UIColor(red:redValue, green: greenValue, blue: blueValue, alpha: 1.0)
-        
+        self.specific = String(Date().timeIntervalSince1970)
     }
     
     func configureImage(setImage: UIImage) {
         self.type = "image"
+        self.image = setImage
         //let image = UIImage(named: "Image Placeholder")!
         let imageView = UIImageView(image: setImage)
         imageView.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
+        self.imageFrame = imageView
         self.addSubview(imageView)
     }
     
@@ -68,10 +80,12 @@ class CustomImage: UIView {
         print("widthed: \(widthed)")
         let framed = CGRect(x: 0, y: 0, width: widthed, height: heighted)
         noteView = CenteredTextView(frame: framed)
+        self.note = setNote
         noteView.text = setNote
         noteView.textAlignment = .center
         noteView.layer.borderWidth = 5
         noteView.layer.borderColor = UIColor.green.cgColor
+        self.noteFrame = noteView
         
         self.addSubview(noteView)
         

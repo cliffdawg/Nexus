@@ -19,6 +19,7 @@ class ItemFrames {
     var connectingState = false
     var editing = false
     var positioning = false
+    var connections = [Connection]()
     
     private init() {
         
@@ -78,7 +79,7 @@ class ItemFrames {
                     let resulting = viewString[start..<start2!]
                     
                     
-                    if ((resulting == "View") || (resulting == "iew")) {
+                    if ((resulting == "View") || (resulting == "iew") || (resulting == "enteredTextView")) {
                        
                     } else {
                         let fadeAnimation = AnimationType.rotate(angle: 0)

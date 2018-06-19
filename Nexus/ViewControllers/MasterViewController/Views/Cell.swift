@@ -7,13 +7,27 @@
 //
 
 import UIKit
+import Hero
 
-class Cell: UITableViewCell {
+protocol SegueDelegate {
+    func push(from: UITextView)
+}
 
-    @IBOutlet weak var name: UILabel!
+class Cell: UITableViewCell, UITextViewDelegate {
+    
+    @IBOutlet weak var textView: UITextView!
+    
+    var delegate: SegueDelegate!
+    
+    var labelName: String? {
+        didSet {
+            textView.heroID = labelName
+        }
+    }
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        self.textView.delegate = self
         // Initialization code
     }
 
@@ -21,6 +35,13 @@ class Cell: UITableViewCell {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state
+    }
+    
+    func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
+        let delegated = delegate as! MasterViewController
+        print("textView should")
+        delegated.performSegue(withIdentifier: "toEdit", sender: self.textView)
+        return false
     }
 
 }

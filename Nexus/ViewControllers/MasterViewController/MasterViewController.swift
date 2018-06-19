@@ -11,9 +11,10 @@ import CoreData
 import TextFieldEffects
 import ViewAnimator
 import IQKeyboardManagerSwift
+import Hero
 
 /* Stores all of the current board topics, loads from Core Data. */
-class MasterViewController: UITableViewController, NSFetchedResultsControllerDelegate, UITextFieldDelegate {
+class MasterViewController: UITableViewController, NSFetchedResultsControllerDelegate, UITextFieldDelegate, SegueDelegate {
 
     var boards = [NSManagedObject]()
     private let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
@@ -22,6 +23,8 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
     @IBOutlet weak var tintView: UIView!
     @IBOutlet weak var toolbar: UIToolbar!
     @IBOutlet weak var leftButton: UIBarButtonItem!
+    
+    var newValue = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -88,6 +91,10 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
         
     }
     
+    func push(from: UITextView) {
+        
+    }
+    
     func textFieldDidBeginEditing(_ textField: UITextField) {
         //let textFieldFrame = CGRect(x: 0, y: 0, width: 140, height: 20)
         let saveButton = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(saveNewObject(_:)))
@@ -109,7 +116,7 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
-        print("Text field end editing")
+
         if ((textField.text?.trimmingCharacters(in: .whitespaces).isEmpty) == true) {
 //            toolbar.items![0].tintColor = .blue
 //            toolbar.items![0].title = "Edit"
@@ -124,8 +131,10 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
     @objc
     func dismissKeyboard(_ sender: Any) {
         textField.endEditing(true)
+        print("dismisskeyboard")
         //self.view.sendSubview(toBack: tintView)
         //view.endEditing(true)
+        
     }
     
     @objc
@@ -151,16 +160,66 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
             self.boards.append(adding)
             textField.text = ""
             textField.endEditing(true)
+            //self.dismissKeyboard(self.view)
             
         } catch let error as NSError  {
             print("Could not save \(error), \(error.userInfo)")
         }
-        tableView.reloadData()
+        
+        
+        
+        
+        
         //tableView.reloadRows(at: [IndexPath.init(row: boards.count-1, section: 0)], with: UITableViewRowAnimation.automatic)
 //
-        //let zoomAnimation = AnimationType.zoom(scale: 0.2)
-        tableView.cellForRow(at: IndexPath.init(row: boards.count-1, section: 0))?.animate(animations: [AnimationType.from(direction: .right, offset: view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: { })
+        self.tableView.reloadData()
+        
+        // you need to press the done aspect
+        // something to do with reloading the data itself
+        // not editing when reload and then animate
+        //let when = DispatchTime.now() + 2
+        //DispatchQueue.main.asyncAfter(deadline: when) {
+        self.tableView.cellForRow(at: IndexPath.init(row: self.boards.count-1, section: 0))?.animate(animations: [AnimationType.from(direction: .right, offset: self.view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: {})
+        
+        self.view.sendSubview(toBack: tintView)
+        tintView.backgroundColor = UIColor.clear
+        
+        //}
         //        [AnimationType.from(direction: .right, offset: view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0, duration: 0.5, animationInterval: 0.1, completion: {    }
+        
+//        view.gestureRecognizers?.removeAll()
+//        textField.endEditing(true)
+//        view.isUserInteractionEnabled = true
+//        print("view: \(view.interactions)")
+        
+    }
+    
+    func editObject(sub: String) {
+    
+        let appDelegate =
+            UIApplication.shared.delegate as! AppDelegate
+        
+        let managedContext =
+            appDelegate.managedObjectContext
+        
+        let fetchRequest =
+            NSFetchRequest<NSFetchRequestResult>(entityName: "Board")
+        
+        do {
+            let data = try managedContext.fetch(fetchRequest)
+            let results = data as! [NSManagedObject]
+            for object in results {
+                if (object.value(forKey: "name") as! String == self.newValue) {
+                    object.setValue(sub, forKey: "name")
+                    print("saveValue")
+                }
+            }
+            try managedContext.save()
+            
+        } catch let error as NSError {
+            print("Could not fetch. \(error), \(error.userInfo)")
+            
+        }
     }
     
     @objc
@@ -170,9 +229,12 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cell = self.tableView.cellForRow(at: indexPath) as! Cell
-        cellName = cell.name.text!
+        cellName = cell.textView.text!
         self.performSegue(withIdentifier: "showDetail", sender: cell)
+        
     }
+    
+    
     
     var cellName = ""
     
@@ -186,6 +248,19 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
             destined.name = cellName
             print("prepare for segue")
             print(cellName)
+        } else if segue.identifier == "toEdit" {
+            print("sender: \(sender), destination: \(segue.destination)")
+            if let view = sender as? UITextView, let editController = segue.destination as? EditNameController {
+                
+                editController.textView = view
+                editController.transition = view.heroID!
+                editController.heroModalAnimationType = .zoomSlide(direction: .left)
+                
+                //view.heroModifiers = [.backgroundColor(.red)]
+                //editController.textView.heroModifiers = [.backgroundColor(.blue)]
+                
+                print("toEdit: \(view.heroID), \(editController.textView.heroID)")
+            }
         }
     }
 
@@ -202,8 +277,10 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! Cell
         let board = boards[indexPath.row]
-        cell.name.text = board.value(forKey: "name") as! String
+        cell.textView.text = board.value(forKey: "name") as! String
+        cell.labelName = cell.textView.text
         print("\(cell.textLabel?.text)")
+        cell.delegate = self
         return cell
     }
 
@@ -224,10 +301,16 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
             tableView.deleteRows(at: [indexPath as IndexPath], with: UITableViewRowAnimation.automatic)
         }
     }
+    
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 80.0
+    }
 
     // MARK: TableViewController Overrides
 
     // MARK: - Fetched results controller
+    
+    
 
 //    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
 //        tableView.beginUpdates()

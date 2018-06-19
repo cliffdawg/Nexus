@@ -1,0 +1,6 @@
+framework module Bolt {
+  umbrella header "BoltProtocol-umbrella.h"
+
+  export *
+  module * { export * }
+}

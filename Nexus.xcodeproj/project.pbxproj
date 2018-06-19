@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		F4AFD2C969EA93FF45AA7D08 /* Pods_Nexus.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D34C28B8513FDAF4084A91F0 /* Pods_Nexus.framework */; };
+		FC2EDB1520C07C89005ADBE4 /* DownloadItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC2EDB1420C07C89005ADBE4 /* DownloadItem.swift */; };
 		FC31192920A6561100B8E547 /* AddType.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC31190E20A6561000B8E547 /* AddType.swift */; };
 		FC31192A20A6561100B8E547 /* AddTypeCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC31191020A6561000B8E547 /* AddTypeCell.swift */; };
 		FC31192B20A6561100B8E547 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC31191220A6561000B8E547 /* DetailViewController.swift */; };
@@ -26,12 +27,15 @@
 		FC31193820A6561100B8E547 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC31192520A6561100B8E547 /* LaunchScreen.storyboard */; };
 		FC31193920A6561100B8E547 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC31192620A6561100B8E547 /* Main.storyboard */; };
 		FC31193A20A6561100B8E547 /* Nexus.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC31192720A6561100B8E547 /* Nexus.xcdatamodeld */; };
+		FCAEFD5B20B5535700F64F49 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FCAEFD5A20B5535700F64F49 /* GoogleService-Info.plist */; };
+		FCDF45C320CCE6340030FF12 /* EditNameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCDF45C220CCE6340030FF12 /* EditNameController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		799DEBC401F4FB641C4BAE57 /* Pods-Nexus.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Nexus.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Nexus/Pods-Nexus.debug.xcconfig"; sourceTree = "<group>"; };
 		9715D97FBD541A36AD86B717 /* Pods-Nexus.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Nexus.release.xcconfig"; path = "Pods/Target Support Files/Pods-Nexus/Pods-Nexus.release.xcconfig"; sourceTree = "<group>"; };
 		D34C28B8513FDAF4084A91F0 /* Pods_Nexus.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Nexus.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FC2EDB1420C07C89005ADBE4 /* DownloadItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadItem.swift; sourceTree = "<group>"; };
 		FC31190E20A6561000B8E547 /* AddType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddType.swift; sourceTree = "<group>"; };
 		FC31191020A6561000B8E547 /* AddTypeCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddTypeCell.swift; sourceTree = "<group>"; };
 		FC31191220A6561000B8E547 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
@@ -51,6 +55,8 @@
 		FC31192620A6561100B8E547 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		FC31192820A6561100B8E547 /* Nexus.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Nexus.xcdatamodel; sourceTree = "<group>"; };
 		FC40BB3320088A3700C7BA25 /* Nexus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nexus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FCAEFD5A20B5535700F64F49 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		FCDF45C220CCE6340030FF12 /* EditNameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditNameController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -85,6 +91,7 @@
 		FC31190C20A6561000B8E547 /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				FCDF45C120CCE6030030FF12 /* EditNameController */,
 				FC31191920A6561000B8E547 /* MasterViewController */,
 				FC31191120A6561000B8E547 /* BoardViewController */,
 				FC31190D20A6561000B8E547 /* AddTypeController */,
@@ -124,6 +131,7 @@
 			children = (
 				FC31191520A6561000B8E547 /* CustomView.swift */,
 				FC31191420A6561000B8E547 /* Connection.swift */,
+				FC2EDB1420C07C89005ADBE4 /* DownloadItem.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -172,6 +180,7 @@
 				FC31192620A6561100B8E547 /* Main.storyboard */,
 				FC31192220A6561100B8E547 /* Assets.xcassets */,
 				FC31192420A6561100B8E547 /* Info.plist */,
+				FCAEFD5A20B5535700F64F49 /* GoogleService-Info.plist */,
 				FC31192720A6561100B8E547 /* Nexus.xcdatamodeld */,
 			);
 			path = Resources;
@@ -203,6 +212,14 @@
 				FC31192020A6561100B8E547 /* Resources */,
 			);
 			path = Nexus;
+			sourceTree = "<group>";
+		};
+		FCDF45C120CCE6030030FF12 /* EditNameController */ = {
+			isa = PBXGroup;
+			children = (
+				FCDF45C220CCE6340030FF12 /* EditNameController.swift */,
+			);
+			path = EditNameController;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -269,6 +286,7 @@
 			files = (
 				FC31193820A6561100B8E547 /* LaunchScreen.storyboard in Resources */,
 				FC31193720A6561100B8E547 /* Info.plist in Resources */,
+				FCAEFD5B20B5535700F64F49 /* GoogleService-Info.plist in Resources */,
 				FC31193520A6561100B8E547 /* Assets.xcassets in Resources */,
 				FC31193920A6561100B8E547 /* Main.storyboard in Resources */,
 			);
@@ -337,11 +355,13 @@
 				FC31192920A6561100B8E547 /* AddType.swift in Sources */,
 				FC31193120A6561100B8E547 /* Cell.swift in Sources */,
 				FC31193620A6561100B8E547 /* CustomSegue.swift in Sources */,
+				FC2EDB1520C07C89005ADBE4 /* DownloadItem.swift in Sources */,
 				FC31192A20A6561100B8E547 /* AddTypeCell.swift in Sources */,
 				FC31192C20A6561100B8E547 /* Connection.swift in Sources */,
 				FC31193220A6561100B8E547 /* ItemFrames.swift in Sources */,
 				FC31193A20A6561100B8E547 /* Nexus.xcdatamodeld in Sources */,
 				FC31192E20A6561100B8E547 /* CenteredTextView.swift in Sources */,
+				FCDF45C320CCE6340030FF12 /* EditNameController.swift in Sources */,
 				FC31193320A6561100B8E547 /* TransitionManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

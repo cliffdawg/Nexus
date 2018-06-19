@@ -17,5 +17,13 @@ target 'Nexus' do
   pod ‘TinyConstraints’
   pod ‘Hero’
   pod ‘Whisper’
+  pod ‘Theo’
+  pod 'Firebase'
+  pod 'Firebase/Core'
+  pod 'Firebase/Storage'
+  pod 'Firebase/Database'
+  pod 'FirebaseUI/Storage'
+  pod 'AlamofireImage'
+  pod 'NVActivityIndicatorView'  
 
 end

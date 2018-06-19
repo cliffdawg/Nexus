@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import Firebase
 
 /* A connection between two items */
 class Connection {
@@ -16,12 +17,25 @@ class Connection {
     var end: String!
     var connection: String!
     
-    private init() {
+    ///// Use these only for pulling data from Neo4j
+    var begin: DownloadItem!
+    var finish: DownloadItem!
+    var beginID: String!
+    var finishID: String!
+    /////
+    
+    var initialBegin: CustomImage!
+    var initialFinish: CustomImage!
+    
+    init() {
         
     }
     
     func set(origin: CustomImage!, final: CustomImage!, connect: String!) {
-        
+        self.origin = origin.specific
+        self.end = final.specific
+        self.connection = connect
     }
+
     
 }

@@ -7,12 +7,21 @@
 //
 
 import UIKit
+import Hero
 
 class EditNameController: UIViewController {
 
+    @IBOutlet weak var textView: UITextView!
+    
+    var transition = ""
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        textView.heroID = transition
+        textView.text = transition
+        
+        
         // Do any additional setup after loading the view.
     }
 
@@ -24,12 +33,15 @@ class EditNameController: UIViewController {
 
     /*
     // MARK: - Navigation
-
+    */
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        if segue.identifier == "backEdit" {
+            let destined = segue.destination as! MasterViewController
+            destined.newValue = transition
+            destined.editObject(sub: textView.text)
+            destined.heroModalAnimationType = .pageOut(direction: .right)
+        }
     }
-    */
-
+ 
 }
