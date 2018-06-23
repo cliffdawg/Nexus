@@ -250,8 +250,8 @@ class CustomView: UIView {
                 sender.superview?.removeFromSuperview()
             })
             let rect = sender.superview?.frame
-            let xCoord = CGFloat(Int((rect?.minX)!) - 2)
-            let yCoord = CGFloat(Int((rect?.minY)!) + 12)
+            let xCoord = CGFloat(Int((rect?.minX)!)) + CGFloat(5)
+            let yCoord = CGFloat(Int((rect?.minY)!)) + CGFloat(12.5)
             let label = UILabel(frame: CGRect(x: xCoord, y: yCoord, width: 100.0, height: 35.0))
             label.backgroundColor = .blue
             label.layer.masksToBounds = true
@@ -287,6 +287,11 @@ class CustomView: UIView {
             ItemFrames.shared.connections.append(connect)
         })
         
+        /////
+        for obj in ItemFrames.shared.frames {
+            print("objID: \(obj.uniqueID)")
+        }
+        
     }
     
     // Dynamically draw the connections. Send highlights to back if necessary. Keeps images at front if present.
@@ -319,7 +324,7 @@ class CustomView: UIView {
             
             // Created initial input field for connection name
             let newX = CGFloat((self.end.x + self.start.x)/2 - 45)
-            let newY = CGFloat((self.end.y + self.start.y)/2 - 45)
+            let newY = CGFloat((self.end.y + self.start.y)/2 - 30)
             let labelRect = CGRect(x: newX, y: newY, width: 90, height: 60)
             let labelView = UIView(frame: labelRect)
             labelView.backgroundColor = .yellow

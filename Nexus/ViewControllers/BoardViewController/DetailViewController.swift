@@ -142,19 +142,15 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         activity.startAnimating()
         
         self.downloadConnect.removeAll()
+        ItemFrames.shared.frames.removeAll()
         ItemFrames.shared.connections.removeAll()
+
         let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
-        //let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)`) RETURN n"
-        let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)`)-[r]->(m:`\(UIDevice.current.identifierForVendor!.uuidString)`) RETURN n, r, m"
+        //let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: `\(self.name)`}) RETURN n"
+        let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'})-[r]->(m:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'}) RETURN n, r, m"
 //        MATCH ({name : "A"})-[r]->({name : "B"})
 //        RETURN r
-        let cypherParams = ["label" : "\(UIDevice.current.identifierForVendor!.uuidString)"]
-        // prints normal string
-        //print("cypherParams: \(cypherParams)")
-//        theo.executeCypher(cypherQuery, params: cypherParams, completionBlock: { (cypher, error) in
-//            print("query cypher: \(cypher?.description)")
-//        })
-        
+        print("cypherQuery: \(cypherQuery)")
         let resultDataContents = ["row", "graph"]
         let statement = ["statement" : cypherQuery, "resultDataContents" : resultDataContents] as [String : Any]
         let statements = [statement]
@@ -547,6 +543,22 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     // Later make it so that the arrow might to able to point to child?
     @IBAction func save(_ sender: Any) {
         print("save")
+        
+        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.regular)
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        blurEffectView.alpha = 0.8
+        blurEffectView.frame = view.bounds
+        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(blurEffectView)
+        self.view.bringSubview(toFront: topBar)
+        self.view.bringSubview(toFront: bottomBar)
+        
+        var activity = NVActivityIndicatorView(frame: CGRect(x: 0.0, y: 0.0, width: 0.0, height: 0.0))
+        let frame = CGRect(x: self.view.frame.midX - 45, y: self.view.frame.midY - 45, width: 90, height: 90)
+        activity = NVActivityIndicatorView(frame: frame, type: NVActivityIndicatorType(rawValue: 12), color: .blue, padding: nil)
+        self.view.addSubview(activity)
+        activity.startAnimating()
+        
         let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
         
         // Will only work if there are connections present
@@ -558,17 +570,19 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             
             /////////// Fix this, it runs twice because of going over connections twice
             for item in ItemFrames.shared.frames {
-                if (item.specific == connect.origin) {
+                if ((item.specific == connect.origin) && (item.uniqueID == "")) {
                     var origin = Node()
                     if (item.type == "note") {
                         
                         let ided = UIDevice.current.identifierForVendor!.uuidString
                         origin.setProp("note", propertyValue: "\(item.note)")
+                        origin.setProp("board", propertyValue: "\(self.label.text!)")
                         origin.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
                         origin.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
                         theo.createNode(origin, labels: ["\(ided)"], completionBlock: { (node, error) in
                             relateOrigin = node
                             print("note error: \(error)")
+                            print("node: \(node)")
                         })
                     }
                     if (item.type == "image") {
@@ -586,11 +600,13 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                             path.putData(localFile!, metadata: nil)
                         //}
                         origin.setProp("image", propertyValue: "\(path)")
+                        origin.setProp("board", propertyValue: "\(self.label.text!)")
                         origin.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
                         origin.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
                         theo.createNode(origin, labels: ["\(ided)"], completionBlock: { (node, error) in
                             relateOrigin = node
                             print("image error: \(error)")
+                            print("node: \(node)")
                         })
                     }
                     
@@ -598,17 +614,19 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             }
             
             for item in ItemFrames.shared.frames {
-                if (item.specific == connect.end) {
+                if ((item.specific == connect.end && (item.uniqueID == ""))) {
                     var end = Node()
                     if (item.type == "note") {
                         
                         let ided = UIDevice.current.identifierForVendor!.uuidString
                         end.setProp("note", propertyValue: "\(item.note)")
+                        end.setProp("board", propertyValue: "\(self.label.text!)")
                         end.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
                         end.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
                         theo.createNode(end, labels: ["\(ided)"], completionBlock: { (node, error) in
                             relateEnd = node
                             print("note error: \(error)")
+                            print("node: \(node)")
                         })
                     }
                     if (item.type == "image") {
@@ -626,14 +644,15 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                             path.putData(localFile!, metadata: nil)
                         //}
                         end.setProp("image", propertyValue: "\(path)")
+                        end.setProp("board", propertyValue: "\(self.label.text!)")
                         end.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
                         end.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
                         theo.createNode(end, labels: ["\(ided)"], completionBlock: { (node, error) in
                             relateEnd = node
                             print("image error: \(error)")
+                            print("node: \(node)")
                         })
                     }
-                    
                 }
             }
             
@@ -646,7 +665,20 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                     })
                 } else {
                     ///////// use Whisper to show that internet is slow/down
+                    print("no new nodes")
                 }
+                let blurredEffectViews = self.view.subviews.filter{$0 is UIVisualEffectView}
+                blurredEffectViews.forEach{ blurView in
+                    let animation = AnimationType.from(direction: .right, offset: 0)
+                    blurView.animate(animations: [animation], initialAlpha: 0.8, finalAlpha: 0.0, delay: 0.0, duration: 1.5, completion: {
+                        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.5) {
+                            blurView.removeFromSuperview()
+                        }
+                    })
+                    
+                    
+                }
+                activity.stopAnimating()
             }
             
         }
