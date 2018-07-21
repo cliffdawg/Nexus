@@ -39,7 +39,6 @@ class Cell: UITableViewCell, UITextViewDelegate {
     
     func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
         let delegated = delegate as! MasterViewController
-        print("textView should")
         delegated.performSegue(withIdentifier: "toEdit", sender: self.textView)
         return false
     }

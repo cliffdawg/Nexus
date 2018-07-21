@@ -24,6 +24,7 @@ class DownloadItem {
         
     }
     
+    // This is redundant, we'll download image when loading
     func downloadImage(imageURL: String!) {
         let gsReference = Storage.storage().reference(forURL: imageURL)
         gsReference.getData(maxSize: 1 * 2048 * 2048) { data, error in
@@ -31,7 +32,7 @@ class DownloadItem {
                 print("error: \(error)")
             } else {
             print("downloadImage")
-            var imaged = UIImage(data: data!)! // Convert image to data
+            let imaged = UIImage(data: data!)! // Convert image to data
                 self.image = self.resizeImage(image: imaged, newWidth: 50) as! UIImage
                    
             }

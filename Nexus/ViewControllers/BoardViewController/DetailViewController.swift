@@ -29,6 +29,8 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     
     var downloadItems = [DownloadItem]()
     
+    var individualItems = [DownloadItem]()
+    
     @IBOutlet weak var detailDescriptionLabel: UILabel!
     
     @IBOutlet weak var addSymbol: UIBarButtonItem!
@@ -132,6 +134,8 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         self.navigationController?.popToRootViewController(animated: true)
     }
     
+    ///* The new flow of downloading image data has no improvement over initial method, try to place and then load somehow, maybe when done loading alpha = 1.0 of view
+    ///* The missing connection appears to be lacking a finish object
     // When shifting vert/horizontal, just rotate image/note itself
     func loadNexus() {
         
@@ -162,169 +166,313 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             for respond in response {
                 print("respond: \(respond.key)")
                 }
+            //if (response != nil) {
+                // (key: NSObject, value: AnyObject) is a unit FOR A DICTIONARY
+                print("results: \(response["results"]!)")
+                let resultobject = response["results"]!
+                let mirrorResult = Mirror(reflecting: resultobject)
+                print("mirror: \(mirrorResult.subjectType)")
+                let resulted = resultobject as! Array<AnyObject>
+                print("resulted: \(resulted)")
+                // Array
+                for res in resulted {
+                    print("res: \(res)")
+                    let mirrorRes = Mirror(reflecting: res)
+                    print("mirrorres: \(mirrorRes.subjectType)")
+                    let resp = res as! Dictionary<String, AnyObject>
+                    // Dictionary
+                    print("resp[\"data\"]: \(resp["data"]!)")
+                    let mirrordata = Mirror(reflecting: resp["data"]!)
+                    print("mirrordata: \(mirrordata.subjectType)")
+                    let reyd = resp["data"]! as! Array<AnyObject>
+                    // Array
+                    for reyd2 in reyd {
+                        print("reyd2: \(reyd2)")
+                        let mirrorreyd2 = Mirror(reflecting: reyd2)
+                        print("mirrorreyd2: \(mirrorreyd2.subjectType)")
+                        let reydd = reyd2 as! Dictionary<String, AnyObject>
+                        print("reyddgraph: \(reydd["graph"]!)")
+                        let mirrorgraph = Mirror(reflecting: reydd["graph"]!)
+                        print("mirrorgraph: \(mirrorgraph.subjectType)")
+                        let rat = reydd["graph"]! as! Dictionary<String, AnyObject>
+                        print("ratnodes: \(rat["nodes"]!)")
+                        let mirrort = Mirror(reflecting: rat["nodes"]!)
+                        print("mirrorrt: \(mirrort.subjectType)")
+                        let mirrortarray = rat["nodes"]! as! Array<AnyObject>
+                        // These loop through the nodes
+                        for rort in mirrortarray {
+                            let download = DownloadItem()
+                            // This is where you can extract the node id
+                            print("rort: \(rort)")
+                            let rortarray = rort as! Dictionary<String, AnyObject>
+                            print("rortarray: \(rortarray)")
+                            // Pull id and properties from this dictionary
+                            print("rortid: \(rortarray["id"])")
+                            download.uniqueID = rortarray["id"] as! String
+                            
+    //                        let dummyNode = DownloadItem()
+    //                        dummyNode.id = rortarray["id"] as! String
+    //                        self.downloadItems.append(dummyNode)
+                            
+                            let rortprop = rortarray["properties"] as! Dictionary<String, AnyObject>
+                            for ror in rortprop {
+                                print("ror: \(ror)")
+                                if (ror.key == "note") {
+                                    print("note: \(ror.value as! String)")
+                                    download.note = ror.value as! String
+                                    ///// Works
+                                    
+                                } else if (ror.key == "image") {
+                                    print("image: \(ror.value as! String)")
+                                    ///*
+                                    download.imageRef = ror.value as! String
+                                    download.image = UIImage(named: "Image Placeholder")
+                                    ///*download.downloadImage(imageURL: ror.value as! String)
+                                    
+                                }
+    //                            end.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
+    //                            end.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
+                                if (ror.key == "x coordinate") {
+                                    print("x value")
+                                    let xSub = ror.value as! String
+                                    download.xCoord = (xSub as NSString).doubleValue
+                                }
+                                if (ror.key == "y coordinate") {
+                                    print("y value")
+                                    let ySub = ror.value as! String
+                                    download.yCoord = (ySub as NSString).doubleValue
+                                    if (self.downloadItems.contains(where: {$0.uniqueID == download.uniqueID}) == false) {
+                                    
+                                        self.downloadItems.append(download)
+                                        
+                                    }
+                                }
+                                // This is where you can extract the node information
+                                // key - value, "note/image" -> value
+                                print("downloadcount: \(self.downloadItems.count)")
+            
+                            }
+                        }
+                        print("ratrelations: \(rat["relationships"]!)")
+                        let mirrorrat = Mirror(reflecting: rat["relationships"]!)
+                        print("mirrorrat: \(mirrorrat.subjectType)")
+                        let ratarray = rat["relationships"]! as! Array<AnyObject>
+                        print("ratarray: \(ratarray)")
+                        // This prints out all the relationships
+                        for ratt in ratarray {
+                            let connection = Connection()
+                            print("ratt: \(ratt)")
+                            let mirrat = Mirror(reflecting: ratt)
+                            let mirt = ratt as! Dictionary<String, AnyObject>
+                            print("endNode: \(mirt["endNode"]!)")
+                            connection.end = mirt["endNode"] as! String
+                            print("startNode: \(mirt["startNode"]!)")
+                            connection.origin = mirt["startNode"] as! String
+                            print("connection: \(mirt["type"]!)")
+                            connection.connection = mirt["type"] as! String
+                            for loaded in self.downloadItems {
+                                if (loaded.uniqueID == connection.origin) {
+                                    print("woo")
+                                    connection.begin = loaded
+                                    connection.beginID = loaded.uniqueID
+                                    if ((self.downloadConnect.contains(where: {$0.connection == connection.connection}) == false)) {
+                                        self.downloadConnect.append(connection)
+                                        ItemFrames.shared.connections.append(connection)
+                                    }
+                                } else if (loaded.uniqueID == connection.end) {
+                                    print("wee")
+                                    connection.finish = loaded
+                                    connection.finishID = loaded.uniqueID
+                                    if ((self.downloadConnect.contains(where: {$0.connection == connection.connection}) == false)) {
+                                        self.downloadConnect.append(connection)
+                                        ItemFrames.shared.connections.append(connection)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            //}
+            self.loadIndividual()
+        
+        })
+            
+            // This is threading; returning to the main thread to update UI
+            // DispatchQueue.main.async
+            
+            // put activity indicator and thread at top of function
+            let when = DispatchTime.now() + 5
+            DispatchQueue.main.asyncAfter(deadline: when) {
+                self.loadBoard()
+                activity.stopAnimating()
+            }
+        
+        
+    }
+    
+    func loadBoard() {
+        ///*
+//        for item in downloadItems {
+//            var obj = CustomImage()
+//            if (item.imageRef != nil) {
+//                let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: 50.0, height: 50.0)
+//                obj = CustomImage(frame: rect)
+//                ///*obj.configureImage(setImage: (item.image)!)
+//                ///*obj.configureImage(setImage: item.image)
+//                obj.imageLink = item.imageRef
+//                obj.uniqueID = item.uniqueID
+//                ItemFrames.shared.frames.append(obj)
+//            } else if (item.note != nil) {
+//                let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: 100.0, height: 100.0)
+//                obj = CustomImage(frame: rect)
+//                obj.configureNote(setNote: (item.note)!)
+//                obj.uniqueID = item.uniqueID
+//                ItemFrames.shared.frames.append(obj)
+//            }
+//
+//        }
+        self.draw(start: CGPoint(x: 0.0, y: 0.0), end: CGPoint(x: 0.0, y: 0.0))
+        self.customView.loadFrames(sender: self)
+    }
+    
+    // Prior was for connections, this one is for individual
+    func loadIndividual() {
+        
+        let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
+        let cypherQuery2 = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'}) RETURN n"
+        let resultDataContents2 = ["row", "graph"]
+        let statement2 = ["statement" : cypherQuery2, "resultDataContents" : resultDataContents2] as [String : Any]
+        let statements2 = [statement2]
+        
+        theo.executeTransaction(statements2, completionBlock: { (response, error) in
+            print("response2: \(response)")
+            for respond in response {
+                print("respond2: \(respond.key)")
+            }
             // (key: NSObject, value: AnyObject) is a unit FOR A DICTIONARY
-            print("results: \(response["results"]!)")
+            print("results2: \(response["results"]!)")
             let resultobject = response["results"]!
             let mirrorResult = Mirror(reflecting: resultobject)
-            print("mirror: \(mirrorResult.subjectType)")
+            print("mirror2: \(mirrorResult.subjectType)")
             let resulted = resultobject as! Array<AnyObject>
-            print("resulted: \(resulted)")
+            print("resulted2: \(resulted)")
             // Array
             for res in resulted {
-                print("res: \(res)")
+                print("res2: \(res)")
                 let mirrorRes = Mirror(reflecting: res)
-                print("mirrorres: \(mirrorRes.subjectType)")
+                print("mirrorres2: \(mirrorRes.subjectType)")
                 let resp = res as! Dictionary<String, AnyObject>
                 // Dictionary
-                print("resp[\"data\"]: \(resp["data"]!)")
+                print("resp2[\"data\"]: \(resp["data"]!)")
                 let mirrordata = Mirror(reflecting: resp["data"]!)
-                print("mirrordata: \(mirrordata.subjectType)")
+                print("mirrordata2: \(mirrordata.subjectType)")
                 let reyd = resp["data"]! as! Array<AnyObject>
                 // Array
                 for reyd2 in reyd {
-                    print("reyd2: \(reyd2)")
+                    print("reyd2.2: \(reyd2)")
                     let mirrorreyd2 = Mirror(reflecting: reyd2)
-                    print("mirrorreyd2: \(mirrorreyd2.subjectType)")
+                    print("mirrorreyd2.2: \(mirrorreyd2.subjectType)")
                     let reydd = reyd2 as! Dictionary<String, AnyObject>
-                    print("reyddgraph: \(reydd["graph"]!)")
+                    print("reyddgraph.2: \(reydd["graph"]!)")
                     let mirrorgraph = Mirror(reflecting: reydd["graph"]!)
-                    print("mirrorgraph: \(mirrorgraph.subjectType)")
+                    print("mirrorgraph.2: \(mirrorgraph.subjectType)")
                     let rat = reydd["graph"]! as! Dictionary<String, AnyObject>
-                    print("ratnodes: \(rat["nodes"]!)")
+                    print("ratnodes.2: \(rat["nodes"]!)")
                     let mirrort = Mirror(reflecting: rat["nodes"]!)
-                    print("mirrorrt: \(mirrort.subjectType)")
+                    print("mirrorrt.2: \(mirrort.subjectType)")
                     let mirrortarray = rat["nodes"]! as! Array<AnyObject>
                     // These loop through the nodes
                     for rort in mirrortarray {
-                        var download = DownloadItem()
+                        let download = DownloadItem()
                         // This is where you can extract the node id
-                        print("rort: \(rort)")
+                        print("rort.2: \(rort)")
                         let rortarray = rort as! Dictionary<String, AnyObject>
-                        print("rortarray: \(rortarray)")
+                        print("rortarray.2: \(rortarray)")
                         // Pull id and properties from this dictionary
-                        print("rortid: \(rortarray["id"])")
+                        print("rortid.2: \(rortarray["id"])")
                         download.uniqueID = rortarray["id"] as! String
-                        
-//                        let dummyNode = DownloadItem()
-//                        dummyNode.id = rortarray["id"] as! String
-//                        self.downloadItems.append(dummyNode)
                         
                         let rortprop = rortarray["properties"] as! Dictionary<String, AnyObject>
                         for ror in rortprop {
-                            print("ror: \(ror)")
+                            print("ror.2: \(ror)")
                             if (ror.key == "note") {
                                 print("note: \(ror.value as! String)")
                                 download.note = ror.value as! String
                                 ///// Works
                                 
                             } else if (ror.key == "image") {
-                                print("image: \(ror.value as! String)")
-                                download.downloadImage(imageURL: ror.value as! String)
+                                print("image.2: \(ror.value as! String)")
+                                ///*
+                                download.imageRef = ror.value as! String
+                                ///*download.downloadImage(imageURL: ror.value as! String)
                                 
                             }
-//                            end.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
-//                            end.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
+                            //                            end.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
+                            //                            end.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
                             if (ror.key == "x coordinate") {
-                                print("x value")
+                                print("x value.2")
                                 let xSub = ror.value as! String
                                 download.xCoord = (xSub as NSString).doubleValue
                             }
                             if (ror.key == "y coordinate") {
-                                print("y value")
+                                print("y value.2")
                                 let ySub = ror.value as! String
                                 download.yCoord = (ySub as NSString).doubleValue
-                                if (self.downloadItems.contains(where: {$0.uniqueID == download.uniqueID}) == false) {
-                                
-                                    self.downloadItems.append(download)
+                                if (self.individualItems.contains(where: {$0.uniqueID == download.uniqueID}) == false) {
+                                    
+                                    self.individualItems.append(download)
                                     
                                 }
                             }
                             // This is where you can extract the node information
                             // key - value, "note/image" -> value
-                            print("downloadcount: \(self.downloadItems.count)")
-        
-                        }
-                    }
-                    print("ratrelations: \(rat["relationships"]!)")
-                    let mirrorrat = Mirror(reflecting: rat["relationships"]!)
-                    print("mirrorrat: \(mirrorrat.subjectType)")
-                    let ratarray = rat["relationships"]! as! Array<AnyObject>
-                    print("ratarray: \(ratarray)")
-                    // This prints out all the relationships
-                    for ratt in ratarray {
-                        let connection = Connection()
-                        print("ratt: \(ratt)")
-                        let mirrat = Mirror(reflecting: ratt)
-                        let mirt = ratt as! Dictionary<String, AnyObject>
-                        print("endNode: \(mirt["endNode"]!)")
-                        connection.end = mirt["endNode"] as! String
-                        print("startNode: \(mirt["startNode"]!)")
-                        connection.origin = mirt["startNode"] as! String
-                        print("connection: \(mirt["type"]!)")
-                        connection.connection = mirt["type"] as! String
-                        for loaded in self.downloadItems {
-                            if (loaded.uniqueID == connection.origin) {
-                                print("woo")
-                                connection.begin = loaded
-                                connection.beginID = loaded.uniqueID
-                                if ((self.downloadConnect.contains(where: {$0.connection == connection.connection}) == false)) {
-                                    self.downloadConnect.append(connection)
-                                    ItemFrames.shared.connections.append(connection)
-                                }
-                            } else if (loaded.uniqueID == connection.end) {
-                                print("wee")
-                                connection.finish = loaded
-                                connection.finishID = loaded.uniqueID
-                                if ((self.downloadConnect.contains(where: {$0.connection == connection.connection}) == false)) {
-                                    self.downloadConnect.append(connection)
-                                    ItemFrames.shared.connections.append(connection)
+                            print("individualItems: \(self.individualItems.count)")
+                            ///
+                            for item in self.individualItems {
+                                print("individual")
+                                if (self.downloadItems.contains(where: {$0.uniqueID == item.uniqueID}) == false) {
+                                    print("append individual")
+                                    self.downloadItems.append(item)
                                 }
                             }
+                            
                         }
                     }
                 }
             }
-//            let when = DispatchTime.now() + 2
-//            DispatchQueue.main.asyncAfter(deadline: when) {
-                //print("dispatch connect")
-                for connect in self.downloadConnect {
-                    print("downloadconnect: \(connect.beginID), \(connect.finishID), \(connect.connection)")
+            
+            ///* Manually download the image for each image object
+//            for item in self.downloadItems {
+//                if (item.imageRef != nil) {
+//                    item.downloadImage(imageURL: item.imageRef)
+//                }
+//            }
+            DispatchQueue.main.async {
+                for item in self.downloadItems {
+                    var obj = CustomImage()
+                    if (item.imageRef != nil) {
+                        let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: 50.0, height: 50.0)
+                        obj = CustomImage(frame: rect)
+                        ///*obj.configureImage(setImage: (item.image)!)
+                        ///*obj.configureImage(setImage: item.image)
+                        obj.imageLink = item.imageRef
+                        obj.uniqueID = item.uniqueID
+                        obj.type = "image"
+                        ItemFrames.shared.frames.append(obj)
+                    } else if (item.note != nil) {
+                        let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: 100.0, height: 100.0)
+                        obj = CustomImage(frame: rect)
+                        obj.configureNote(setNote: (item.note)!)
+                        obj.uniqueID = item.uniqueID
+                        obj.type = "note"
+                        ItemFrames.shared.frames.append(obj)
+                    }
+                    
                 }
-            //}
-            // This is threading; returning to the main thread to update UI
-            // DispatchQueue.main.async
-            
-            // put activity indicator and thread at top of function
-            let when = DispatchTime.now() + 4
-            DispatchQueue.main.asyncAfter(deadline: when) {
-                self.loadBoard()
-                activity.stopAnimating()
+                self.customView.loadImages(sender: self)
             }
-        
+            
         })
-       
-    }
-    
-    func loadBoard() {
-        for item in downloadItems {
-            var obj = CustomImage()
-            if (item.image != nil) {
-                let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: 50.0, height: 50.0)
-                obj = CustomImage(frame: rect)
-                obj.configureImage(setImage: (item.image)!)
-                obj.uniqueID = item.uniqueID
-                ItemFrames.shared.frames.append(obj)
-            } else if (item.note != nil) {
-                let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: 100.0, height: 100.0)
-                obj = CustomImage(frame: rect)
-                obj.configureNote(setNote: (item.note)!)
-                obj.uniqueID = item.uniqueID
-                ItemFrames.shared.frames.append(obj)
-            }
-            
-        }
-        self.draw(start: CGPoint(x: 0.0, y: 0.0), end: CGPoint(x: 0.0, y: 0.0))
-        self.customView.loadFrames()
     }
     
     // Selecting which item to add 
@@ -536,8 +684,10 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         ItemFrames.shared.sendNotesToBack()
     }
     
+    // Now there is a weird gs:\ folder being made sometimes
     // Sometimes creating nodes take so long that the create relation runs too fast. But that was only during slow internet.
     // For some reason, it sometimes just doesn't save some pics in Firebase when doing 3 or more connect. Only up to 2. But sometimes it JUST DOESNT WORK
+    // Duplicates are happening again
     // Could this error be a part?  errors encountered while discovering extensions: Error Domain=PlugInKit Code=13 "query cancelled" UserInfo={NSLocalizedDescription=query cancelled}
     // Or maybe, you have to wait for 2018-05-30 23:35:55.859907-0700 Nexus[44248:5614171] TIC Read Status [9:0x0]: 1:57 to show
     // Later make it so that the arrow might to able to point to child?
@@ -561,7 +711,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         
         let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
         
-        // Will only work if there are connections present
+        // Will only work if there are connections present, fix
         for connect in ItemFrames.shared.connections {
             
             var relate = Relationship()
@@ -570,6 +720,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             
             /////////// Fix this, it runs twice because of going over connections twice
             for item in ItemFrames.shared.frames {
+                print("item")
                 if ((item.specific == connect.origin) && (item.uniqueID == "")) {
                     var origin = Node()
                     if (item.type == "note") {
@@ -582,7 +733,10 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         theo.createNode(origin, labels: ["\(ided)"], completionBlock: { (node, error) in
                             relateOrigin = node
                             print("note error: \(error)")
-                            print("node: \(node)")
+                            let rawID = node?.id
+                            let intID = 1*rawID!
+                            print("intID:\(intID)")
+                            item.uniqueID = "\(intID)"
                         })
                     }
                     if (item.type == "image") {
@@ -597,7 +751,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         metadata.contentType = "image/png"
 //                        let when = DispatchTime.now() + 2
 //                        DispatchQueue.main.asyncAfter(deadline: when) {
-                            path.putData(localFile!, metadata: nil)
+                            ///*path.putData(localFile!, metadata: nil)
                         //}
                         origin.setProp("image", propertyValue: "\(path)")
                         origin.setProp("board", propertyValue: "\(self.label.text!)")
@@ -606,7 +760,11 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         theo.createNode(origin, labels: ["\(ided)"], completionBlock: { (node, error) in
                             relateOrigin = node
                             print("image error: \(error)")
-                            print("node: \(node)")
+                            let rawID = node?.id
+                            let intID = 1*rawID!
+                            print("intID:\(intID)")
+                            item.uniqueID = "\(intID)"
+                            item.imageLink = "\(refdStore)"
                         })
                     }
                     
@@ -626,7 +784,10 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         theo.createNode(end, labels: ["\(ided)"], completionBlock: { (node, error) in
                             relateEnd = node
                             print("note error: \(error)")
-                            print("node: \(node)")
+                            let rawID = node?.id
+                            let intID = 1*rawID!
+                            print("intID:\(intID)")
+                            item.uniqueID = "\(intID)"
                         })
                     }
                     if (item.type == "image") {
@@ -641,7 +802,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         metadata.contentType = "image/png"
 //                        let when = DispatchTime.now() + 2
 //                        DispatchQueue.main.asyncAfter(deadline: when) {
-                            path.putData(localFile!, metadata: nil)
+                            ///*path.putData(localFile!, metadata: nil)
                         //}
                         end.setProp("image", propertyValue: "\(path)")
                         end.setProp("board", propertyValue: "\(self.label.text!)")
@@ -650,14 +811,19 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         theo.createNode(end, labels: ["\(ided)"], completionBlock: { (node, error) in
                             relateEnd = node
                             print("image error: \(error)")
-                            print("node: \(node)")
+                            let rawID = node?.id
+                            let intID = 1*rawID!
+                            print("intID:\(intID)")
+                            item.uniqueID = "\(intID)"
+                            item.imageLink = "\(refdStore)"
                         })
                     }
                 }
             }
-            
-            let when = DispatchTime.now() + 5
-            DispatchQueue.main.asyncAfter(deadline: when) {
+           
+            let when2 = DispatchTime.now() + 7
+            DispatchQueue.main.asyncAfter(deadline: when2) {
+                
                 if ((relateEnd != nil) && (relateOrigin != nil)) {
                 relate.relate(relateOrigin, toNode: relateEnd, type: connect.connection)
                 theo.createRelationship(relate, completionBlock: {(node, error) in
@@ -682,8 +848,90 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             }
             
         }
+        
+        ///* It runs save individuals before the node creations are all complete
+        let when = DispatchTime.now() + 5
+        DispatchQueue.main.asyncAfter(deadline: when) {
+                ///*
+                self.saveIndividuals()
+            }
+        
+        let when2 = DispatchTime.now() + 7
+        DispatchQueue.main.asyncAfter(deadline: when2) {
+            // This works
+            for item in ItemFrames.shared.frames {
+                print("upload pics")
+                if (item.type == "image") {
+                    if (item.imageLink != nil) {
+                        let ided = UIDevice.current.identifierForVendor!.uuidString
+                        let localFile = UIImagePNGRepresentation(item.image)
+                        let metadata = StorageMetadata()
+                        metadata.contentType = "image/png"
+                        let path = self.storageRef.child("\(ided)/\(item.imageLink!)")
+                        print("upload pic: \(path)")
+                        path.putData(localFile!, metadata: nil)
+                    }
+                }
+            }
+        }
     }
     
+    ///*
+    func saveIndividuals() {
+        let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
+        ///* Seems like free-floating ones are duplicated
+        for item in ItemFrames.shared.frames {
+            print("UNIQUEID: \(item.uniqueID)")
+        }
+        for item in ItemFrames.shared.frames {
+            if item.uniqueID == "" {
+                var node = Node()
+                print("unique")
+                if (item.type == "note") {
+                    print("note")
+                    let ided = UIDevice.current.identifierForVendor!.uuidString
+                    node.setProp("note", propertyValue: "\(item.note)")
+                    node.setProp("board", propertyValue: "\(self.label.text!)")
+                    node.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
+                    node.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
+                    theo.createNode(node, labels: ["\(ided)"], completionBlock: { (node, error) in
+                        print("note error: \(error)")
+                        let rawID = node?.id
+                        let intID = 1*rawID!
+                        print("intID:\(intID)")
+                        item.uniqueID = "\(intID)"
+                    })
+                }
+                if (item.type == "image") {
+                    print("image")
+                    let image = item.image
+                    let refd = self.ref.childByAutoId()
+                    let refdStore = refd.key
+                    let ided = UIDevice.current.identifierForVendor!.uuidString
+                    let path = self.storageRef.child("\(ided)/\(refdStore)")
+                    let localFile = UIImagePNGRepresentation(image!)
+                    let metadata = StorageMetadata()
+                    metadata.contentType = "image/png"
+                    //                        let when = DispatchTime.now() + 2
+                    //                        DispatchQueue.main.asyncAfter(deadline: when) {
+                    ///*path.putData(localFile!, metadata: nil)
+                    //}
+                    node.setProp("image", propertyValue: "\(path)")
+                    node.setProp("board", propertyValue: "\(self.label.text!)")
+                    node.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
+                    node.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
+                    theo.createNode(node, labels: ["\(ided)"], completionBlock: { (node, error) in
+                        print("image error: \(error)")
+                        let rawID = node?.id
+                        let intID = 1*rawID!
+                        print("intID:\(intID)")
+                        item.uniqueID = "\(intID)"
+                        item.imageLink = "\(refdStore)"
+                    })
+                }
+            }
+        }
+    }
     
     func adaptivePresentationStyle(for controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {
         return .none

@@ -39,7 +39,6 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
         //saveButton.tintColor = .clear
         //navigationItem.rightBarButtonItem = saveButton
         //////////////////
-        print("viewDidLoad")
         self.tableView.reloadData()
         self.load() { (success) -> Void in
             if success {
@@ -131,7 +130,6 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
     @objc
     func dismissKeyboard(_ sender: Any) {
         textField.endEditing(true)
-        print("dismisskeyboard")
         //self.view.sendSubview(toBack: tintView)
         //view.endEditing(true)
         

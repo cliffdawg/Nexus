@@ -104,6 +104,7 @@ class CustomView: UIView {
         UIColor.red.setStroke()
         line.stroke()
         
+        ///* Connection begin/end is not recording it as image
         // Draws all the connections' lines
         for item in ItemFrames.shared.connections {
             print("wwowowowow")
@@ -129,58 +130,59 @@ class CustomView: UIView {
             
             if (item.initialBegin != nil) {
                 if (item.initialBegin.type == "image") {
-                    
+                    print("initialbegin: \(Double(item.initialBegin.frame.minX) + oneWidth)/\(Double(item.initialBegin.frame.minY) + oneHeight)")
                     oneWidth = Double(item.initialBegin.imageFrame.frame.width)/2
                     oneHeight = Double(item.initialBegin.imageFrame.frame.height)/2
+                
                 } else if (item.initialBegin.type == "note") {
-                    
+                    print("item.initialBegin.type == note")
                     oneWidth = Double(item.initialBegin.noteFrame.frame.width)/2
                     oneHeight = Double(item.initialBegin.noteFrame.frame.height)/2
                 } else {
-                    print("noooo1")
+                    print("no initialBegin")
                 
                 }
             }
             
             if (item.initialFinish != nil) {
                 if (item.initialFinish.type == "image") {
-                    
+                    print("initialfinish: \(Double(item.initialFinish.frame.minX) + twoWidth)/\(Double(item.initialFinish.frame.minY) + twoHeight)")
                     twoWidth = Double(item.initialFinish.imageFrame.frame.width)/2
                     twoHeight = Double(item.initialFinish.imageFrame.frame.height)/2
                 } else if (item.initialFinish.type == "note") {
-                    
+                    print("item.initialFinish.type == note")
                     twoWidth = Double(item.initialFinish.noteFrame.frame.width)/2
                     twoHeight = Double(item.initialFinish.noteFrame.frame.height)/2
                 } else {
-                    print("noooo2")
+                    print("no item.initialfinish")
                 }
             }
         
             if (item.begin != nil) {
                 if (item.begin.image != nil) {
-                    
+                    print("item.begin.image != nil")
                     oneWidth = Double(sub1.imageFrame.frame.width)/2
                     oneHeight = Double(sub1.imageFrame.frame.height)/2
                 } else if (item.begin.note != nil) {
-                    
+                    print("item.begin.note != nil")
                     oneWidth = Double(sub1.noteFrame.frame.width)/2
                     oneHeight = Double(sub1.noteFrame.frame.width)/2
                 } else {
-                    print("noooo2")
+                    print("no itembegin")
                 }
             }
             
             if (item.finish != nil) {
                 if (item.finish.image != nil) {
-                    
+                    print("item.finish.image != nil")
                     twoWidth = Double(sub2.imageFrame.frame.width)/2
                     twoHeight = Double(sub2.imageFrame.frame.width)/2
                 } else if (item.finish.note != nil) {
-                    
+                    print("item.finish.note != nil")
                     twoWidth = Double(sub2.noteFrame.frame.width)/2
                     twoHeight = Double(sub2.noteFrame.frame.height)/2
                 } else {
-                    print("noooo2")
+                    print("no item.finish")
                 }
             }
             
@@ -188,12 +190,16 @@ class CustomView: UIView {
             
             line.lineWidth = 5
             
-            print("onewidth: \(oneWidth), twowidth: \(twoWidth), threewidth: \(oneHeight), fourwidth: \(twoHeight)")
-            
             if ((item.initialBegin != nil) && (item.initialFinish != nil)) {
                 line.move(to: CGPoint(x: Double(item.initialBegin.frame.minX) + oneWidth, y: Double(item.initialBegin.frame.minY) + oneHeight))
                 
                 line.addLine(to: CGPoint(x: Double(item.initialFinish.frame.minX) + twoWidth, y: Double(item.initialFinish.frame.minY) + twoHeight))
+                if (item.initialBegin.type == "image") {
+                    print("concurrent: \(Double(item.initialBegin.frame.minX) + oneWidth)/\(Double(item.initialBegin.frame.minY) + oneHeight), \(Double(item.initialFinish.frame.minX) + twoWidth)/\(Double(item.initialFinish.frame.minY) + twoHeight)")
+                }
+                if (item.initialFinish.type == "image") {
+                    print("concurrent: \(Double(item.initialBegin.frame.minX) + oneWidth)/\(Double(item.initialBegin.frame.minY) + oneHeight), \(Double(item.initialFinish.frame.minX) + twoWidth)/\(Double(item.initialFinish.frame.minY) + twoHeight)")
+                }
             } else if ((item.begin != nil) && (item.finish != nil)) {
                 line.move(to: CGPoint(x: item.begin.xCoord + oneWidth, y: item.begin.yCoord + oneHeight))
                 
@@ -208,9 +214,16 @@ class CustomView: UIView {
     }
     
     // Add Neo4j objects and connections
-    func loadFrames() {
+    func loadFrames(sender: DetailViewController) {
         for obj in ItemFrames.shared.frames {
-            self.addSubview(obj)
+            
+//            ///*
+            if (obj.imageLink == nil) {
+                //obj.loadImage()
+                self.addSubview(obj)
+                obj.delegate = sender
+            }
+            obj.alpha = 1.0
             let intoAnimation = AnimationType.zoom(scale: 0.5)
             obj.animate(animations: [intoAnimation], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: { })
         }
@@ -234,6 +247,20 @@ class CustomView: UIView {
             self.addSubview(label)
             label.animate(animations: [intoAnimation], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: { label.backgroundColor = .blue })
         }
+    }
+    
+    ///*
+    func loadImages(sender: DetailViewController) {
+        for obj in ItemFrames.shared.frames {
+            //            ///*
+            if (obj.imageLink != nil) {
+                obj.alpha = 0.0
+                self.addSubview(obj)
+                obj.delegate = sender
+                obj.loadImage()
+            }
+        }
+        
     }
     
     // When connection is added, be able to name it

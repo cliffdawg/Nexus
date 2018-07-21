@@ -10,6 +10,7 @@ import Foundation
 import UIKit
 import ViewAnimator
 import TinyConstraints
+import FirebaseStorage
 
 protocol DrawLineDelegate {
     func draw(start: CGPoint, end: CGPoint)
@@ -35,6 +36,7 @@ class CustomImage: UIView {
     var specific = ""
     
     var image: UIImage!
+    var imageLink: String!
     
     var imageFrame: UIImageView!
     var noteFrame: UITextView!
@@ -64,6 +66,31 @@ class CustomImage: UIView {
         imageView.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
         self.imageFrame = imageView
         self.addSubview(imageView)
+    }
+    
+    func loadImage() {
+        let gsReference = Storage.storage().reference(forURL: imageLink)
+        gsReference.getData(maxSize: 1 * 2048 * 2048) { data, error in
+            if error != nil {
+                print("error: \(error)")
+            } else {
+                print("downloadImage")
+                var imaged = UIImage(data: data!)! // Convert image to data
+                let trueImage = self.resizeImage(image: imaged, newWidth: 50) as! UIImage
+                self.configureImage(setImage: trueImage)
+            }
+        }
+    }
+    
+    // Scale the image if needed
+    func resizeImage(image: UIImage, newWidth: CGFloat) -> UIImage? {
+        let scale = newWidth / image.size.width
+        let newHeight = image.size.height * scale
+        UIGraphicsBeginImageContext(CGSize(width: newWidth, height: newHeight))
+        image.draw(in: CGRect(x: 0, y: 0, width: newWidth, height: newHeight))
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return newImage
     }
     
     // pressing on note doesn't allow touch to be detected
