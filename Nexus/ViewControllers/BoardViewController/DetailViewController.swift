@@ -20,12 +20,10 @@ import NVActivityIndicatorView
 
 /* ViewController that presents the Nexus as a pin-board type view. */
 class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPopoverPresentationControllerDelegate, ChooseAddDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, DrawLineDelegate {
-
+    
     var imagePickerController: UIImagePickerController?
     
     var name = ""
-    
-    var downloadConnect = [Connection]()
     
     var downloadItems = [DownloadItem]()
     
@@ -58,6 +56,8 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     
     var lineBegin = CGPoint(x: 30, y: 30)
     var lineEnd = CGPoint(x: 140, y: 140)
+    
+    var activity = NVActivityIndicatorView(frame: CGRect(x: 0.0, y: 0.0, width: 0.0, height: 0.0))
     
     func configureView() {
         // Update the user interface for the detail item.
@@ -98,6 +98,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         
         //////////////////////////
         self.loadNexus()
+        self.updateConnections()
         
         let halfSizeOfView = 25.0
 //        let maxViews = 3
@@ -134,18 +135,16 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         self.navigationController?.popToRootViewController(animated: true)
     }
     
-    ///* The new flow of downloading image data has no improvement over initial method, try to place and then load somehow, maybe when done loading alpha = 1.0 of view
-    ///* The missing connection appears to be lacking a finish object
-    // When shifting vert/horizontal, just rotate image/note itself
+    // The new flow of downloading image data has an improvement over initial method, now tries to place and then load
+    ///* When shifting vert/horizontal, just rotate image/note itself <- NEXT TASK
     func loadNexus() {
         
-        var activity = NVActivityIndicatorView(frame: CGRect(x: 0.0, y: 0.0, width: 0.0, height: 0.0))
+        activity = NVActivityIndicatorView(frame: CGRect(x: 0.0, y: 0.0, width: 0.0, height: 0.0))
         let frame = CGRect(x: self.view.frame.midX - 45, y: self.view.frame.midY - 45, width: 90, height: 90)
         activity = NVActivityIndicatorView(frame: frame, type: NVActivityIndicatorType(rawValue: 9), color: .blue, padding: nil)
         self.view.addSubview(activity)
         activity.startAnimating()
         
-        self.downloadConnect.removeAll()
         ItemFrames.shared.frames.removeAll()
         ItemFrames.shared.connections.removeAll()
 
@@ -158,6 +157,8 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         let resultDataContents = ["row", "graph"]
         let statement = ["statement" : cypherQuery, "resultDataContents" : resultDataContents] as [String : Any]
         let statements = [statement]
+        
+        let dispatchGroup = DispatchGroup()
         
         theo.executeTransaction(statements, completionBlock: { (response, error) in
 //            for node in response {
@@ -174,6 +175,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 print("mirror: \(mirrorResult.subjectType)")
                 let resulted = resultobject as! Array<AnyObject>
                 print("resulted: \(resulted)")
+            
                 // Array
                 for res in resulted {
                     print("res: \(res)")
@@ -224,14 +226,10 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                                     
                                 } else if (ror.key == "image") {
                                     print("image: \(ror.value as! String)")
-                                    ///*
                                     download.imageRef = ror.value as! String
                                     download.image = UIImage(named: "Image Placeholder")
-                                    ///*download.downloadImage(imageURL: ror.value as! String)
                                     
                                 }
-    //                            end.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
-    //                            end.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
                                 if (ror.key == "x coordinate") {
                                     print("x value")
                                     let xSub = ror.value as! String
@@ -270,22 +268,38 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                             connection.origin = mirt["startNode"] as! String
                             print("connection: \(mirt["type"]!)")
                             connection.connection = mirt["type"] as! String
+                            
                             for loaded in self.downloadItems {
+                                
+                                dispatchGroup.enter()
+                                
                                 if (loaded.uniqueID == connection.origin) {
                                     print("woo")
                                     connection.begin = loaded
                                     connection.beginID = loaded.uniqueID
-                                    if ((self.downloadConnect.contains(where: {$0.connection == connection.connection}) == false)) {
-                                        self.downloadConnect.append(connection)
+                                    if ((ItemFrames.shared.connections.contains(where: {($0.connection == connection.connection) && ($0.end == connection.end) && ($0.origin == connection.origin)}) == false)) {
                                         ItemFrames.shared.connections.append(connection)
+                                        
+                                        dispatchGroup.leave()
+                                        
+                                    } else {
+                                        
+                                        dispatchGroup.leave()
+                                        
                                     }
                                 } else if (loaded.uniqueID == connection.end) {
                                     print("wee")
                                     connection.finish = loaded
                                     connection.finishID = loaded.uniqueID
-                                    if ((self.downloadConnect.contains(where: {$0.connection == connection.connection}) == false)) {
-                                        self.downloadConnect.append(connection)
+                                    if ((ItemFrames.shared.connections.contains(where: {($0.connection == connection.connection) && ($0.end == connection.end) && ($0.origin == connection.origin)}) == false)) {
                                         ItemFrames.shared.connections.append(connection)
+                                        
+                                        dispatchGroup.leave()
+                                        
+                                    } else {
+                                        
+                                        dispatchGroup.leave()
+                                        
                                     }
                                 }
                             }
@@ -293,7 +307,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                     }
                 }
             //}
-            self.loadIndividual()
+            
         
         })
             
@@ -301,24 +315,31 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             // DispatchQueue.main.async
             
             // put activity indicator and thread at top of function
-            let when = DispatchTime.now() + 5
-            DispatchQueue.main.asyncAfter(deadline: when) {
-                self.loadBoard()
-                activity.stopAnimating()
-            }
+//            let when = DispatchTime.now() + 5
+//            DispatchQueue.main.asyncAfter(deadline: when) {
+//                self.loadBoard()
+//                activity.stopAnimating()
+//            }
+        
+        dispatchGroup.notify(queue: DispatchQueue.main) {
+            self.loadIndividual()
+//            self.loadBoard()
+//            activity.stopAnimating()
+            // MOVE THESE ABOVE TWO TO LOADINDIVIDUAL AND 
+        }
         
         
     }
     
     func loadBoard() {
-        ///*
+        
 //        for item in downloadItems {
 //            var obj = CustomImage()
 //            if (item.imageRef != nil) {
 //                let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: 50.0, height: 50.0)
 //                obj = CustomImage(frame: rect)
-//                ///*obj.configureImage(setImage: (item.image)!)
-//                ///*obj.configureImage(setImage: item.image)
+//                obj.configureImage(setImage: (item.image)!)
+//                obj.configureImage(setImage: item.image)
 //                obj.imageLink = item.imageRef
 //                obj.uniqueID = item.uniqueID
 //                ItemFrames.shared.frames.append(obj)
@@ -402,9 +423,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                                 
                             } else if (ror.key == "image") {
                                 print("image.2: \(ror.value as! String)")
-                                ///*
                                 download.imageRef = ror.value as! String
-                                ///*download.downloadImage(imageURL: ror.value as! String)
                                 
                             }
                             //                            end.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
@@ -441,20 +460,20 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 }
             }
             
-            ///* Manually download the image for each image object
+            // Manually download the image for each image object
 //            for item in self.downloadItems {
 //                if (item.imageRef != nil) {
 //                    item.downloadImage(imageURL: item.imageRef)
 //                }
 //            }
+            
             DispatchQueue.main.async {
+                print("DispatchQueue for images")
                 for item in self.downloadItems {
                     var obj = CustomImage()
                     if (item.imageRef != nil) {
                         let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: 50.0, height: 50.0)
                         obj = CustomImage(frame: rect)
-                        ///*obj.configureImage(setImage: (item.image)!)
-                        ///*obj.configureImage(setImage: item.image)
                         obj.imageLink = item.imageRef
                         obj.uniqueID = item.uniqueID
                         obj.type = "image"
@@ -470,9 +489,68 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                     
                 }
                 self.customView.loadImages(sender: self)
+                
+                print("loadBoard")
+                self.loadBoard()
+                self.activity.stopAnimating()
+                
             }
             
         })
+    }
+    
+    func updateConnections() {
+        ItemFrames.shared.downloadedConnections.removeAll()
+        
+        let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
+
+        let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'})-[r]->(m:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'}) RETURN n, r, m"
+    
+        let resultDataContents = ["row", "graph"]
+        let statement = ["statement" : cypherQuery, "resultDataContents" : resultDataContents] as [String : Any]
+        let statements = [statement]
+        
+        theo.executeTransaction(statements, completionBlock: { (response, error) in
+            let resultobject = response["results"]!
+            let mirrorResult = Mirror(reflecting: resultobject)
+            let resulted = resultobject as! Array<AnyObject>
+            // Array
+            for res in resulted {
+                let mirrorRes = Mirror(reflecting: res)
+                let resp = res as! Dictionary<String, AnyObject>
+                // Dictionary
+                let mirrordata = Mirror(reflecting: resp["data"]!)
+                let reyd = resp["data"]! as! Array<AnyObject>
+                print("connectreyd:\(reyd)")
+                // Array
+                for reyd2 in reyd {
+                    let mirrorreyd2 = Mirror(reflecting: reyd2)
+                    let reydd = reyd2 as! Dictionary<String, AnyObject>
+                    let mirrorgraph = Mirror(reflecting: reydd["graph"]!)
+                    let rat = reydd["graph"]! as! Dictionary<String, AnyObject>
+                    let mirrort = Mirror(reflecting: rat["nodes"]!)
+                    let mirrortarray = rat["nodes"]! as! Array<AnyObject>
+                    let mirrorrat = Mirror(reflecting: rat["relationships"]!)
+                    let ratarray = rat["relationships"]! as! Array<AnyObject>
+                    print("connectratarray:\(ratarray)")
+                    // This prints out all the relationships
+                    for ratt in ratarray {
+                        let connection = Connection()
+                        let mirrat = Mirror(reflecting: ratt)
+                        print("connectmirrat: \(mirrat)")
+                        let mirt = ratt as! Dictionary<String, AnyObject>
+                        connection.end = mirt["endNode"] as! String
+                        connection.origin = mirt["startNode"] as! String
+                        connection.connection = mirt["type"] as! String
+                
+                        // Also check for same beginNode and endNode
+                        if ((ItemFrames.shared.downloadedConnections.contains(where: {($0.connection == connection.connection) && ($0.end == connection.end) && ($0.origin == connection.origin)}) == false)) {
+                                ItemFrames.shared.downloadedConnections.append(connection)
+                            }
+                        }
+                    }
+                }
+            })
     }
     
     // Selecting which item to add 
@@ -545,6 +623,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             self.connectingBanner.text = "Connecting"
             ItemFrames.shared.connectingState = true
             ItemFrames.shared.positioning = false
+            ItemFrames.shared.deleting = false
             self.connectingBanner.alpha = 1.0
             let animate = AnimationType.from(direction: .right, offset: 100)
             self.connectingBanner.animate(animations: [animate], initialAlpha: 0.5, finalAlpha: 1.0, delay: 0.0, duration: 1.0, completion: nil)
@@ -555,6 +634,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             self.connectingBanner.text = "Re-positioning"
             ItemFrames.shared.connectingState = false
             ItemFrames.shared.editing = false
+            ItemFrames.shared.deleting = false
             ItemFrames.shared.positioning = true
             self.connectingBanner.alpha = 1.0
             let animate = AnimationType.from(direction: .right, offset: 100)
@@ -566,12 +646,26 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             self.connectingBanner.text = "Editing"
             ItemFrames.shared.connectingState = false
             ItemFrames.shared.positioning = false
+            ItemFrames.shared.deleting = false
             self.connectingBanner.alpha = 1.0
             let animate = AnimationType.from(direction: .right, offset: 100)
             self.connectingBanner.animate(animations: [animate], initialAlpha: 0.5, finalAlpha: 1.0, delay: 0.0, duration: 1.0, completion: nil)
             self.endConnect.title = "Done"
             self.endConnect.isEnabled = true
             ItemFrames.shared.bringNotesToFront()
+        } else if (chosenAdd == "Delete") {
+            self.connectingBanner.text = "Deleting"
+            ItemFrames.shared.connectingState = false
+            ItemFrames.shared.positioning = false
+            ItemFrames.shared.editing = false
+            ItemFrames.shared.deleting = true
+            self.connectingBanner.alpha = 1.0
+            let animate = AnimationType.from(direction: .right, offset: 100)
+            self.connectingBanner.animate(animations: [animate], initialAlpha: 0.5, finalAlpha: 1.0, delay: 0.0, duration: 1.0, completion: nil)
+            self.endConnect.title = "Done"
+            self.endConnect.isEnabled = true
+            ItemFrames.shared.sendNotesToBack()
+            ItemFrames.shared.setupDeleteMode()
         }
         
     }
@@ -591,6 +685,21 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         popoverPresentationViewController?.sourceRect = CGRect(x:0, y:0, width: addSymbol.width/2, height: 30)
         
         present(popoverViewController, animated: true, completion: nil)
+        
+        //* This delete works
+        let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
+        
+        //F5D8A989-C917-46F0-995E-F4B46F3BBE99
+        //MATCH (p:`F5D8A989-C917-46F0-995E-F4B46F3BBE99` { board: 'anoher'}) where ID(p)=40 OPTIONAL MATCH (p)-[r]-() DELETE r,p
+        let cypher = "MATCH (p:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'}) where ID(p)=40 OPTIONAL MATCH (p)-[r]-() DELETE r,p"
+        print("uuid: \(UIDevice.current.identifierForVendor!.uuidString)", "name: \(self.name)")
+        
+        let resultDataContents = ["row", "graph"]
+        let statement = ["statement" : cypher, "resultDataContents" : resultDataContents] as [String : Any]
+        let statements = [statement]
+        theo.executeTransaction(statements, completionBlock: { (response, error) in
+            print("delete response: \(response), delete error: \(error)")
+        })
     }
 
     func showImagePickerController(sourceType: UIImagePickerControllerSourceType) {
@@ -636,16 +745,40 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         self.customView.refresh(begin: start, stop: end)
     }
     
+    func delete(object: CustomImage) {
+    
+        UIView.animate(withDuration: 0.5, delay: 0.0, options: .curveEaseOut, animations: {
+            object.transform = CGAffineTransform.init(scaleX: 0.1, y: 0.1)
+            object.alpha = 0.0
+        }, completion: {_ in
+            object.removeFromSuperview()
+        })
+        
+        var index = 0
+        
+        for connect in ItemFrames.shared.connections {
+            
+            
+            if object.specific == connect.origin || object.specific == connect.end {
+                  ItemFrames.shared.connections.remove(at: index)
+            }
+            
+            index += 1
+        }
+        ///* Needs a way to delete the connection label
+        ///* When creating connection, assign that label to the connection class
+        self.draw(start: CGPoint(x: 0.0, y: 0.0), end: CGPoint(x: 0.0, y: 0.0))
+    }
+    
     @objc
     func selectImage(_ sender: Any) {
         
     }
     
     //limit number of char in note text
-    // make it work only when text isn't blank
     @IBAction func addNote(_ sender: Any) {
         
-        if ((newNoteLabel.text?.trimmingCharacters(in: .whitespaces).isEmpty) == false) {
+        if newNoteLabel.text?.trimmingCharacters(in: .whitespaces).isEmpty == false {
             print("Add note")
             let pointX = CGFloat(self.view.frame.midX - 25)
             let pointY = CGFloat(self.view.frame.midY - 25)
@@ -682,6 +815,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         ItemFrames.shared.connectingState = false
         ItemFrames.shared.positioning = false
         ItemFrames.shared.sendNotesToBack()
+        ItemFrames.shared.exitDeleteMode()
     }
     
     // Now there is a weird gs:\ folder being made sometimes
@@ -694,37 +828,34 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     @IBAction func save(_ sender: Any) {
         print("save")
         
-        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.regular)
-        let blurEffectView = UIVisualEffectView(effect: blurEffect)
-        blurEffectView.alpha = 0.8
-        blurEffectView.frame = view.bounds
-        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        view.addSubview(blurEffectView)
-        self.view.bringSubview(toFront: topBar)
-        self.view.bringSubview(toFront: bottomBar)
+        self.loadAnimate()
         
-        var activity = NVActivityIndicatorView(frame: CGRect(x: 0.0, y: 0.0, width: 0.0, height: 0.0))
-        let frame = CGRect(x: self.view.frame.midX - 45, y: self.view.frame.midY - 45, width: 90, height: 90)
-        activity = NVActivityIndicatorView(frame: frame, type: NVActivityIndicatorType(rawValue: 12), color: .blue, padding: nil)
-        self.view.addSubview(activity)
-        activity.startAnimating()
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1, execute: {
+            self.saveNexus()
+        })
         
+    }
+    
+    func saveNexus() {
         let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
         
-        // Will only work if there are connections present, fix
+        // Creates nodes and connections in database
         for connect in ItemFrames.shared.connections {
             
+            print("connect: \(connect.connection)")
             var relate = Relationship()
             var relateOrigin: Node!
             var relateEnd: Node!
             
-            /////////// Fix this, it runs twice because of going over connections twice
             for item in ItemFrames.shared.frames {
-                print("item")
+                print("item1")
+             
+                let semaphore = DispatchSemaphore(value: 0) // create a semaphore with a value 0. signal() will make the value 1.
+                
                 if ((item.specific == connect.origin) && (item.uniqueID == "")) {
                     var origin = Node()
                     if (item.type == "note") {
-                        
+                        print("note1")
                         let ided = UIDevice.current.identifierForVendor!.uuidString
                         origin.setProp("note", propertyValue: "\(item.note)")
                         origin.setProp("board", propertyValue: "\(self.label.text!)")
@@ -735,12 +866,13 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                             print("note error: \(error)")
                             let rawID = node?.id
                             let intID = 1*rawID!
-                            print("intID:\(intID)")
                             item.uniqueID = "\(intID)"
+                            print("intID:\(item.uniqueID)")
+                            
+                            semaphore.signal() // once you make the signal(), then only next loop will get executed.
                         })
-                    }
-                    if (item.type == "image") {
-                        
+                    } else if (item.type == "image") {
+                        print("image1")
                         let image = item.image
                         let refd = ref.childByAutoId()
                         let refdStore = refd.key
@@ -749,9 +881,9 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         let localFile = UIImagePNGRepresentation(image!)
                         let metadata = StorageMetadata()
                         metadata.contentType = "image/png"
-//                        let when = DispatchTime.now() + 2
-//                        DispatchQueue.main.asyncAfter(deadline: when) {
-                            ///*path.putData(localFile!, metadata: nil)
+                        //                        let when = DispatchTime.now() + 2
+                        //                        DispatchQueue.main.asyncAfter(deadline: when) {
+                        ///*path.putData(localFile!, metadata: nil)
                         //}
                         origin.setProp("image", propertyValue: "\(path)")
                         origin.setProp("board", propertyValue: "\(self.label.text!)")
@@ -762,20 +894,46 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                             print("image error: \(error)")
                             let rawID = node?.id
                             let intID = 1*rawID!
-                            print("intID:\(intID)")
                             item.uniqueID = "\(intID)"
+                            print("intID:\(item.uniqueID)")
                             item.imageLink = "\(refdStore)"
+                            
+                            semaphore.signal() // once you make the signal(), then only next loop will get executed.
                         })
                     }
                     
+                } else if ((item.specific == connect.origin) && (item.uniqueID != "")) {
+                    // Locate node with this uniqueID
+                    // Assign as beginning of relation, but don't create
+                    
+                    // (item.uniqueID != "") is not being run
+                    print("already ID1: \(item.uniqueID)")
+                    theo.fetchNode(item.uniqueID, completionBlock: {(node, error) in
+                        print("id node: \(node)")
+                        relateOrigin = node
+                        
+                        semaphore.signal() // once you make the signal(), then only next loop will get executed.
+                    })
+                    
+                } else {
+                    // Neither fits into the connection-itemFrames correspondence or is an already used item
+                    print("neither1")
+                    semaphore.signal()
                 }
+
+                semaphore.wait() // asking the semaphore to wait, till it gets the signal.
+                
             }
             
             for item in ItemFrames.shared.frames {
+                print("item2")
+
+                let semaphore2 = DispatchSemaphore(value: 0) // create a semaphore with a value 0. signal() will make the value 1.
+                
                 if ((item.specific == connect.end && (item.uniqueID == ""))) {
                     var end = Node()
                     if (item.type == "note") {
-                        
+                        print("note2")
                         let ided = UIDevice.current.identifierForVendor!.uuidString
                         end.setProp("note", propertyValue: "\(item.note)")
                         end.setProp("board", propertyValue: "\(self.label.text!)")
@@ -786,12 +944,13 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                             print("note error: \(error)")
                             let rawID = node?.id
                             let intID = 1*rawID!
-                            print("intID:\(intID)")
                             item.uniqueID = "\(intID)"
+                            print("intID:\(item.uniqueID)")
+                            
+                            semaphore2.signal() // once you make the signal(), then only next loop will get executed.
                         })
-                    }
-                    if (item.type == "image") {
-                        
+                    } else if (item.type == "image") {
+                        print("image2")
                         let image = item.image
                         let refd = ref.childByAutoId()
                         let refdStore = refd.key
@@ -800,9 +959,9 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         let localFile = UIImagePNGRepresentation(image!)
                         let metadata = StorageMetadata()
                         metadata.contentType = "image/png"
-//                        let when = DispatchTime.now() + 2
-//                        DispatchQueue.main.asyncAfter(deadline: when) {
-                            ///*path.putData(localFile!, metadata: nil)
+                        //                        let when = DispatchTime.now() + 2
+                        //                        DispatchQueue.main.asyncAfter(deadline: when) {
+                        ///*path.putData(localFile!, metadata: nil)
                         //}
                         end.setProp("image", propertyValue: "\(path)")
                         end.setProp("board", propertyValue: "\(self.label.text!)")
@@ -813,77 +972,95 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                             print("image error: \(error)")
                             let rawID = node?.id
                             let intID = 1*rawID!
-                            print("intID:\(intID)")
                             item.uniqueID = "\(intID)"
+                            print("intID:\(item.uniqueID)")
                             item.imageLink = "\(refdStore)"
+                            
+                            semaphore2.signal() // once you make the signal(), then only next loop will get executed.
+                        })
+                    }
+                } else if ((item.specific == connect.end) && (item.uniqueID != "")) {
+                    // Locate node with this uniqueID
+                    // Assign as beginning of relation, but don't create
+                    print("already ID2: \(item.uniqueID)")
+                    theo.fetchNode(item.uniqueID, completionBlock: {(node, error) in
+                        print("id node2: \(node)")
+                        relateEnd = node
+                        
+                        semaphore2.signal() // once you make the signal(), then only next loop will get executed.
+                    })
+                    
+                } else {
+                    // Neither fits into the connection-itemFrames correspondence or is an already used item
+                    print("neither2")
+                    semaphore2.signal()
+                }
+                
+                semaphore2.wait() // asking the semaphore to wait, till it gets the signal.
+            }
+            
+            // Error is that the the 7 second delay allows the correct relateBegin and relateEnds to be switched around, so semaphore.wait should already account for it here
+            // CreateRelationship can be run independently, at this point it has every info it needs
+            if ((relateEnd != nil) && (relateOrigin != nil)) {
+                relate.relate(relateOrigin, toNode: relateEnd, type: connect.connection)
+                print("connectID: \(connect.connection)")
+                print("downloadconnect count: \(ItemFrames.shared.downloadedConnections.count)")
+                if (ItemFrames.shared.downloadedConnections.count == 0) {
+                    theo.createRelationship(relate, completionBlock: {(node, error) in
+                        print("relate error: \(error)")
+                    })
+                } else {
+                    
+                    
+                    if ((ItemFrames.shared.downloadedConnections.contains(where: {($0.connection == connect.connection) && ($0.end == "\(1*relateEnd.id)") && ($0.origin == "\(1*relateOrigin.id)")}) == false)) {
+                            theo.createRelationship(relate, completionBlock: {(node, error) in
+                                print("relate error: \(error)")
                         })
                     }
                 }
-            }
-           
-            let when2 = DispatchTime.now() + 7
-            DispatchQueue.main.asyncAfter(deadline: when2) {
                 
-                if ((relateEnd != nil) && (relateOrigin != nil)) {
-                relate.relate(relateOrigin, toNode: relateEnd, type: connect.connection)
-                theo.createRelationship(relate, completionBlock: {(node, error) in
-                    print("relate error: \(error)")
-                    })
-                } else {
-                    ///////// use Whisper to show that internet is slow/down
-                    print("no new nodes")
-                }
-                let blurredEffectViews = self.view.subviews.filter{$0 is UIVisualEffectView}
-                blurredEffectViews.forEach{ blurView in
-                    let animation = AnimationType.from(direction: .right, offset: 0)
-                    blurView.animate(animations: [animation], initialAlpha: 0.8, finalAlpha: 0.0, delay: 0.0, duration: 1.5, completion: {
-                        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.5) {
-                            blurView.removeFromSuperview()
-                        }
-                    })
-                    
-                    
-                }
-                activity.stopAnimating()
+            } else {
+                ///////// use Whisper to show that internet is slow/down
+                print("no new nodes")
             }
             
         }
         
-        ///* It runs save individuals before the node creations are all complete
-        let when = DispatchTime.now() + 5
-        DispatchQueue.main.asyncAfter(deadline: when) {
-                ///*
-                self.saveIndividuals()
-            }
+        // Delay is needed here to run saveindividuals after nodes completed
+        //let when = DispatchTime.now() + 5
+        //DispatchQueue.main.asyncAfter(deadline: when) {
         
-        let when2 = DispatchTime.now() + 7
-        DispatchQueue.main.asyncAfter(deadline: when2) {
-            // This works
-            for item in ItemFrames.shared.frames {
-                print("upload pics")
-                if (item.type == "image") {
-                    if (item.imageLink != nil) {
-                        let ided = UIDevice.current.identifierForVendor!.uuidString
-                        let localFile = UIImagePNGRepresentation(item.image)
-                        let metadata = StorageMetadata()
-                        metadata.contentType = "image/png"
-                        let path = self.storageRef.child("\(ided)/\(item.imageLink!)")
-                        print("upload pic: \(path)")
-                        path.putData(localFile!, metadata: nil)
-                    }
-                }
-            }
-        }
+        self.saveIndividuals()
+        
+        //}
+        
+//        let when2 = DispatchTime.now() + 7
+//        // This is where remove blur and quit NVActivity indicator was
+////        DispatchQueue.main.asyncAfter(deadline: when2) {
+////
+////
+////
+////        }
+//
+//        DispatchQueue.main.asyncAfter(deadline: when2) {
+//
+//        }
     }
     
-    ///*
     func saveIndividuals() {
+        print("save individuals")
         let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
-        ///* Seems like free-floating ones are duplicated
+        // MultipleConnect: Each object is confirmed to have a uniqueID by the time this runs, and the correct number is present
         for item in ItemFrames.shared.frames {
             print("UNIQUEID: \(item.uniqueID)")
         }
+        
+        let dispatchGroup = DispatchGroup()
+        
         for item in ItemFrames.shared.frames {
+            
+            dispatchGroup.enter()
+            
             if item.uniqueID == "" {
                 var node = Node()
                 print("unique")
@@ -898,11 +1075,13 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         print("note error: \(error)")
                         let rawID = node?.id
                         let intID = 1*rawID!
-                        print("intID:\(intID)")
+                        print("indieID:\(intID)")
                         item.uniqueID = "\(intID)"
+                        
+                        dispatchGroup.leave()
+                        
                     })
-                }
-                if (item.type == "image") {
+                } else if (item.type == "image") {
                     print("image")
                     let image = item.image
                     let refd = self.ref.childByAutoId()
@@ -924,13 +1103,71 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         print("image error: \(error)")
                         let rawID = node?.id
                         let intID = 1*rawID!
-                        print("intID:\(intID)")
                         item.uniqueID = "\(intID)"
+                        print("indieID:\(intID)")
                         item.imageLink = "\(refdStore)"
+                        
+                        dispatchGroup.leave()
+                        
                     })
+                }
+            } else {
+                dispatchGroup.leave()
+            }
+        }
+        
+        dispatchGroup.notify(queue: DispatchQueue.main) {
+            print("dispatchGroup.notify")
+            self.uploadImages()
+            self.updateConnections()
+        }
+        
+    }
+    
+    func uploadImages() {
+        // This works
+        for item in ItemFrames.shared.frames {
+            print("upload pics")
+            if (item.type == "image") {
+                if (item.imageLink != nil) {
+                    let ided = UIDevice.current.identifierForVendor!.uuidString
+                    let localFile = UIImagePNGRepresentation(item.image)
+                    let metadata = StorageMetadata()
+                    metadata.contentType = "image/png"
+                    let path = self.storageRef.child("\(ided)/\(item.imageLink!)")
+                    print("upload pic: \(path)")
+                    path.putData(localFile!, metadata: nil)
                 }
             }
         }
+        
+        ///*
+        let blurredEffectViews = self.view.subviews.filter{$0 is UIVisualEffectView}
+        blurredEffectViews.forEach{ blurView in
+            let animation = AnimationType.from(direction: .right, offset: 0)
+            blurView.animate(animations: [animation], initialAlpha: 0.8, finalAlpha: 0.0, delay: 0.0, duration: 1.5, completion: {
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 1.5) {
+                    blurView.removeFromSuperview()
+                }
+            })
+        }
+        self.activity.stopAnimating()
+    }
+    
+    func loadAnimate() {
+        let blurEffect = UIBlurEffect(style: UIBlurEffectStyle.regular)
+        let blurEffectView = UIVisualEffectView(effect: blurEffect)
+        blurEffectView.alpha = 0.8
+        blurEffectView.frame = view.bounds
+        blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.addSubview(blurEffectView)
+        self.view.bringSubview(toFront: topBar)
+        self.view.bringSubview(toFront: bottomBar)
+        
+        let frame = CGRect(x: self.view.frame.midX - 45, y: self.view.frame.midY - 45, width: 90, height: 90)
+        activity = NVActivityIndicatorView(frame: frame, type: NVActivityIndicatorType(rawValue: 12), color: .blue, padding: nil)
+        self.view.addSubview(activity)
+        activity.startAnimating()
     }
     
     func adaptivePresentationStyle(for controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {

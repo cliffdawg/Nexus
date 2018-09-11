@@ -14,6 +14,7 @@ import FirebaseStorage
 
 protocol DrawLineDelegate {
     func draw(start: CGPoint, end: CGPoint)
+    func delete(object: CustomImage)
 }
 
 /* Custom view that can represent a note or picture. Can be interacted with, repositioned, connected, and is touch/pan/press-enabled. */
@@ -180,12 +181,16 @@ class CustomImage: UIView {
     
     // only for initial
     override func touchesBegan(_ touches: (Set<UITouch>!), with event: UIEvent!) {
+        if (self.connecting == false) {
         // Promote the touched view
         self.superview?.bringSubview(toFront: self)
         print("Touches begin")
         // Remember original location
         lastLocation = self.center
-        
+        } else {
+        let touch = touches.first!
+        lastLocation = touch.location(in: self.superview)
+        }
     }
     
     func borderView() {
@@ -200,6 +205,32 @@ class CustomImage: UIView {
         tintView.animate(animations: [zoomAnimation], initialAlpha: 0.0, finalAlpha: 0.5, delay: 0.0, duration: 0.3, completion: { })
         //self.connecting = true
         self.bordering = true
+    }
+    
+    func setupDelete() {
+        let rect = CGRect(x: -10.0, y: -10.0, width: 25, height: 25)
+        let button = UIButton(frame: rect)
+        button.setTitle("X", for: .normal)
+        button.setTitleColor(UIColor.red, for: .normal)
+        button.addTarget(self, action: #selector(deleteNode(_:)), for: .touchUpInside)
+        self.addSubview(button)
+        self.bringSubview(toFront: button)
+        let zoomAnimation = AnimationType.zoom(scale: 0.5)
+        button.animate(animations: [zoomAnimation], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: { })
+        
+    }
+    
+    @objc
+    func deleteNode(_ sender: Any) {
+        
+        print("deleteNode")
+
+        self.delegate.delete(object: self)
+        
+        if (self.uniqueID != "") {
+            
+        }
+        
     }
     
 }

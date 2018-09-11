@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="7bK-jq-Zjz">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="D2Z-RX-l86">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -51,7 +51,7 @@
                                 <items>
                                     <barButtonItem title="Item" id="dV4-1R-qcd">
                                         <connections>
-                                            <segue destination="7bK-jq-Zjz" kind="custom" identifier="backToMaster" customClass="CustomUnwindSegue" customModule="Nexus" customModuleProvider="target" id="bAg-if-ImJ"/>
+                                            <segue destination="D2Z-RX-l86" kind="show" identifier="backToMaster" customClass="CustomUnwindSegue" customModule="Nexus" customModuleProvider="target" id="7zD-A2-tDS"/>
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" id="QCC-93-i5I">
@@ -204,7 +204,7 @@
         <!--Master-->
         <scene sceneID="smW-Zh-WAh">
             <objects>
-                <tableViewController storyboardIdentifier="master" title="Master" clearsSelectionOnViewWillAppear="NO" id="7bK-jq-Zjz" customClass="MasterViewController" customModule="Nexus" customModuleProvider="target" sceneMemberID="viewController">
+                <tableViewController title="Master" clearsSelectionOnViewWillAppear="NO" id="7bK-jq-Zjz" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" id="r7i-6Z-zg0">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -231,7 +231,7 @@
                             </items>
                         </toolbar>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Cell" textLabel="Arm-wq-HPj" rowHeight="80" style="IBUITableViewCellStyleDefault" id="WCw-Qf-5nD" customClass="Cell" customModule="Nexus" customModuleProvider="target">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="Cell" textLabel="Arm-wq-HPj" rowHeight="80" style="IBUITableViewCellStyleDefault" id="WCw-Qf-5nD">
                                 <rect key="frame" x="0.0" y="72" width="375" height="80"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="WCw-Qf-5nD" id="37f-cq-3Eg">
@@ -255,9 +255,6 @@
                                     </subviews>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                                <connections>
-                                    <outlet property="textView" destination="7Fk-AF-8xs" id="x8c-45-XRE"/>
-                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <sections/>
@@ -269,14 +266,6 @@
                     <userDefinedRuntimeAttributes>
                         <userDefinedRuntimeAttribute type="boolean" keyPath="isHeroEnabled" value="YES"/>
                     </userDefinedRuntimeAttributes>
-                    <connections>
-                        <outlet property="leftButton" destination="ltF-Wf-Dfs" id="bBX-Hx-3to"/>
-                        <outlet property="textField" destination="yOj-9d-FV8" id="OY7-IO-vSn"/>
-                        <outlet property="tintView" destination="B7o-nT-5xq" id="T3b-Lz-hY5"/>
-                        <outlet property="toolbar" destination="eUc-i8-usr" id="pSI-te-PPf"/>
-                        <segue destination="JEX-9P-axG" kind="custom" identifier="showDetail" customClass="CustomSegue" customModule="Nexus" customModuleProvider="target" id="w2L-6P-dvu"/>
-                        <segue destination="rv6-lc-D0S" kind="show" identifier="toEdit" id="kPg-Df-1Tx"/>
-                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Rux-fX-hf1" sceneMemberID="firstResponder"/>
                 <view alpha="0.5" contentMode="scaleToFill" id="B7o-nT-5xq">
@@ -286,7 +275,122 @@
                     <viewLayoutGuide key="safeArea" id="9tq-PA-MI6"/>
                 </view>
             </objects>
-            <point key="canvasLocation" x="-402.39999999999998" y="-490.70464767616198"/>
+            <point key="canvasLocation" x="-1950" y="-301"/>
+        </scene>
+        <!--Master View Controller-->
+        <scene sceneID="kVF-Hu-RT9">
+            <objects>
+                <viewController storyboardIdentifier="master" id="D2Z-RX-l86" customClass="MasterViewController" customModule="Nexus" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="iDB-yP-1gL">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="UOc-iy-v3E">
+                                <rect key="frame" x="32" y="132" width="309" height="478"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="ZcE-jv-RQb">
+                                    <size key="itemSize" width="117" height="123"/>
+                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="footerReferenceSize" width="0.0" height="0.0"/>
+                                    <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                                </collectionViewFlowLayout>
+                                <cells>
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="Cell" id="CCU-cf-f4L" customClass="Cell" customModule="Nexus" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="0.0" width="117" height="123"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO">
+                                            <rect key="frame" x="0.0" y="0.0" width="117" height="123"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <visualEffectView opaque="NO" alpha="0.5" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="li5-rP-6ss">
+                                                    <rect key="frame" x="0.0" y="0.0" width="117" height="123"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" ambiguous="YES" insetsLayoutMarginsFromSafeArea="NO" id="HNJ-eZ-e9i">
+                                                        <rect key="frame" x="0.0" y="0.0" width="117" height="123"/>
+                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                    </view>
+                                                    <color key="backgroundColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <blurEffect style="extraLight"/>
+                                                </visualEffectView>
+                                                <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" fixedFrame="YES" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="R8m-t8-64h">
+                                                    <rect key="frame" x="0.0" y="0.0" width="117" height="123"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                    <string key="text">Lorem ipsum dolor sit er elit lamet, consectetaur cillium adipisicing pecu, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Nam liber te conscient to factor tum poen legum odioque civiuda.</string>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                                </textView>
+                                                <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Bmy-AQ-qTz">
+                                                    <rect key="frame" x="0.0" y="0.0" width="25" height="25"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="15"/>
+                                                    <state key="normal" title="X"/>
+                                                    <connections>
+                                                        <action selector="deleteButtonTapped:" destination="CCU-cf-f4L" eventType="touchUpInside" id="puX-gH-MRZ"/>
+                                                    </connections>
+                                                </button>
+                                            </subviews>
+                                        </view>
+                                        <connections>
+                                            <outlet property="deleteBackgroundView" destination="li5-rP-6ss" id="ICy-rx-MjA"/>
+                                            <outlet property="deleteButton" destination="Bmy-AQ-qTz" id="ITl-Zw-f62"/>
+                                            <outlet property="textView" destination="R8m-t8-64h" id="r22-OW-NeG"/>
+                                        </connections>
+                                    </collectionViewCell>
+                                </cells>
+                                <connections>
+                                    <outlet property="dataSource" destination="D2Z-RX-l86" id="aE6-wV-QKO"/>
+                                    <outlet property="delegate" destination="D2Z-RX-l86" id="INt-3T-jzV"/>
+                                </connections>
+                            </collectionView>
+                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="e9p-oa-Zp8">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                <items>
+                                    <barButtonItem title="Item" id="n9f-Ky-T1T"/>
+                                    <barButtonItem style="plain" id="i43-KF-lAx">
+                                        <textField key="customView" opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" id="Efe-Nh-Tbm" customClass="KaedeTextField" customModule="TextFieldEffects">
+                                            <rect key="frame" x="61" y="7" width="97" height="30"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                            <nil key="textColor"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                            <textInputTraits key="textInputTraits"/>
+                                            <userDefinedRuntimeAttributes>
+                                                <userDefinedRuntimeAttribute type="color" keyPath="foregroundColor">
+                                                    <color key="value" red="0.40781933069999998" green="0.40781933069999998" blue="0.90632233799999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                </userDefinedRuntimeAttribute>
+                                            </userDefinedRuntimeAttributes>
+                                        </textField>
+                                    </barButtonItem>
+                                </items>
+                            </toolbar>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <viewLayoutGuide key="safeArea" id="sXP-gD-juM"/>
+                    </view>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="boolean" keyPath="isHeroEnabled" value="YES"/>
+                    </userDefinedRuntimeAttributes>
+                    <connections>
+                        <outlet property="collectionView" destination="UOc-iy-v3E" id="l69-e0-QeT"/>
+                        <outlet property="leftButton" destination="i43-KF-lAx" id="49I-0W-EOM"/>
+                        <outlet property="textField" destination="Efe-Nh-Tbm" id="Sxf-uW-OAf"/>
+                        <outlet property="tintView" destination="hAI-gG-6Jb" id="GWb-en-jjs"/>
+                        <outlet property="toolbar" destination="e9p-oa-Zp8" id="5pL-md-1vw"/>
+                        <segue destination="rv6-lc-D0S" kind="show" identifier="toEdit" id="lDK-sv-Pfo"/>
+                        <segue destination="JEX-9P-axG" kind="custom" identifier="showDetail" customClass="CustomSegue" customModule="Nexus" customModuleProvider="target" id="rfF-EF-sgy"/>
+                    </connections>
+                </viewController>
+                <view alpha="0.5" contentMode="scaleToFill" id="hAI-gG-6Jb">
+                    <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                    <color key="backgroundColor" red="0.18039215689999999" green="0.69411764710000001" blue="0.52941176469999995" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                    <viewLayoutGuide key="safeArea" id="lOr-Qu-oZ4"/>
+                </view>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="d4S-BI-dQ7" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-999.20000000000005" y="638.2308845577212"/>
         </scene>
         <!--Edit Name Controller-->
         <scene sceneID="Luc-UG-7Uh">
@@ -309,7 +413,7 @@
                                 <items>
                                     <barButtonItem title="Home" id="y7s-TK-tPp">
                                         <connections>
-                                            <segue destination="7bK-jq-Zjz" kind="show" identifier="backEdit" id="tPk-7m-nzM"/>
+                                            <segue destination="D2Z-RX-l86" kind="show" identifier="backEdit" id="EBR-ag-RAY"/>
                                         </connections>
                                     </barButtonItem>
                                 </items>
@@ -332,10 +436,10 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1mh-sD-odh" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="457" y="-94"/>
+            <point key="canvasLocation" x="860" y="495"/>
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="bAg-if-ImJ"/>
+        <segue reference="EBR-ag-RAY"/>
     </inferredMetricsTieBreakers>
 </document>

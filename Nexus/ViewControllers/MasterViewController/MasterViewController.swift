@@ -14,17 +14,21 @@ import IQKeyboardManagerSwift
 import Hero
 
 /* Stores all of the current board topics, loads from Core Data. */
-class MasterViewController: UITableViewController, NSFetchedResultsControllerDelegate, UITextFieldDelegate, SegueDelegate {
+class MasterViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate, UITextFieldDelegate, SegueDelegate {
 
     var boards = [NSManagedObject]()
+    
     private let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
     
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var tintView: UIView!
     @IBOutlet weak var toolbar: UIToolbar!
     @IBOutlet weak var leftButton: UIBarButtonItem!
+    @IBOutlet weak var collectionView: UICollectionView!
+    
     
     var newValue = ""
+    var editingStatus = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,16 +43,28 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
         //saveButton.tintColor = .clear
         //navigationItem.rightBarButtonItem = saveButton
         //////////////////
-        self.tableView.reloadData()
+        self.collectionView.reloadData()
         self.load() { (success) -> Void in
             if success {
                 self.setupActivityIndicator()
                 self.activityIndicator.stopAnimating()
                 
-                self.tableView.animateViews(animations: [AnimationType.from(direction: .right, offset: self.view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0, duration: 0.5, animationInterval: 0.1, completion: {    })
+                self.collectionView.animateViews(animations: [AnimationType.from(direction: .right, offset: self.view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0, duration: 0.5, animationInterval: 0.1, completion: {})
             }
         }
         
+    }
+    
+    override func setEditing(_ editing: Bool, animated: Bool) {
+        super.setEditing(editing, animated: animated)
+        self.editingStatus = editing
+        if let indexPaths = collectionView?.indexPathsForVisibleItems {
+            for indexPath in indexPaths {
+                if let cell = collectionView?.cellForItem(at: indexPath) as? Cell {
+                    cell.isEditing = editing
+                }
+            }
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -90,8 +106,13 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
         
     }
     
-    func push(from: UITextView) {
-        
+    func delete(from: UITextView, cell: Cell) {
+        if let indexPath = collectionView.indexPath(for: cell) {
+            let appDel:AppDelegate = UIApplication.shared.delegate as! AppDelegate
+            let context:NSManagedObjectContext = appDel.managedObjectContext
+            context.delete(boards.remove(at: indexPath.row))
+            collectionView.deleteItems(at: [indexPath])
+        }
     }
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
@@ -108,7 +129,7 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
         //self.tintView.addGestureRecognizer(tap)
         tintView.backgroundColor = UIColor(red: 46/255, green: 177/255, blue: 135/255, alpha: 0.5)
         self.tintView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height)
-        self.view.insertSubview(tintView, aboveSubview: tableView)
+        self.view.insertSubview(tintView, aboveSubview: self.collectionView)
         self.view.bringSubview(toFront: toolbar)
         
         //self.view.sendSubview(toBack: tableView)
@@ -155,7 +176,10 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
         do {
             
             try context.save()
+            //let insertIndexPath = IndexPath(item: self.boards.count, section: 0)
+            //self.collectionView.insertItems(at: [insertIndexPath])
             self.boards.append(adding)
+            print("boards append")
             textField.text = ""
             textField.endEditing(true)
             //self.dismissKeyboard(self.view)
@@ -167,18 +191,29 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
         
         
         
-        
         //tableView.reloadRows(at: [IndexPath.init(row: boards.count-1, section: 0)], with: UITableViewRowAnimation.automatic)
-//
-        self.tableView.reloadData()
+        ///////////////////////
+        self.collectionView.reloadData()
         
         // you need to press the done aspect
         // something to do with reloading the data itself
         // not editing when reload and then animate
         //let when = DispatchTime.now() + 2
         //DispatchQueue.main.asyncAfter(deadline: when) {
-        self.tableView.cellForRow(at: IndexPath.init(row: self.boards.count-1, section: 0))?.animate(animations: [AnimationType.from(direction: .right, offset: self.view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: {})
-        
+//        self.collectionView.cellForRow(at: IndexPath.init(row: self.boards.count-1, section: 0))?.animate(animations: [AnimationType.from(direction: .right, offset: self.view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: {})
+        print("boards: \(self.boards.count)")
+        // now indexpath(0, 0) works
+        let indexedPath = IndexPath(item: self.boards.count-1, section: 0)
+        print("indexPath: \(indexedPath)")
+        //self.setupActivityIndicator()
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.005) {
+            self.collectionView.cellForItem(at: indexedPath)?.animate(animations: [AnimationType.from(direction: .right, offset: self.view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: {
+                    print("animate")
+            })
+        }
+//        self.collectionView.animateViews(animations: [AnimationType.from(direction: .right, offset: self.view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0, duration: 0.5, animationInterval: 0.1, completion: {
+//                //self.activityIndicator.stopAnimating()
+//            })
         self.view.sendSubview(toBack: tintView)
         tintView.backgroundColor = UIColor.clear
         
@@ -225,14 +260,12 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
         print("insertNewObject")
     }
     
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let cell = self.tableView.cellForRow(at: indexPath) as! Cell
-        cellName = cell.textView.text!
-        self.performSegue(withIdentifier: "showDetail", sender: cell)
-        
-    }
-    
-    
+//    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        let cell = self.tableView.cellForRow(at: indexPath) as! Cell
+//        cellName = cell.textView.text!
+//        self.performSegue(withIdentifier: "showDetail", sender: cell)
+//
+//    }
     
     var cellName = ""
     
@@ -264,46 +297,67 @@ class MasterViewController: UITableViewController, NSFetchedResultsControllerDel
 
     // MARK: - Table View
 
-    override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
+//    override func numberOfSections(in tableView: UITableView) -> Int {
+//        return 1
+//    }
+//
+//    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+//        return boards.count
+//    }
 
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return boards.count
-    }
+//    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+//        if editingStyle == .delete {
+//            let appDel:AppDelegate = UIApplication.shared.delegate as! AppDelegate
+//            let context:NSManagedObjectContext = appDel.managedObjectContext
+//            context.delete(boards.remove(at: indexPath.row))
+//
+//            do {
+//                try context.save()
+//            } catch {
+//                // Replace this implementation with code to handle the error appropriately.
+//                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+//                let nserror = error as NSError
+//                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+//            }
+//            tableView.deleteRows(at: [indexPath as IndexPath], with: UITableViewRowAnimation.automatic)
+//        }
+//    }
+    
+    
+    
+//    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+//        return 80.0
+//    }
 
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! Cell
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return self.boards.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as! Cell
         let board = boards[indexPath.row]
         cell.textView.text = board.value(forKey: "name") as! String
         cell.labelName = cell.textView.text
-        print("\(cell.textLabel?.text)")
         cell.delegate = self
+        cell.setUp(editing: self.editingStatus)
         return cell
     }
-
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            let appDel:AppDelegate = UIApplication.shared.delegate as! AppDelegate
-            let context:NSManagedObjectContext = appDel.managedObjectContext
-            context.delete(boards.remove(at: indexPath.row))
-            
-            do {
-                try context.save()
-            } catch {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-                let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-            }
-            tableView.deleteRows(at: [indexPath as IndexPath], with: UITableViewRowAnimation.automatic)
-        }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print("cell select")
+        let cell = self.collectionView.cellForItem(at: indexPath) as! Cell
+        cellName = cell.textView.text!
+        self.performSegue(withIdentifier: "showDetail", sender: cell)
     }
     
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 80.0
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1 // row count
     }
-
+    
+//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//        return CGSize(width: 155, height: 155)
+//    }
+    
     // MARK: TableViewController Overrides
 
     // MARK: - Fetched results controller

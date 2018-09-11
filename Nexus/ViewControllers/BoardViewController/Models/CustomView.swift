@@ -32,6 +32,9 @@ class CustomView: UIView {
     var sub1: CustomImage!
     var sub2: CustomImage!
     
+    var beginOffset = 0.0
+    var finishOffset = 0.0
+    
     /*
     // Only override draw() if you perform custom drawing.
     // An empty implementation adversely affects performance during animation.
@@ -104,7 +107,6 @@ class CustomView: UIView {
         UIColor.red.setStroke()
         line.stroke()
         
-        ///* Connection begin/end is not recording it as image
         // Draws all the connections' lines
         for item in ItemFrames.shared.connections {
             print("wwowowowow")
@@ -161,6 +163,7 @@ class CustomView: UIView {
             if (item.begin != nil) {
                 if (item.begin.image != nil) {
                     print("item.begin.image != nil")
+                    ///* No image found in database, unexpected value here
                     oneWidth = Double(sub1.imageFrame.frame.width)/2
                     oneHeight = Double(sub1.imageFrame.frame.height)/2
                 } else if (item.begin.note != nil) {
@@ -231,11 +234,22 @@ class CustomView: UIView {
             ////////////////////
             let animation = AnimationType.rotate(angle: 0.0)
             
+            if (item.begin.note == nil) {
+                beginOffset = ItemFrames.shared.imageDimension/2
+            } else {
+                beginOffset = ItemFrames.shared.noteDimension/2
+            }
             
-            let newX = CGFloat((item.finish.xCoord + item.begin.xCoord)/2)
-            let newY = CGFloat((item.finish.yCoord + item.begin.yCoord)/2 + 10)
+            if (item.finish.note == nil) {
+                finishOffset = ItemFrames.shared.imageDimension/2
+            } else {
+                finishOffset = ItemFrames.shared.noteDimension/2
+            }
             
-            let label = UILabel(frame: CGRect(x: newX, y: newY, width: 100.0, height: 35.0))
+            let newX = CGFloat((item.finish.xCoord + finishOffset + item.begin.xCoord + beginOffset)/2)
+            let newY = CGFloat((item.finish.yCoord + finishOffset + item.begin.yCoord + beginOffset)/2)
+            
+            let label = UILabel(frame: CGRect(x: newX - 50, y: newY - 17.5, width: 100.0, height: 35.0))
             label.text = item.connection
             label.backgroundColor = .blue
             label.textColor = .white
@@ -269,6 +283,8 @@ class CustomView: UIView {
         
         var text = ""
         let animation = AnimationType.rotate(angle: 0.0)
+        
+        // Remove text field
         sender.animate(animations: [animation], initialAlpha: 1.0, finalAlpha: 0.5, delay: 0.0, duration: 0.1, completion: {
             
                 let awayAnimation = AnimationType.rotate(angle: 0.0)
@@ -276,15 +292,17 @@ class CustomView: UIView {
                 sender.superview?.animate(animations: [awayAnimation], initialAlpha: 1.0, finalAlpha: 0.0, delay: 0.2, duration: 1.0, completion: {
                 sender.superview?.removeFromSuperview()
             })
-            let rect = sender.superview?.frame
-            let xCoord = CGFloat(Int((rect?.minX)!)) + CGFloat(5)
-            let yCoord = CGFloat(Int((rect?.minY)!)) + CGFloat(12.5)
-            let label = UILabel(frame: CGRect(x: xCoord, y: yCoord, width: 100.0, height: 35.0))
+            
+            // Set up the label
+            let xCoord = (self.startObject.center.x + self.endObject.center.x)/2
+            let yCoord = (self.startObject.center.y + self.endObject.center.y)/2
+            let label = UILabel(frame: CGRect(x: xCoord - 50, y: yCoord - 17.5, width: 100.0, height: 35.0))
             label.backgroundColor = .blue
             label.layer.masksToBounds = true
             label.layer.cornerRadius = 5.0
             label.textAlignment = .center
             
+            // Assigns the label the input textField's text
             for view in (sender.superview?.subviews)! {
                 let viewString = "\(view)"
                 let start = viewString.index(viewString.startIndex, offsetBy: 8)
@@ -298,7 +316,6 @@ class CustomView: UIView {
                 }
             }
             
-            //print("contentSize: \()")
             self.addSubview(label)
             label.animate(animations: [intoAnimation], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: { label.backgroundColor = .blue })
             
@@ -312,6 +329,10 @@ class CustomView: UIView {
             connect.initialBegin = self.startObject
             connect.initialFinish = self.endObject
             ItemFrames.shared.connections.append(connect)
+            ///*
+            self.start = CGPoint(x: 0.0, y: 0.0)
+            self.end = CGPoint(x: 0.0, y: 0.0)
+            self.setNeedsDisplay()
         })
         
         /////
@@ -350,9 +371,9 @@ class CustomView: UIView {
             }
             
             // Created initial input field for connection name
-            let newX = CGFloat((self.end.x + self.start.x)/2 - 45)
-            let newY = CGFloat((self.end.y + self.start.y)/2 - 30)
-            let labelRect = CGRect(x: newX, y: newY, width: 90, height: 60)
+            let newX = CGFloat((self.end.x + self.start.x)/2)
+            let newY = CGFloat((self.end.y + self.start.y)/2)
+            let labelRect = CGRect(x: newX - 45, y: newY - 30, width: 90, height: 60)
             let labelView = UIView(frame: labelRect)
             labelView.backgroundColor = .yellow
             labelView.tag = 999

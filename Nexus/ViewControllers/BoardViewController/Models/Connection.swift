@@ -16,6 +16,7 @@ class Connection {
     var origin: String!
     var end: String!
     var connection: String!
+    var label: UILabel!
     
     ///// Use these only for pulling data from Neo4j
     var begin: DownloadItem!

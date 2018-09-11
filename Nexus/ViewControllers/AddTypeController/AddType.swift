@@ -17,7 +17,7 @@ protocol ChooseAddDelegate {
 /* Consists of all the types of items that can be added to a Nexus board */
 class AddType: UITableViewController {
     
-    let adds = ["Picture", "Note", "Connection", "Re-position", "Edit"]
+    let adds = ["Picture", "Note", "Connection", "Re-position", "Edit", "Delete"]
     var delegate2: ChooseAddDelegate!
     
     override func viewDidLoad() {
