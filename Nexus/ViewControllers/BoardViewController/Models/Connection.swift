@@ -19,12 +19,18 @@ class Connection {
     var label: UILabel!
     
     ///// Use these only for pulling data from Neo4j
+    // Raw data templates from downloading
     var begin: DownloadItem!
     var finish: DownloadItem!
+    // ID's from downloaded data
     var beginID: String!
     var finishID: String!
+    // The actual objects created from downloaded data
+    var downloadBegin: CustomImage!
+    var downloadFinish: CustomImage!
     /////
     
+    // These are only for locally created objects which haven't been uploaded yet
     var initialBegin: CustomImage!
     var initialFinish: CustomImage!
     

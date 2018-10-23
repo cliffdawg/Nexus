@@ -13,7 +13,7 @@ import TinyConstraints
 import Theo
 
 /* Enables all the interaction/implementation of the Nexus board. */
-class CustomView: UIView {
+class CustomView: UIView, UITextFieldDelegate {
 
     var start = CGPoint()
     
@@ -24,8 +24,6 @@ class CustomView: UIView {
     var endObject: CustomImage!
     
     let border = 15
-    
-    //var client: BoltClient!
     
     var theo: RestClient!
     
@@ -43,48 +41,48 @@ class CustomView: UIView {
     }
     */
 
-    func loadneo4j() {
-        
-        let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
-        
-        //var noded = Node()
-        
-        
-        ////////// RELATIONSHIP
-        
-//        var tester1: Node!
-//        var tester2: Node!
-//
-//        var relate = Relationship()
-//
-//        theo.fetchNode("41", completionBlock: {(node, error) in
-//            print("fetch error: \(error)")
-//            tester1 = node!
-//        })
-//
-//        theo.fetchNode("24", completionBlock: {(node, error) in
-//            print("fetch error: \(error)")
-//            tester2 = node!
-//        })
-//
-//        let when = DispatchTime.now() + 2
-//        DispatchQueue.main.asyncAfter(deadline: when) {
-//            relate.relate(tester1, toNode: tester2, type: "friends")
-//
-//            theo.createRelationship(relate, completionBlock: {(node, error) in
-//               print("relate error: \(error)")
-//            })
-//        }
-        /////////// CREATE
-        //noded.addLabel("tester1")
-//        noded.setProp("key1", propertyValue: "value1")
-//
-//        // error: "{ URL: https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780/db/data/db/data/node }"
-//        theo.createNode(noded, labels: ["friend1"], completionBlock: { (node, error) in
-//            print("error: \(error)")
-//        })
-        
-    }
+//    func loadneo4j() {
+//        
+//        let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
+//        
+//        //var noded = Node()
+//        
+//        
+//        ////////// RELATIONSHIP
+//        
+////        var tester1: Node!
+////        var tester2: Node!
+////
+////        var relate = Relationship()
+////
+////        theo.fetchNode("41", completionBlock: {(node, error) in
+////            print("fetch error: \(error)")
+////            tester1 = node!
+////        })
+////
+////        theo.fetchNode("24", completionBlock: {(node, error) in
+////            print("fetch error: \(error)")
+////            tester2 = node!
+////        })
+////
+////        let when = DispatchTime.now() + 2
+////        DispatchQueue.main.asyncAfter(deadline: when) {
+////            relate.relate(tester1, toNode: tester2, type: "friends")
+////
+////            theo.createRelationship(relate, completionBlock: {(node, error) in
+////               print("relate error: \(error)")
+////            })
+////        }
+//        /////////// CREATE
+//        //noded.addLabel("tester1")
+////        noded.setProp("key1", propertyValue: "value1")
+////
+////        // error: "{ URL: https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780/db/data/db/data/node }"
+////        theo.createNode(noded, labels: ["friend1"], completionBlock: { (node, error) in
+////            print("error: \(error)")
+////        })
+//        
+//    }
     
     // Drawing the connection(s)
     override func draw(_ rect: CGRect) {
@@ -109,8 +107,21 @@ class CustomView: UIView {
         
         // Draws all the connections' lines
         for item in ItemFrames.shared.connections {
-            print("wwowowowow")
+            print("\(item.connection)")
 
+            // We changed it to this but then it stopeed working sometimes
+//            for single in ItemFrames.shared.frames {
+//                if single.uniqueID != "" && item.downloadBegin != nil {
+//                    if item.downloadBegin.uniqueID == single.uniqueID {
+//                        print("single: \(single)")
+//                        sub1 = single
+//                    } else if item.downloadFinish.uniqueID == single.uniqueID {
+//                        sub2 = single
+//                        print("single: \(single)")
+//                    }
+//                }
+//            }
+            
             for single in ItemFrames.shared.frames {
                 print("\(item.beginID), \(single.uniqueID)")
                 if ((single.uniqueID != "") && (item.beginID != nil)){
@@ -130,13 +141,13 @@ class CustomView: UIView {
             var oneHeight = 0.0
             var twoHeight = 0.0
             
-            if (item.initialBegin != nil) {
-                if (item.initialBegin.type == "image") {
+            if item.initialBegin != nil {
+                if item.initialBegin.type == "image" {
                     print("initialbegin: \(Double(item.initialBegin.frame.minX) + oneWidth)/\(Double(item.initialBegin.frame.minY) + oneHeight)")
                     oneWidth = Double(item.initialBegin.imageFrame.frame.width)/2
                     oneHeight = Double(item.initialBegin.imageFrame.frame.height)/2
                 
-                } else if (item.initialBegin.type == "note") {
+                } else if item.initialBegin.type == "note" {
                     print("item.initialBegin.type == note")
                     oneWidth = Double(item.initialBegin.noteFrame.frame.width)/2
                     oneHeight = Double(item.initialBegin.noteFrame.frame.height)/2
@@ -146,12 +157,12 @@ class CustomView: UIView {
                 }
             }
             
-            if (item.initialFinish != nil) {
-                if (item.initialFinish.type == "image") {
+            if item.initialFinish != nil {
+                if item.initialFinish.type == "image" {
                     print("initialfinish: \(Double(item.initialFinish.frame.minX) + twoWidth)/\(Double(item.initialFinish.frame.minY) + twoHeight)")
                     twoWidth = Double(item.initialFinish.imageFrame.frame.width)/2
                     twoHeight = Double(item.initialFinish.imageFrame.frame.height)/2
-                } else if (item.initialFinish.type == "note") {
+                } else if item.initialFinish.type == "note" {
                     print("item.initialFinish.type == note")
                     twoWidth = Double(item.initialFinish.noteFrame.frame.width)/2
                     twoHeight = Double(item.initialFinish.noteFrame.frame.height)/2
@@ -160,58 +171,51 @@ class CustomView: UIView {
                 }
             }
         
-            if (item.begin != nil) {
-                if (item.begin.image != nil) {
-                    print("item.begin.image != nil")
-                    ///* No image found in database, unexpected value here
-                    oneWidth = Double(sub1.imageFrame.frame.width)/2
-                    oneHeight = Double(sub1.imageFrame.frame.height)/2
-                } else if (item.begin.note != nil) {
-                    print("item.begin.note != nil")
-                    oneWidth = Double(sub1.noteFrame.frame.width)/2
-                    oneHeight = Double(sub1.noteFrame.frame.width)/2
-                } else {
-                    print("no itembegin")
-                }
+            if item.downloadBegin != nil {
+                print("downloadBegin!")
+                oneWidth = Double(item.downloadBegin.frame.width)/2
+                oneHeight = Double(item.downloadBegin.frame.height)/2
+                
+            } else {
+                print("no itembegin")
             }
             
-            if (item.finish != nil) {
-                if (item.finish.image != nil) {
-                    print("item.finish.image != nil")
-                    twoWidth = Double(sub2.imageFrame.frame.width)/2
-                    twoHeight = Double(sub2.imageFrame.frame.width)/2
-                } else if (item.finish.note != nil) {
-                    print("item.finish.note != nil")
-                    twoWidth = Double(sub2.noteFrame.frame.width)/2
-                    twoHeight = Double(sub2.noteFrame.frame.height)/2
-                } else {
-                    print("no item.finish")
-                }
+            if item.downloadFinish != nil {
+                print("downloadFinish!")
+                twoWidth = Double(item.downloadFinish.frame.width)/2
+                twoHeight = Double(item.downloadFinish.frame.width)/2
+                
+            } else {
+                print("no item.finish")
             }
             
             let line = UIBezierPath()
             
             line.lineWidth = 5
             
-            if ((item.initialBegin != nil) && (item.initialFinish != nil)) {
+            if item.initialBegin != nil && item.initialFinish != nil {
+                print("draw initial begin")
                 line.move(to: CGPoint(x: Double(item.initialBegin.frame.minX) + oneWidth, y: Double(item.initialBegin.frame.minY) + oneHeight))
                 
                 line.addLine(to: CGPoint(x: Double(item.initialFinish.frame.minX) + twoWidth, y: Double(item.initialFinish.frame.minY) + twoHeight))
-                if (item.initialBegin.type == "image") {
-                    print("concurrent: \(Double(item.initialBegin.frame.minX) + oneWidth)/\(Double(item.initialBegin.frame.minY) + oneHeight), \(Double(item.initialFinish.frame.minX) + twoWidth)/\(Double(item.initialFinish.frame.minY) + twoHeight)")
-                }
-                if (item.initialFinish.type == "image") {
-                    print("concurrent: \(Double(item.initialBegin.frame.minX) + oneWidth)/\(Double(item.initialBegin.frame.minY) + oneHeight), \(Double(item.initialFinish.frame.minX) + twoWidth)/\(Double(item.initialFinish.frame.minY) + twoHeight)")
-                }
-            } else if ((item.begin != nil) && (item.finish != nil)) {
-                line.move(to: CGPoint(x: item.begin.xCoord + oneWidth, y: item.begin.yCoord + oneHeight))
                 
-                line.addLine(to: CGPoint(x: item.finish.xCoord + twoWidth, y: item.finish.yCoord + twoHeight))
+            } else if item.downloadBegin != nil && item.downloadFinish != nil {
+                print("new onewidth and oneheight")
+                
+                line.move(to: CGPoint(x: Double(item.downloadBegin.frame.minX) + oneWidth, y: Double(item.downloadBegin.frame.minY) + oneHeight))
+                
+                line.addLine(to: CGPoint(x: Double(item.downloadFinish.frame.minX) + twoWidth, y: Double(item.downloadFinish.frame.minY) + twoHeight))
             }
             
             UIColor.red.setStroke()
             line.stroke()
             //////// Still have the issue where note is being pushed back
+            
+//            let pointCheck = CGPoint(x: xCheck - 50.0, y: yCheck - 17.5)
+//            if item.label.frame.minX != xCheck - 50.0 || item.label.frame.minY != yCheck - 17.5 {
+//                item.label.center = pointCheck
+//            }
+            
         }
         
     }
@@ -220,7 +224,10 @@ class CustomView: UIView {
     func loadFrames(sender: DetailViewController) {
         for obj in ItemFrames.shared.frames {
             
-//            ///*
+            if ItemFrames.shared.orientation != "" {
+                ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: obj)
+            }
+            
             if (obj.imageLink == nil) {
                 //obj.loadImage()
                 self.addSubview(obj)
@@ -229,12 +236,13 @@ class CustomView: UIView {
             obj.alpha = 1.0
             let intoAnimation = AnimationType.zoom(scale: 0.5)
             obj.animate(animations: [intoAnimation], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: { })
+            
         }
+        
         for item in ItemFrames.shared.connections {
             ////////////////////
-            let animation = AnimationType.rotate(angle: 0.0)
-            
-            if (item.begin.note == nil) {
+            // begin and finish need to be kept here.
+            if item.begin.note == nil {
                 beginOffset = ItemFrames.shared.imageDimension/2
             } else {
                 beginOffset = ItemFrames.shared.noteDimension/2
@@ -256,17 +264,130 @@ class CustomView: UIView {
             label.layer.masksToBounds = true
             label.layer.cornerRadius = 5.0
             label.textAlignment = .center
+            label.adjustsFontSizeToFitWidth = true
+            
+            item.label = label
+            self.addSubview(label)
+            
+            if ItemFrames.shared.orientation != "" {
+                ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: label)
+            }
             
             let intoAnimation = AnimationType.zoom(scale: 0.5)
-            self.addSubview(label)
             label.animate(animations: [intoAnimation], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: { label.backgroundColor = .blue })
         }
     }
     
-    ///*
+    // Limit the connections textField character count
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentCharacterCount = textField.text?.count ?? 0
+        if (range.length + range.location > currentCharacterCount){
+            return false
+        }
+        let newLength = currentCharacterCount + string.count - range.length
+        
+        return newLength <= 20
+    }
+    
+    func loadLabelAfterRedraw(connections: [Connection]) {
+        print("loadlabelafterredraw: \(connections)")
+        ////////////////////
+        // Get midpoint of downloadBegin and downloadFinish
+        var startOffset = 0.0
+        var endOffset = 0.0
+        for item in connections {
+            print("connectname: \(item.connection)")
+            
+//            if item.begin != nil && item.finish != nil {
+//                if item.begin.note == nil {
+//                    startOffset = ItemFrames.shared.imageDimension/2
+//                } else {
+//                    startOffset = ItemFrames.shared.noteDimension/2
+//                }
+//                if item.finish.note == nil {
+//                    endOffset = ItemFrames.shared.imageDimension/2
+//                } else {
+//                    endOffset = ItemFrames.shared.noteDimension/2
+//                }
+//            } else {
+//                if item.initialBegin.note == "" {
+//                    startOffset = ItemFrames.shared.imageDimension/2
+//                } else {
+//                    startOffset = ItemFrames.shared.noteDimension/2
+//                }
+//                if item.initialFinish.note == "" {
+//                    endOffset = ItemFrames.shared.imageDimension/2
+//                } else {
+//                    endOffset = ItemFrames.shared.noteDimension/2
+//                }
+//            }
+//
+            ////
+            if item.downloadBegin != nil {
+                print("item.begin: \(item.downloadBegin)")
+                print("item.finish: \(item.downloadFinish)")
+                if item.downloadBegin.note == "" {
+                    startOffset = ItemFrames.shared.imageDimension/2
+                } else {
+                    startOffset = ItemFrames.shared.noteDimension/2
+                }
+            
+                if item.downloadFinish.note == "" {
+                    endOffset = ItemFrames.shared.imageDimension/2
+                } else {
+                    endOffset = ItemFrames.shared.noteDimension/2
+                }
+            }
+            
+            if item.initialBegin != nil {
+                print("item.initialBegin: \(item.initialBegin)")
+                print("item.initialFinish: \(item.initialFinish)")
+                if item.initialBegin.note == "" {
+                    startOffset = ItemFrames.shared.imageDimension/2
+                } else {
+                    startOffset = ItemFrames.shared.noteDimension/2
+                }
+                if item.initialFinish.note == "" {
+                    endOffset = ItemFrames.shared.imageDimension/2
+                } else {
+                    endOffset = ItemFrames.shared.noteDimension/2
+                }
+            }
+            
+            ////
+
+            var newX = 0.0
+            var newY = 0.0
+            if item.downloadBegin != nil {
+                newX = (Double(item.downloadFinish.frame.minX) + endOffset + Double(item.downloadBegin.frame.minX) + startOffset)/2
+                newY = (Double(item.downloadFinish.frame.minY) + endOffset + Double(item.downloadBegin.frame.minY) + startOffset)/2
+            }
+            if item.initialBegin != nil {
+                newX = (Double(item.initialFinish.frame.minX) + endOffset + Double(item.initialBegin.frame.minX) + startOffset)/2
+                newY = (Double(item.initialFinish.frame.minY) + endOffset + Double(item.initialBegin.frame.minY) + startOffset)/2
+            }
+                
+            let label = item.label!
+            label.frame = CGRect(x: newX - 50, y: newY - 17.5, width: 100.0, height: 35.0)
+
+            label.text = item.connection
+            label.backgroundColor = .blue
+            label.textColor = .white
+            label.layer.masksToBounds = true
+            label.layer.cornerRadius = 5.0
+            label.textAlignment = .center
+            label.adjustsFontSizeToFitWidth = true
+            
+            item.label = label
+            //self.addSubview(label)
+
+            let intoAnimation = AnimationType.zoom(scale: 0.5)
+            label.animate(animations: [intoAnimation], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: { label.backgroundColor = .blue })
+        }
+    }
+    
     func loadImages(sender: DetailViewController) {
         for obj in ItemFrames.shared.frames {
-            //            ///*
             if (obj.imageLink != nil) {
                 obj.alpha = 0.0
                 self.addSubview(obj)
@@ -301,7 +422,9 @@ class CustomView: UIView {
             label.layer.masksToBounds = true
             label.layer.cornerRadius = 5.0
             label.textAlignment = .center
-            
+            label.adjustsFontSizeToFitWidth = true
+        
+            print("create connection objects: \(self.startObject), \(self.endObject)")
             // Assigns the label the input textField's text
             for view in (sender.superview?.subviews)! {
                 let viewString = "\(view)"
@@ -311,6 +434,15 @@ class CustomView: UIView {
                 if (resulting == "ield") {
                     let textField = view as! UITextField
                     label.text = textField.text
+                    if (label.text?.count)! < 14 {
+                        label.sizeToFit()
+                        let insets = UIEdgeInsets(top: -2, left: -4, bottom: -2, right: -4)
+                        //label.drawText(in: UIEdgeInsetsInsetRect(label.frame, insets))
+                        label.frame = UIEdgeInsetsInsetRect(label.frame, insets)
+                    } else {
+                        label.frame = CGRect(x: xCoord - 60, y: yCoord - 15.0, width: 120.0, height: 30.0)
+                    }
+                    
                     label.textColor = .white
                     text = textField.text!
                 }
@@ -320,7 +452,8 @@ class CustomView: UIView {
             label.animate(animations: [intoAnimation], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: { label.backgroundColor = .blue })
             
             let connect = Connection()
-            print("origin: \(self.startObject), end: \(self.endObject)")
+            connect.label = label
+            print("origin: \(self.startObject.specific), end: \(self.endObject.specific)")
             connect.set(origin: self.startObject, final: self.endObject, connect: text)
 //            startSub.xCoord = Double(self.startObject.frame.minX)
 //            startSub.yCoord = Double(self.startObject.frame.minY)
@@ -328,8 +461,10 @@ class CustomView: UIView {
 //            endSub.yCoord = Double(self.endObject.frame.minY)
             connect.initialBegin = self.startObject
             connect.initialFinish = self.endObject
+            //connect.initialOrigin = self.startObject.specific
+           // connect.initialEnd = self.endObject.specific
             ItemFrames.shared.connections.append(connect)
-            ///*
+            print("connect: \(connect.connection), \(connect.origin), \(connect.end), \(connect.beginID), \(connect.finishID)")
             self.start = CGPoint(x: 0.0, y: 0.0)
             self.end = CGPoint(x: 0.0, y: 0.0)
             self.setNeedsDisplay()
@@ -373,7 +508,7 @@ class CustomView: UIView {
             // Created initial input field for connection name
             let newX = CGFloat((self.end.x + self.start.x)/2)
             let newY = CGFloat((self.end.y + self.start.y)/2)
-            let labelRect = CGRect(x: newX - 45, y: newY - 30, width: 90, height: 60)
+            let labelRect = CGRect(x: newX - 65, y: newY - 30, width: 130, height: 60)
             let labelView = UIView(frame: labelRect)
             labelView.backgroundColor = .yellow
             labelView.tag = 999
@@ -382,6 +517,10 @@ class CustomView: UIView {
             labelText.borderStyle = .bezel
             labelText.isUserInteractionEnabled = true
             labelText.allowsEditingTextAttributes = true
+            labelText.adjustsFontSizeToFitWidth = true
+            labelText.autocorrectionType = UITextAutocorrectionType.no
+            labelText.autocapitalizationType = UITextAutocapitalizationType.none
+            labelText.delegate = self as! UITextFieldDelegate
             labelView.addSubview(labelText)
             labelText.edges(to: labelView, insets: UIEdgeInsets(top: 0, left: 0, bottom: -labelView.frame.height/2, right: 0))
             labelView.bringSubview(toFront: labelText)
@@ -453,7 +592,11 @@ class CustomView: UIView {
         } else {
             self.start = begin
             self.end = stop
-            self.setNeedsDisplay()
+            ///*
+            DispatchQueue.main.async {
+                self.setNeedsDisplay()
+            }
+            
             
         }
         for frame in ItemFrames.shared.frames {

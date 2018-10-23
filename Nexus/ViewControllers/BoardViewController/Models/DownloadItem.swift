@@ -19,6 +19,7 @@ class DownloadItem {
     var xCoord: Double!
     var yCoord: Double!
     var image: UIImage!
+    var frame: CGRect!
     
     init() {
         

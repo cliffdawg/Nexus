@@ -15,6 +15,8 @@ import FirebaseStorage
 protocol DrawLineDelegate {
     func draw(start: CGPoint, end: CGPoint)
     func delete(object: CustomImage)
+    func placeLabel(object: CustomImage)
+    func changeImage(custom: CustomImage)
 }
 
 /* Custom view that can represent a note or picture. Can be interacted with, repositioned, connected, and is touch/pan/press-enabled. */
@@ -35,6 +37,9 @@ class CustomImage: UIView {
     var note = ""
     
     var specific = ""
+    
+    // For determining whether or not image has been uploaded
+    var imageCache = ""
     
     var image: UIImage!
     var imageLink: String!
@@ -131,10 +136,11 @@ class CustomImage: UIView {
     @objc
     func detectPan(_ recognizer: UIPanGestureRecognizer) {
         
-        
         if ((connecting == false) && (ItemFrames.shared.editing == false) && (ItemFrames.shared.positioning == true)) {
-            let translation  = recognizer.translation(in: self.superview)
+            let translation = recognizer.translation(in: self.superview)
             self.center = CGPoint(x: lastLocation.x + translation.x, y: lastLocation.y + translation.y)
+            self.delegate.draw(start: CGPoint(x: 0.0, y: 0.0), end: CGPoint(x: 0.0, y: 0.0))
+            
         } else if ((connecting == true) && (ItemFrames.shared.editing == false)) {
             
             let translation = recognizer.translation(in: self.superview)
@@ -148,6 +154,10 @@ class CustomImage: UIView {
         if (recognizer.state == .ended) {
             print("pan ended")
             //////////////////////
+            if ((connecting == false) && (ItemFrames.shared.editing == false) && (ItemFrames.shared.positioning == true)) {
+                // For moving the label, we can either track it (might get complicated) or just refresh the one moved at the end of re-position
+                self.delegate.placeLabel(object: self)
+            }
             if (self.connecting == true) {
                 let starting = CGPoint(x: 0.0, y: 0.0)
                 let ending = CGPoint(x: 0.0, y: 0.0)
@@ -176,11 +186,21 @@ class CustomImage: UIView {
         } else {
             print("connectingState is false")
             // notify not connecting
+            if ItemFrames.shared.editing == true {
+                if type == "image" {
+                    if UserDefaults.standard.string(forKey: "changingImage") == nil {
+                        print("changing image")
+                        UserDefaults.standard.set("changing", forKey: "changingImage")
+                        delegate.changeImage(custom: self)
+                    }
+                }
+            }
         }
     }
     
     // only for initial
     override func touchesBegan(_ touches: (Set<UITouch>!), with event: UIEvent!) {
+        UserDefaults.standard.set(nil, forKey: "changingImage")
         if (self.connecting == false) {
         // Promote the touched view
         self.superview?.bringSubview(toFront: self)

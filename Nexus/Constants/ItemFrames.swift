@@ -25,6 +25,10 @@ class ItemFrames {
     var imageDimension = 50.0
     var noteDimension = 100.0
     
+    var orientation = ""
+    
+    var rotatingTypeMenu: AddType!
+    
     private init() {
         
     }
@@ -128,6 +132,136 @@ class ItemFrames {
 //        let zoomAnimation = AnimationType.zoom(scale: 0.5)
 //        button.animate(animations: [zoomAnimation], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: { })
         }
+    }
+    
+    // Sets up initial orientation of views before any rotations occur with them
+    func initialOrientation(direction: String, view: UIView) {
+        if ItemFrames.shared.orientation == "right" {
+           view.transform = CGAffineTransform(rotationAngle: -CGFloat.pi/2)
+        }
+        if ItemFrames.shared.orientation == "left" {
+            view.transform = CGAffineTransform(rotationAngle: CGFloat.pi/2)
+        }
+    }
+    
+    func rotate(toOrientation: String) {
+        
+        ///*
+        print("rotate frames")
+        
+        if toOrientation == "toRight" && ItemFrames.shared.orientation != "right" {
+            //
+            print("toRight")
+            for item in frames {
+                item.transform = CGAffineTransform(rotationAngle: -CGFloat.pi/2)
+                let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
+                item.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
+
+                })
+                
+            }
+            for connect in connections {
+                connect.label.transform = CGAffineTransform(rotationAngle: -CGFloat.pi/2)
+                let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
+                connect.label.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
+                    
+                })
+            }
+            if rotatingTypeMenu != nil {
+                rotatingTypeMenu.view.transform = CGAffineTransform(rotationAngle: -CGFloat.pi/2)
+                let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
+                rotatingTypeMenu.view.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
+                    
+                })
+            }
+            ItemFrames.shared.orientation = "right"
+        }
+        if toOrientation == "toLeft" && ItemFrames.shared.orientation != "left" {
+            //
+            print("toLeft")
+            for item in frames {
+                item.transform = CGAffineTransform(rotationAngle: CGFloat.pi/2)
+                
+                let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
+                item.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
+
+                })
+            
+            }
+            for connect in connections {
+                connect.label.transform = CGAffineTransform(rotationAngle: CGFloat.pi/2)
+                let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
+                connect.label.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
+                    
+                })
+            }
+            if rotatingTypeMenu != nil {
+                rotatingTypeMenu.view.transform = CGAffineTransform(rotationAngle: CGFloat.pi/2)
+                let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
+                rotatingTypeMenu.view.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
+                    
+                })
+            }
+            ItemFrames.shared.orientation = "left"
+        }
+        if toOrientation == "backFromRight" && ItemFrames.shared.orientation != "" {
+            //
+            print("backFromRight")
+            for item in frames {
+                item.transform = CGAffineTransform(rotationAngle: 0)
+                let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
+                item.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
+
+                })
+            
+            }
+            for connect in connections {
+                connect.label.transform = CGAffineTransform(rotationAngle: 0)
+                let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
+                connect.label.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
+                    
+                })
+            }
+            if rotatingTypeMenu != nil {
+                rotatingTypeMenu.view.transform = CGAffineTransform(rotationAngle: 0)
+                let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
+                rotatingTypeMenu.view.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
+                    
+                })
+            }
+            ItemFrames.shared.orientation = ""
+        }
+        if toOrientation == "backFromLeft"  && ItemFrames.shared.orientation != "" {
+            //
+            print("backFromLeft")
+            for item in frames {
+                item.transform = CGAffineTransform(rotationAngle: 0)
+                let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
+                item.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
+
+                })
+                
+            }
+            for connect in connections {
+                connect.label.transform = CGAffineTransform(rotationAngle: 0)
+                let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
+                connect.label.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
+                    
+                })
+            }
+            if rotatingTypeMenu != nil {
+                rotatingTypeMenu.view.transform = CGAffineTransform(rotationAngle: 0)
+                let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
+                rotatingTypeMenu.view.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
+                    
+                })
+            }
+            ItemFrames.shared.orientation = ""
+        }
+    }
+    
+    func makeImagesEditable() {
+        
     }
     
 }

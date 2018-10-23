@@ -52,7 +52,7 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
                 self.collectionView.animateViews(animations: [AnimationType.from(direction: .right, offset: self.view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0, duration: 0.5, animationInterval: 0.1, completion: {})
             }
         }
-        
+        self.setUpOrientation()
     }
     
     override func setEditing(_ editing: Bool, animated: Bool) {
@@ -104,6 +104,35 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
             completion(true)
         }
         
+    }
+    
+    func setUpOrientation() {
+        print("setuporientation")
+        NotificationCenter.default.addObserver(forName: .UIDeviceOrientationDidChange,
+                                               object: nil,
+                                               queue: .main,
+                                               using: didRotate)
+    }
+    
+    // This works for orientation
+    var didRotate: (Notification) -> Void = { notification in
+        switch UIDevice.current.orientation {
+        case .landscapeLeft:
+            print("landscapeLeft")
+            ItemFrames.shared.rotate(toOrientation: "toLeft")
+        case .landscapeRight:
+            print("landscapeRight")
+            ItemFrames.shared.rotate(toOrientation: "toRight")
+        case .portrait:
+            if ItemFrames.shared.orientation == "left" {
+                ItemFrames.shared.rotate(toOrientation: "backFromLeft")
+            } else if ItemFrames.shared.orientation == "right" {
+                ItemFrames.shared.rotate(toOrientation: "backFromRight")
+            }
+            print("Portrait")
+        default:
+            print("other")
+        }
     }
     
     func delete(from: UITextView, cell: Cell) {
