@@ -262,10 +262,20 @@ class CustomView: UIView, UITextFieldDelegate {
             label.backgroundColor = .blue
             label.textColor = .white
             label.layer.masksToBounds = true
-            label.layer.cornerRadius = 5.0
+            label.layer.cornerRadius = 3.0
             label.textAlignment = .center
             label.adjustsFontSizeToFitWidth = true
-            
+            if (label.text?.count)! < 14 {
+                label.sizeToFit()
+                label.frame = CGRect(x: newX - label.frame.width/2, y: newY - label.frame.height/2, width: label.frame.width, height: label.frame.height)
+                let insets = UIEdgeInsets(top: -2, left: -4, bottom: -2, right: -4)
+                //label.drawText(in: UIEdgeInsetsInsetRect(label.frame, insets))
+                label.frame = UIEdgeInsetsInsetRect(label.frame, insets)
+            } else {
+                ///*
+                let insets = UIEdgeInsets(top: 0, left: -2, bottom: 0, right: -2)
+                label.frame = UIEdgeInsetsInsetRect(CGRect(x: newX - 60.0, y: newY - 15.0, width: 120.0, height: 30.0), insets)
+            }
             item.label = label
             self.addSubview(label)
             
@@ -368,13 +378,24 @@ class CustomView: UIView, UITextFieldDelegate {
             }
                 
             let label = item.label!
+            ///*
             label.frame = CGRect(x: newX - 50, y: newY - 17.5, width: 100.0, height: 35.0)
-
+            if (label.text?.count)! < 14 {
+                label.sizeToFit()
+                label.frame = CGRect(x: newX - Double(label.frame.width/2), y: newY - Double(label.frame.height/2), width: Double(label.frame.width), height: Double(label.frame.height))
+                let insets = UIEdgeInsets(top: -2, left: -4, bottom: -2, right: -4)
+                //label.drawText(in: UIEdgeInsetsInsetRect(label.frame, insets))
+                label.frame = UIEdgeInsetsInsetRect(label.frame, insets)
+            } else {
+                ///*
+                let insets = UIEdgeInsets(top: 0, left: -2, bottom: 0, right: -2)
+                label.frame = UIEdgeInsetsInsetRect(CGRect(x: newX - 60.0, y: newY - 15.0, width: 120.0, height: 30.0), insets)
+            }
             label.text = item.connection
             label.backgroundColor = .blue
             label.textColor = .white
             label.layer.masksToBounds = true
-            label.layer.cornerRadius = 5.0
+            label.layer.cornerRadius = 3.0
             label.textAlignment = .center
             label.adjustsFontSizeToFitWidth = true
             
@@ -420,7 +441,7 @@ class CustomView: UIView, UITextFieldDelegate {
             let label = UILabel(frame: CGRect(x: xCoord - 50, y: yCoord - 17.5, width: 100.0, height: 35.0))
             label.backgroundColor = .blue
             label.layer.masksToBounds = true
-            label.layer.cornerRadius = 5.0
+            label.layer.cornerRadius = 3.0
             label.textAlignment = .center
             label.adjustsFontSizeToFitWidth = true
         
@@ -440,7 +461,8 @@ class CustomView: UIView, UITextFieldDelegate {
                         //label.drawText(in: UIEdgeInsetsInsetRect(label.frame, insets))
                         label.frame = UIEdgeInsetsInsetRect(label.frame, insets)
                     } else {
-                        label.frame = CGRect(x: xCoord - 60, y: yCoord - 15.0, width: 120.0, height: 30.0)
+                        let insets = UIEdgeInsets(top: 0, left: -2, bottom: 0, right: -2)
+                        label.frame = UIEdgeInsetsInsetRect(CGRect(x: xCoord - 60.0, y: yCoord - 15.0, width: 120.0, height: 30.0), insets)
                     }
                     
                     label.textColor = .white
@@ -514,6 +536,7 @@ class CustomView: UIView, UITextFieldDelegate {
             labelView.tag = 999
             let labelText = UITextField()
             labelText.placeholder = "Enter..."
+            labelText.textAlignment = .center
             labelText.borderStyle = .bezel
             labelText.isUserInteractionEnabled = true
             labelText.allowsEditingTextAttributes = true

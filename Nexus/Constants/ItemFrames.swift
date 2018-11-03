@@ -16,13 +16,14 @@ class ItemFrames {
     static let shared = ItemFrames()
     
     var frames = [CustomImage]()
+    var controllerViews = [UIView]()
     var connectingState = false
     var editing = false
     var positioning = false
     var deleting = false
     var connections = [Connection]()
     var downloadedConnections = [Connection]()
-    var imageDimension = 50.0
+    var imageDimension = 80.0
     var noteDimension = 100.0
     
     var orientation = ""
@@ -73,7 +74,15 @@ class ItemFrames {
         }
     }
     
-    func removeOtherHighlights (object: CustomImage) {
+    func recenterNoteviews() {
+        for item in frames {
+            if item.noteFrame != nil {
+                item.noteFrame.centerVertically()
+            }
+        }
+    }
+    
+    func removeOtherHighlights(object: CustomImage) {
         for frame in frames {
             if ((frame != object) && (frame.bordering == true)) {
                 print("target done")
@@ -100,6 +109,32 @@ class ItemFrames {
                         })
                     }
                     
+                }
+            }
+        }
+    }
+    
+    func removeAllHighlights() {
+        for frame in frames {
+            print("target done")
+            frame.connecting = false
+            for view in frame.subviews{
+                //print("view: \(view)")
+                let viewString = "\(view)"
+                    
+                let start = viewString.index(viewString.startIndex, offsetBy: 8)
+                let start2 = viewString[start...].index(of: ":")
+                let resulting = viewString[start..<start2!]
+                
+                if ((resulting == "View") || (resulting == "iew") || (resulting == "enteredTextView")) {
+                        
+                } else {
+                    let fadeAnimation = AnimationType.rotate(angle: 0)
+                    view.animate(animations: [fadeAnimation], initialAlpha: 0.5, finalAlpha: 0.0, delay: 0.0, duration: 0.5, completion: {
+                            
+                        frame.sendSubview(toBack: view)
+                        frame.bordering = false
+                    })
                 }
             }
         }
@@ -167,6 +202,14 @@ class ItemFrames {
                     
                 })
             }
+            for view in controllerViews {
+                view.transform = CGAffineTransform(rotationAngle: -CGFloat.pi/2)
+                let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
+                view.animate(animations: [rotateAnimation], initialAlpha: view.alpha, finalAlpha: view.alpha, delay: 0.0, duration: 0.25, completion: {
+                    
+                })
+                
+            }
             if rotatingTypeMenu != nil {
                 rotatingTypeMenu.view.transform = CGAffineTransform(rotationAngle: -CGFloat.pi/2)
                 let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
@@ -189,11 +232,20 @@ class ItemFrames {
             
             }
             for connect in connections {
+                // sometimes gets nil error here
                 connect.label.transform = CGAffineTransform(rotationAngle: CGFloat.pi/2)
                 let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
                 connect.label.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
                     
                 })
+            }
+            for view in controllerViews {
+                view.transform = CGAffineTransform(rotationAngle: CGFloat.pi/2)
+                let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
+                view.animate(animations: [rotateAnimation], initialAlpha: view.alpha, finalAlpha: view.alpha, delay: 0.0, duration: 0.25, completion: {
+                    
+                })
+                
             }
             if rotatingTypeMenu != nil {
                 rotatingTypeMenu.view.transform = CGAffineTransform(rotationAngle: CGFloat.pi/2)
@@ -222,6 +274,14 @@ class ItemFrames {
                     
                 })
             }
+            for view in controllerViews {
+                view.transform = CGAffineTransform(rotationAngle: 0)
+                let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
+                view.animate(animations: [rotateAnimation], initialAlpha: view.alpha, finalAlpha: view.alpha, delay: 0.0, duration: 0.25, completion: {
+                    
+                })
+                
+            }
             if rotatingTypeMenu != nil {
                 rotatingTypeMenu.view.transform = CGAffineTransform(rotationAngle: 0)
                 let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
@@ -248,6 +308,14 @@ class ItemFrames {
                 connect.label.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
                     
                 })
+            }
+            for view in controllerViews {
+                view.transform = CGAffineTransform(rotationAngle: 0)
+                let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
+                view.animate(animations: [rotateAnimation], initialAlpha: view.alpha, finalAlpha: view.alpha, delay: 0.0, duration: 0.25, completion: {
+                    
+                })
+                
             }
             if rotatingTypeMenu != nil {
                 rotatingTypeMenu.view.transform = CGAffineTransform(rotationAngle: 0)

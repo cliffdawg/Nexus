@@ -34,7 +34,7 @@ class DownloadItem {
             } else {
             print("downloadImage")
             let imaged = UIImage(data: data!)! // Convert image to data
-                self.image = self.resizeImage(image: imaged, newWidth: 50) as! UIImage
+                self.image = self.resizeImage(image: imaged, newWidth: CGFloat(ItemFrames.shared.imageDimension)) as! UIImage
                    
             }
         }

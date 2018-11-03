@@ -19,6 +19,18 @@ protocol DrawLineDelegate {
     func changeImage(custom: CustomImage)
 }
 
+extension UITextView {
+    
+    func centerVertically() {
+        let fittingSize = CGSize(width: bounds.width, height: CGFloat.greatestFiniteMagnitude)
+        let size = sizeThatFits(fittingSize)
+        let topOffset = (bounds.size.height - size.height * zoomScale) / 2
+        let positiveTopOffset = max(1, topOffset)
+        contentOffset.y = -positiveTopOffset
+    }
+    
+}
+
 /* Custom view that can represent a note or picture. Can be interacted with, repositioned, connected, and is touch/pan/press-enabled. */
 class CustomImage: UIView {
     var lastLocation = CGPoint(x: 0, y: 0)
@@ -64,12 +76,19 @@ class CustomImage: UIView {
         self.specific = String(Date().timeIntervalSince1970)
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        if self.noteFrame != nil {
+            noteFrame.centerVertically()
+        }
+    }
+    
     func configureImage(setImage: UIImage) {
         self.type = "image"
         self.image = setImage
         //let image = UIImage(named: "Image Placeholder")!
         let imageView = UIImageView(image: setImage)
-        imageView.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
+        imageView.frame = CGRect(x: 0, y: 0, width: ItemFrames.shared.imageDimension, height: ItemFrames.shared.imageDimension)
         self.imageFrame = imageView
         self.addSubview(imageView)
     }
@@ -82,7 +101,7 @@ class CustomImage: UIView {
             } else {
                 print("downloadImage")
                 var imaged = UIImage(data: data!)! // Convert image to data
-                let trueImage = self.resizeImage(image: imaged, newWidth: 50) as! UIImage
+                let trueImage = self.resizeImage(image: imaged, newWidth: CGFloat(ItemFrames.shared.imageDimension)) as! UIImage
                 self.configureImage(setImage: trueImage)
             }
         }
@@ -104,11 +123,10 @@ class CustomImage: UIView {
         
         self.type = "note"
         
-        //let framed = CGRect(x: 0, y: 0, width: 50, height: 50)
         var noteView = UITextView()
         noteView.text = setNote
-        let heighted = 100
-        let widthed = 100
+        let heighted = ItemFrames.shared.noteDimension
+        let widthed = ItemFrames.shared.noteDimension
         print("heighted: \(heighted)")
         print("widthed: \(widthed)")
         let framed = CGRect(x: 0, y: 0, width: widthed, height: heighted)
@@ -118,8 +136,8 @@ class CustomImage: UIView {
         noteView.textAlignment = .center
         noteView.layer.borderWidth = 5
         noteView.layer.borderColor = UIColor.green.cgColor
+        noteView.centerVertically()
         self.noteFrame = noteView
-        
         self.addSubview(noteView)
         
         noteView.isUserInteractionEnabled = false

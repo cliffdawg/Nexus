@@ -19,7 +19,7 @@ import Alamofire
 import NVActivityIndicatorView
 
 /* ViewController that presents the Nexus as a pin-board type view. */
-class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPopoverPresentationControllerDelegate, ChooseAddDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, DrawLineDelegate {
+class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPopoverPresentationControllerDelegate, ChooseAddDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, DrawLineDelegate, UITextViewDelegate {
     
     var theo: RestClient!
     
@@ -65,6 +65,8 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     
     var imageToChange: CustomImage!
     
+    // last one before uI
+    
     func configureView() {
         // Update the user interface for the detail item.
         //titleView.frame = CGRect(x: titleView.frame.midX, y: titleView.frame.midY, width: 300, height: 20)
@@ -97,9 +99,11 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         let zoomAnimation = AnimationType.zoom(scale: 0.2)
         self.titleView.animate(animations: [zoomAnimation], initialAlpha: 0.5, finalAlpha: 1.0, delay: 0.0, duration: 1.0, completion: { })
         
+        ItemFrames.shared.controllerViews.append(self.createNote)
         self.createNote.alpha = 0.0
         self.newNoteLabel.layer.borderWidth = 5.0
         self.newNoteLabel.layer.borderColor = UIColor.blue.cgColor
+        self.newNoteLabel.delegate = self
         /* Dragging image implementation */
     
         ///*
@@ -508,14 +512,14 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                     for item in self.downloadItems {
                         var obj = CustomImage()
                         if item.imageRef != nil {
-                            let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: 50.0, height: 50.0)
+                            let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: ItemFrames.shared.imageDimension, height: ItemFrames.shared.imageDimension)
                             obj = CustomImage(frame: rect)
                             obj.imageLink = item.imageRef
                             obj.uniqueID = item.uniqueID
                             obj.type = "image"
                             ItemFrames.shared.frames.append(obj)
                         } else if item.note != nil {
-                            let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: 100.0, height: 100.0)
+                            let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: ItemFrames.shared.noteDimension, height: ItemFrames.shared.noteDimension)
                             obj = CustomImage(frame: rect)
                             obj.configureNote(setNote: (item.note)!)
                             obj.uniqueID = item.uniqueID
@@ -640,8 +644,6 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                                               using: didRotate)
     }
     
-    ///* TODO: Try to put orientation listener in ItemFrames static instance, so it can detect between segues
-    
     // This works for orientation
     var didRotate: (Notification) -> Void = { notification in
         switch UIDevice.current.orientation {
@@ -667,6 +669,9 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     func chooseAdd(chosenAdd: String) {
         print(chosenAdd)
         if (chosenAdd == "Picture") {
+            
+            self.endEditing()
+            
             // Allows user to choose between photo library and camera
             let alertController = UIAlertController(title: nil, message: "Where do you want to get your picture from?", preferredStyle: .actionSheet)
             
@@ -696,6 +701,9 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 present(alertController, animated: true, completion: nil)
             }
         } else if (chosenAdd == "Note") {
+            
+            self.endEditing()
+            
             self.createNote.alpha = 1.0
             if (self.presentedViewController == nil) {
                 let newView = self.createNote
@@ -711,6 +719,9 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 },
                                completion: { Void in()  }
                 )
+                if ItemFrames.shared.orientation != "" {
+                    ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: newView!)
+                }
                 self.view.addSubview(newView!)
             }
             else {
@@ -728,6 +739,9 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 },
                                completion: { Void in()  }
                 )
+                if ItemFrames.shared.orientation != "" {
+                    ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: newView!)
+                }
                 self.view.addSubview(newView!)
             }
             
@@ -818,7 +832,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let pickedImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            let frame = CGRect(x: view.frame.midX - 25 , y: view.frame.midY - 25, width: 50, height: 50)
+            let frame = CGRect(x: view.frame.midX - 25 , y: view.frame.midY - 25, width: CGFloat(ItemFrames.shared.imageDimension), height: CGFloat(ItemFrames.shared.imageDimension))
             if self.imageToChange == nil {
                 let imageView = CustomImage(frame: frame)
             
@@ -831,6 +845,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 //imageView.frame = CGRect(x: view.center.x - 200/2 , y: view.center.y - 200/2, width: 200, height: 200)
                 imageView.tag = 5
                 view.addSubview(imageView)
+                ItemFrames.shared.recenterNoteviews()
             } else {
                 ///*
                 let size = CGSize(width: 250.0, height: 250.0)
@@ -840,7 +855,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 self.imageToChange.delegate = self
                 self.imageToChange.imageCache = "cacheForDelete"
                 self.imageToChange = nil
-                
+                ItemFrames.shared.recenterNoteviews()
                 //imageView.frame = CGRect(x: view.center.x - 200/2 , y: view.center.y - 200/2, width: 200, height: 200)
             }
             //let pressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(DetailViewController.selectImage))
@@ -861,7 +876,9 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     
     ///* TODO
     // - Disable anything that can mess with it during loading/saving
-    // - Make it so that the labels/views/notes/images are presented in the right orientation when created
+    // - Refactor noteDimensions
+    // - Limit the character count of note creation
+    // - On one instance, we added an image, deleted before saving, yet it still saved
     func changeImage(custom: CustomImage) {
         
         self.imageToChange = custom
@@ -879,6 +896,14 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         let storage = Storage.storage()
         let storageRef = storage.reference()
         
+        var index2 = 0
+        for frame in ItemFrames.shared.frames {
+            if frame === object {
+                print("removed object from board array")
+                ItemFrames.shared.frames.remove(at: index2)
+            }
+            index2 += 1
+        }
         
         // Now delete them online as well, dont forget to test the most complex
         for connect in ItemFrames.shared.connections {
@@ -916,7 +941,11 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         
         if object.type == "image" {
             let storagePath = object.imageLink
-            deleteFirebaseImage(link: storagePath!)
+            if let storedImage = storagePath as? String {
+                deleteFirebaseImage(link: storedImage)
+            } else {
+                print("image hasn't been uploaded")
+            }
         }
         
         UIView.animate(withDuration: 0.5, delay: 0.0, options: .curveEaseOut, animations: {
@@ -992,14 +1021,11 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             let framed = CGRect(x: pointX, y: pointY, width: 100, height: 100)
             let newView = CustomImage(frame: framed)
             newView.configureNote(setNote: newNoteLabel.text!)
+            if ItemFrames.shared.orientation != "" {
+                ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: newView)
+            }
             ItemFrames.shared.frames.append(newView)
             print("phone orientation: \(ItemFrames.shared.orientation)")
-            if ItemFrames.shared.orientation == "right" {
-                newView.transform = CGAffineTransform(rotationAngle: -CGFloat.pi/2)
-            }
-            if ItemFrames.shared.orientation == "left" {
-                newView.transform = CGAffineTransform(rotationAngle: CGFloat.pi/2)
-            }
             self.view.addSubview(newView)
             newView.delegate = self
             self.view.bringSubview(toFront: newView)
@@ -1016,11 +1042,24 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         } else {
             print("no text")
             // notify that there is no text
+            // or just send to back/gives user a way to quit out
+            UIView.animate(withDuration: 1.0, delay: 0.0, options: .curveEaseOut, animations: {
+                self.createNote.transform = CGAffineTransform.init(scaleX: 0.1, y: 0.1)
+            }, completion: {_ in
+                print("attempt transform complete")
+                self.view.sendSubview(toBack: self.createNote)
+                self.createNote.alpha = 0.0
+                self.newNoteLabel.text = ""
+            })
         }
         
     }
     
     @IBAction func endConnect(_ sender: Any) {
+        self.endEditing()
+    }
+    
+    func endEditing() {
         print("endConnect")
         let animate = AnimationType.from(direction: .left, offset: 0)
         self.connectingBanner.animate(animations: [animate], initialAlpha: 1.0, finalAlpha: 0.0, delay: 0.0, duration: 1.0, completion: nil)
@@ -1030,6 +1069,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         ItemFrames.shared.positioning = false
         ItemFrames.shared.sendNotesToBack()
         ItemFrames.shared.exitDeleteMode()
+        ItemFrames.shared.removeAllHighlights()
     }
     
     // Now there is a weird gs:\ folder being made sometimes
@@ -1501,6 +1541,13 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: activity)
         }
         activity.startAnimating()
+    }
+    
+    // Limits characters in note creation to 60
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        let newText = (textView.text as NSString).replacingCharacters(in: range, with: text)
+        let numberOfChars = newText.count // for Swift use count(newText)
+        return numberOfChars < 60
     }
     
     func adaptivePresentationStyle(for controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {
