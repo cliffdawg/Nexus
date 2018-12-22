@@ -28,7 +28,6 @@ class PlaceholderDataSourceDelegate: NSObject {
     
     // MARK: Utilities methods 
     
-    
     /// fill the placeholder cell to the texts and styles
     ///
     /// - Parameters:
@@ -36,6 +35,8 @@ class PlaceholderDataSourceDelegate: NSObject {
     ///   - placeholder: the placeholder object
     ///   - tintColor: the tint color to apply
     func fill(cell: CellPlaceholding, to placeholder: Placeholder, tintColor: UIColor?) {
+        
+        /* if the the placeholder created by xib and data/style are nil, we should keep the xib data/style */
         
         // apply style
         if let style = placeholder.style {
@@ -47,7 +48,6 @@ class PlaceholderDataSourceDelegate: NSObject {
             cell.apply(data: data)
         }
     }
-    
     
     /// Animate the cell (UICollectionViewCell / UITableViewCell)
     ///
@@ -68,8 +68,25 @@ class PlaceholderDataSourceDelegate: NSObject {
             
         }, completion: nil)
     }
+    
+    /// Returns the height of the scroll view by removing the top and bottom inset + the height of the refresh control
+    ///
+    /// - Parameter scrollView: the scroll view
+    /// - Returns: the height of the scroll view without refresh control, top and bottom inset
+    func height(of scrollView: UIScrollView) -> CGFloat {
+        var height = scrollView.bounds.height
+        if #available(iOS 10, *) {
+            height -= scrollView.refreshControl?.bounds.height ?? 0
+        }
+        if #available(iOS 11, *) {
+            height -= (scrollView.adjustedContentInset.top + scrollView.adjustedContentInset.bottom)
+        } else {
+            height -= (scrollView.contentInset.top + scrollView.contentInset.bottom)
+        }
+        return height
+    }
+    
 }
-
 
 // MARK: table view data source methods
 
@@ -94,7 +111,7 @@ extension PlaceholderDataSourceDelegate: UITableViewDataSource {
        
         cell.selectionStyle = .none
         // If the cell does not inherit from PlaceholderTableViewCell, the data and the style can't be applied
-        guard let placeholderTableViewCell = (cell as? PlaceholderTableViewCell) else {
+        guard let placeholderTableViewCell = cell as? PlaceholderTableViewCell else {
             return cell
         }
         
@@ -110,7 +127,6 @@ extension PlaceholderDataSourceDelegate: UITableViewDataSource {
     }
 }
 
-
 // MARK: - table view delegate methods 
 
 /**
@@ -123,18 +139,29 @@ extension PlaceholderDataSourceDelegate: UITableViewDelegate {
     // the placeholder cell takes always the size of the table view
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         
-        var height = tableView.bounds.height
-        if #available(iOS 10, *) {
-            height -= tableView.refreshControl?.bounds.height ?? 0
+        var tableViewHeight = height(of: tableView)
+        
+        // subtract tableHeaderView Height out of height
+        let style = placeholder.style
+        if style?.shouldShowTableViewHeader != true {
+            tableViewHeight -= tableView.tableHeaderView?.bounds.height ?? 0
         }
-        height -= (tableView.contentInset.top +  tableView.contentInset.bottom)
-        return height
+        
+        // subtract tableFooterView Height out of height
+        if style?.shouldShowTableViewFooter != true {
+            tableViewHeight -= tableView.tableFooterView?.bounds.height ?? 0
+        }
+        
+        return tableViewHeight
     }
     
     // animate the cell
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         
-        if placeholder.style?.isAnimated == false { return }
+        if placeholder.style?.isAnimated == false {
+            return
+        }
+        
         guard let placeholderTableViewCell = cell as? PlaceholderTableViewCell else { return }
         animate(cell: placeholderTableViewCell)
     }
@@ -154,7 +181,7 @@ extension PlaceholderDataSourceDelegate: UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath)
 
         // If the cell does not inherit from PlaceholderTableViewCell, the data and the style can't be applied
-        guard let placeholderCollectionViewCell = (cell as? PlaceholderCollectionViewCell) else {
+        guard let placeholderCollectionViewCell = cell as? PlaceholderCollectionViewCell else {
             return cell
         }
         
@@ -162,15 +189,12 @@ extension PlaceholderDataSourceDelegate: UICollectionViewDataSource {
         
         // forward action to placeholder delegate
         placeholderCollectionViewCell.onActionButtonTap = { [unowned self] in
-            guard let placeholderCollectionView = (collectionView as? CollectionView) else { return }
+            guard let placeholderCollectionView = collectionView as? CollectionView else { return }
             placeholderCollectionView.placeholderDelegate?.view(collectionView, actionButtonTappedFor: self.placeholder)
         }
-        
         return cell
     }
-
 }
-
 
 extension PlaceholderDataSourceDelegate: UICollectionViewDelegateFlowLayout {
     
@@ -184,12 +208,8 @@ extension PlaceholderDataSourceDelegate: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         
-        var height = collectionView.bounds.height
-        if #available(iOS 10, *) {
-            height -= collectionView.refreshControl?.bounds.height ?? 0
-        }
-        height -= (collectionView.contentInset.top +  collectionView.contentInset.bottom)
-        return CGSize(width: collectionView.bounds.width, height: height)
+        let collectionViewHeight = height(of: collectionView)
+        return CGSize(width: collectionView.bounds.width, height: collectionViewHeight)
     }
 }
 

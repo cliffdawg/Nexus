@@ -8,7 +8,6 @@
 
 import Foundation
 import UIKit
-import PanelKit
 
 protocol ChooseAddDelegate {
     func chooseAdd(chosenAdd: String)
@@ -17,7 +16,7 @@ protocol ChooseAddDelegate {
 /* Consists of all the types of items that can be added to a Nexus board */
 class AddType: UITableViewController {
     
-    let adds = ["Picture", "Note", "Connection", "Re-position", "Edit", "Delete"]
+    let adds = ["Add Picture", "Add Note", "Create Connection", "Re-position Element", "Edit Element", "Delete Element"]
     var delegate2: ChooseAddDelegate!
     
     override func viewDidLoad() {
@@ -29,6 +28,10 @@ class AddType: UITableViewController {
         super.didReceiveMemoryWarning()
     }
     
+    override func viewDidLayoutSubviews() {
+        view.superview?.layer.masksToBounds = true
+        view.superview?.layer.cornerRadius = 5.0
+    }
     
     // MARK: - Table view data source
     
@@ -58,7 +61,7 @@ class AddType: UITableViewController {
     
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat
     {
-        return 50.0;
+        return 50.0
     }
 }
 

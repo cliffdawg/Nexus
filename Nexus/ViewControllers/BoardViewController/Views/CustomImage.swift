@@ -19,6 +19,23 @@ protocol DrawLineDelegate {
     func changeImage(custom: CustomImage)
 }
 
+extension UIView {
+    
+    // Provides a drop shadow
+    func dropShadow(scale: Bool = true) {
+        layer.masksToBounds = false
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOpacity = 0.5
+        layer.shadowOffset = CGSize(width: -1, height: 2)
+        layer.shadowRadius = 1
+        
+        layer.shadowPath = UIBezierPath(rect: bounds).cgPath
+        layer.shouldRasterize = true
+        layer.rasterizationScale = scale ? UIScreen.main.scale : 1
+    }
+    
+}
+
 extension UITextView {
     
     func centerVertically() {
@@ -44,10 +61,12 @@ class CustomImage: UIView {
     
     var delegate: DrawLineDelegate!
     
+    // Whether this is a note or image
     var type = ""
     
     var note = ""
     
+    // Local ID when created used as a unique identifier
     var specific = ""
     
     // For determining whether or not image has been uploaded
@@ -67,12 +86,14 @@ class CustomImage: UIView {
         let pressRecognizer = UILongPressGestureRecognizer(target:self, action:#selector(CustomImage.detectPress(_:)))
         self.gestureRecognizers = [panRecognizer, pressRecognizer]
         
-        //randomize view color
-        let blueValue = CGFloat(Int(arc4random() % 255)) / 255.0
-        let greenValue = CGFloat(Int(arc4random() % 255)) / 255.0
-        let redValue = CGFloat(Int(arc4random() % 255)) / 255.0
+        let placeholder = UIImage(named: "Image Placeholder")!
+        let imageView = UIImageView(image: placeholder)
+        self.addSubview(imageView)
+        imageView.edgesToSuperview()
         
-        self.backgroundColor = UIColor(red:redValue, green: greenValue, blue: blueValue, alpha: 1.0)
+        self.layer.borderColor = UIColor(rgb: 0x34E5FF).cgColor
+        self.dropShadow()
+        
         self.specific = String(Date().timeIntervalSince1970)
     }
     
@@ -86,9 +107,10 @@ class CustomImage: UIView {
     func configureImage(setImage: UIImage) {
         self.type = "image"
         self.image = setImage
-        //let image = UIImage(named: "Image Placeholder")!
         let imageView = UIImageView(image: setImage)
         imageView.frame = CGRect(x: 0, y: 0, width: ItemFrames.shared.imageDimension, height: ItemFrames.shared.imageDimension)
+        imageView.layer.masksToBounds = true
+        imageView.layer.cornerRadius = 5.0
         self.imageFrame = imageView
         self.addSubview(imageView)
     }
@@ -97,9 +119,8 @@ class CustomImage: UIView {
         let gsReference = Storage.storage().reference(forURL: imageLink)
         gsReference.getData(maxSize: 1 * 2048 * 2048) { data, error in
             if error != nil {
-                print("error: \(error)")
+                print("Load image error: \(error)")
             } else {
-                print("downloadImage")
                 var imaged = UIImage(data: data!)! // Convert image to data
                 let trueImage = self.resizeImage(image: imaged, newWidth: CGFloat(ItemFrames.shared.imageDimension)) as! UIImage
                 self.configureImage(setImage: trueImage)
@@ -118,7 +139,6 @@ class CustomImage: UIView {
         return newImage
     }
     
-    // pressing on note doesn't allow touch to be detected
     func configureNote(setNote: String) {
         
         self.type = "note"
@@ -133,18 +153,20 @@ class CustomImage: UIView {
         noteView = CenteredTextView(frame: framed)
         self.note = setNote
         noteView.text = setNote
+        noteView.font = UIFont(name: "Futura", size: 17)
+        
+        // Set object background color
+        noteView.backgroundColor = UIColor(rgb: 0x007AFF)
+        noteView.textColor = UIColor.white
+
+        noteView.layer.cornerRadius = 5.0
         noteView.textAlignment = .center
-        noteView.layer.borderWidth = 5
-        noteView.layer.borderColor = UIColor.green.cgColor
         noteView.centerVertically()
         self.noteFrame = noteView
         self.addSubview(noteView)
         
         noteView.isUserInteractionEnabled = false
-        
-//        let overView = UIView()
-//        self.addSubview(overView)
-//        overView.edges(to: noteView)
+
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -154,12 +176,12 @@ class CustomImage: UIView {
     @objc
     func detectPan(_ recognizer: UIPanGestureRecognizer) {
         
-        if ((connecting == false) && (ItemFrames.shared.editing == false) && (ItemFrames.shared.positioning == true)) {
+        if (connecting == false && ItemFrames.shared.editing == false) && (ItemFrames.shared.positioning == true) {
             let translation = recognizer.translation(in: self.superview)
             self.center = CGPoint(x: lastLocation.x + translation.x, y: lastLocation.y + translation.y)
             self.delegate.draw(start: CGPoint(x: 0.0, y: 0.0), end: CGPoint(x: 0.0, y: 0.0))
             
-        } else if ((connecting == true) && (ItemFrames.shared.editing == false)) {
+        } else if (connecting == true) && (ItemFrames.shared.editing == false) {
             
             let translation = recognizer.translation(in: self.superview)
             let start = CGPoint(x: lastLocation.x, y: lastLocation.y)
@@ -167,12 +189,10 @@ class CustomImage: UIView {
             self.delegate.draw(start: start, end: end)
         }
         
-        // pan ended works
-        // order matters
-        if (recognizer.state == .ended) {
+        if recognizer.state == .ended {
             print("pan ended")
             //////////////////////
-            if ((connecting == false) && (ItemFrames.shared.editing == false) && (ItemFrames.shared.positioning == true)) {
+            if (connecting == false) && (ItemFrames.shared.editing == false) && (ItemFrames.shared.positioning == true) {
                 // For moving the label, we can either track it (might get complicated) or just refresh the one moved at the end of re-position
                 self.delegate.placeLabel(object: self)
             }
@@ -185,10 +205,11 @@ class CustomImage: UIView {
         }
     }
     
+    // For long presses while connecting, and while editing
     @objc
     func detectPress(_ recognizer: UILongPressGestureRecognizer) {
         
-        if ((self.connecting == false) && (ItemFrames.shared.connectingState == true)) {
+        if (self.connecting == false) && (ItemFrames.shared.connectingState == true) {
             let tintRect = CGRect(x: -(border/2), y: -(border/2), width: Int.init(self.frame.width) + border, height: Int.init(self.frame.height) + border)
             let tintView = UIView(frame: tintRect)
             tintView.backgroundColor = .red
@@ -196,7 +217,6 @@ class CustomImage: UIView {
             self.addSubview(tintView)
             self.bringSubview(toFront: tintView)
             let zoomAnimation = AnimationType.zoom(scale: 0.2)
-            //let rotateAnimation = AnimationType.rotate(angle: 3.14/2)
             tintView.animate(animations: [zoomAnimation], initialAlpha: 0.0, finalAlpha: 0.5, delay: 0.0, duration: 0.3, completion: { })
             self.connecting = true
             self.bordering = true
@@ -205,6 +225,7 @@ class CustomImage: UIView {
             print("connectingState is false")
             // notify not connecting
             if ItemFrames.shared.editing == true {
+                print("editing image")
                 if type == "image" {
                     if UserDefaults.standard.string(forKey: "changingImage") == nil {
                         print("changing image")
@@ -226,8 +247,8 @@ class CustomImage: UIView {
         // Remember original location
         lastLocation = self.center
         } else {
-        let touch = touches.first!
-        lastLocation = touch.location(in: self.superview)
+        let touch = touches?.first!
+        lastLocation = (touch?.location(in: self.superview))!
         }
     }
     
@@ -246,10 +267,12 @@ class CustomImage: UIView {
     }
     
     func setupDelete() {
+        print("setupDelete")
         let rect = CGRect(x: -10.0, y: -10.0, width: 25, height: 25)
         let button = UIButton(frame: rect)
-        button.setTitle("X", for: .normal)
-        button.setTitleColor(UIColor.red, for: .normal)
+        let stencil = UIImage(named: "X")!.withRenderingMode(.alwaysTemplate)
+        button.setImage(stencil, for: .normal)
+        button.tintColor = .red
         button.addTarget(self, action: #selector(deleteNode(_:)), for: .touchUpInside)
         self.addSubview(button)
         self.bringSubview(toFront: button)

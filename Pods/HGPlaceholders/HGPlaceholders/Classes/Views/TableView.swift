@@ -46,7 +46,9 @@ open class TableView: UITableView {
     weak open override var dataSource: UITableViewDataSource? {
         didSet {
             /* we save only the initial data source (and not a placeholder datasource) to allow to go back to the initial data */
-            if  dataSource is PlaceholderDataSourceDelegate { return }
+            if  dataSource is PlaceholderDataSourceDelegate {
+                return
+            }
             defaultDataSource = dataSource
         }
     }
@@ -58,7 +60,9 @@ open class TableView: UITableView {
     open override weak var delegate: UITableViewDelegate? {
         didSet {
             /* we save only the initial delegate (and not the placeholder delegate) to allow to go back to the initial one */
-            if  delegate is PlaceholderDataSourceDelegate { return }
+            if  delegate is PlaceholderDataSourceDelegate {
+                return
+            }
             defaultDelegate = delegate
         }
     }
@@ -69,7 +73,9 @@ open class TableView: UITableView {
      */
     open override var tableHeaderView: UIView? {
         didSet {
-            if tableHeaderView == nil { return }
+            if tableHeaderView == nil {
+                return
+            }
             
             defaultTableHeaderView = tableHeaderView
         }
@@ -87,6 +93,12 @@ open class TableView: UITableView {
         }
     }
     
+    /**
+     * A Boolean value that determines whether bouncing always occurs when the placeholder is shown.
+     * The default value is false
+     */
+    open var placeholdersAlwaysBounceVertical = false
+    
     // MARK: - Private properties
     
     /// The defaultDataSource is used to allow to go back to the initial data source of the table view after switching to a placeholder data source
@@ -96,7 +108,7 @@ open class TableView: UITableView {
     internal weak var defaultDelegate: UITableViewDelegate?
     
     /// The defaultSeparatorStyle is used to save the tableview separator style, because, when you switch to a placeholder, is changed to `.none`
-    fileprivate var defaultSeparatorStyle: UITableViewCellSeparatorStyle!
+    fileprivate var defaultSeparatorStyle: UITableViewCell.SeparatorStyle!
     
     /// The defaultAlwaysBounceVertical is used to save the tableview bouncing setup, because, when you switch to a placeholder, the vertical bounce is disabled
     fileprivate var defaultAlwaysBounceVertical: Bool!
@@ -131,7 +143,7 @@ open class TableView: UITableView {
      
      - returns: Returns an initialized TableView object, or nil if the object could not be successfully initialized.
      */
-    override init(frame: CGRect, style: UITableViewStyle) {
+    override public init(frame: CGRect, style: UITableView.Style) {
         super.init(frame: frame, style: style)
         
         setup()
@@ -170,12 +182,17 @@ open class TableView: UITableView {
             return
         }
         
-        if theDataSource is PlaceholderDataSourceDelegate {
+        if let placeholderDataSource = theDataSource as? PlaceholderDataSourceDelegate {
             // placeholder configuration
             separatorStyle = .none
-            alwaysBounceVertical = false
-            tableHeaderView = nil
-            tableFooterView = nil
+            alwaysBounceVertical = placeholdersAlwaysBounceVertical
+            let style = placeholderDataSource.placeholder.style
+            if style?.shouldShowTableViewHeader != true { // style = nil or shouldShowTableViewHeader == false
+                tableHeaderView = nil
+            }
+            if style?.shouldShowTableViewFooter != true {
+                tableFooterView = nil
+            }
         }
         else {
             // default configuration
@@ -216,6 +233,17 @@ open class TableView: UITableView {
             return
         }
         super.reloadData()
+    }
+    
+    /**
+     Called when the adjusted content insets of the scroll view change.
+     */
+    open override func adjustedContentInsetDidChange() {
+        if dataSource is PlaceholderDataSourceDelegate {
+            // Force table view to recalculate the cell height, because the method tableView:heightForRowAt: is called before adjusting the content of the scroll view
+            guard let indexPaths = indexPathsForVisibleRows else { return }
+            reloadRows(at: indexPaths, with: .automatic)
+        }
     }
 }
 

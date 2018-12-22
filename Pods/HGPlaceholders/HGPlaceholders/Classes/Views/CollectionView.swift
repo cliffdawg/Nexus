@@ -19,7 +19,9 @@ open class CollectionView: UICollectionView {
      */
     open override var collectionViewLayout: UICollectionViewLayout {
         didSet {
-            if collectionViewLayout === placeholderLayout { return }
+            if collectionViewLayout === placeholderLayout {
+                return
+            }
             defaultLayout = collectionViewLayout
         }
     }
@@ -57,10 +59,18 @@ open class CollectionView: UICollectionView {
     open override weak var delegate: UICollectionViewDelegate? {
         didSet {
             /* we save only the initial delegate (and not the placeholder delegate) to allow to go back to the initial one */
-            if  delegate is PlaceholderDataSourceDelegate { return }
+            if  delegate is PlaceholderDataSourceDelegate {
+                return
+            }
             defaultDelegate = delegate
         }
     }
+    
+    /**
+     * A Boolean value that determines whether bouncing always occurs when the placeholder is shown.
+     * The default value is false
+     */
+    open var placeholdersAlwaysBounceVertical = false
     
     // MARK: - Private properties
     
@@ -77,7 +87,7 @@ open class CollectionView: UICollectionView {
     fileprivate var defaultLayout: UICollectionViewLayout!
     
     /// The placeholderLayout used to show placeholder cell in the UICollectionView size
-    fileprivate var placeholderLayout = PlaceholderLayout()
+    fileprivate let placeholderLayout = UICollectionViewFlowLayout()
     
     // MARK: - init methods
     
@@ -103,7 +113,7 @@ open class CollectionView: UICollectionView {
      
      - returns: Returns an initialized collectionView object, or nil if the object could not be successfully initialized.
      */
-    public override init(frame: CGRect, collectionViewLayout layout: UICollectionViewLayout) {
+     override public init(frame: CGRect, collectionViewLayout layout: UICollectionViewLayout) {
         super.init(frame: frame, collectionViewLayout: layout)
         
         setup()
@@ -136,20 +146,19 @@ open class CollectionView: UICollectionView {
         if dataSource === theDataSource && delegate === theDelegate {
             return
         }
-        dataSource = theDataSource
-        delegate = theDelegate
-        super.reloadData()
-        collectionViewLayout.invalidateLayout()
 
-        if dataSource is PlaceholderDataSourceDelegate {
+        if theDataSource is PlaceholderDataSourceDelegate {
             // Placeholder configuration
-            alwaysBounceVertical = false
+            alwaysBounceVertical = placeholdersAlwaysBounceVertical
             collectionViewLayout = placeholderLayout
         } else {
             // default configuration
             alwaysBounceVertical = defaultAlwaysBounceVertical
             collectionViewLayout = defaultLayout
         }
+        dataSource = theDataSource
+        delegate = theDelegate
+        super.reloadData()
     }
     
     /// The total number of rows in all sections of the collectionView

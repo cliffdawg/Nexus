@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0700"
+   LastUpgradeVersion = "0930"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -13,11 +13,11 @@
             buildForProfiling = "YES"
             buildForArchiving = "YES">
             <BuildableReference
-               BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '8EA42E0565DC32EF58F423B5E69509F8'
-               BlueprintName = 'TinyConstraints'
-               ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'TinyConstraints.framework'>
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "F5B6E6F9F16FB43333BD372F2DAFA1CE"
+               BlueprintName = "TinyConstraints"
+               ReferencedContainer = "container:Pods.xcodeproj"
+               BuildableName = "TinyConstraints.framework">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0700"
+   LastUpgradeVersion = "0930"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -13,11 +13,11 @@
             buildForProfiling = "YES"
             buildForArchiving = "YES">
             <BuildableReference
-               BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '1D0ED6A44289862CBC489F0966BCBBF4'
-               BlueprintName = 'TextFieldEffects'
-               ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'TextFieldEffects.framework'>
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "A48730393941A9C21BBC6FC1271C3416"
+               BlueprintName = "TextFieldEffects"
+               ReferencedContainer = "container:Pods.xcodeproj"
+               BuildableName = "TextFieldEffects.framework">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

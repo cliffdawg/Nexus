@@ -10,6 +10,21 @@ import UIKit
 import CoreData
 import IQKeyboardManagerSwift
 import Firebase
+import Alamofire
+import NotificationBannerSwift
+
+extension String {
+    /*
+     Truncates the string to the specified length number of characters and appends an optional trailing string if longer.
+     - Parameter length: Desired maximum lengths of a string
+     - Parameter trailing: A 'String' that will be appended after the truncation.
+     
+     - Returns: 'String' object.
+     */
+    func trunc(length: Int, trailing: String = "…") -> String {
+        return (self.count > length) ? String(self.prefix(length)) : self
+    }
+}
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
@@ -24,6 +39,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         FirebaseApp.configure()
         IQKeyboardManager.sharedManager().enable = true
         print("IQKeyboard")
+        Reachability.shared.reachabilityManager?.startListening()
         return true
     }
 
@@ -37,6 +53,70 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         print("return orientation")
         //ItemFrames.shared.rotate()
         return self.restrictRotation
+    }
+    
+    func listenForNetwork() {
+        Reachability.shared.reachabilityManager?.startListening()
+    }
+    
+    //
+    // Now test what happens for unsecure network
+    func checkConnection() {
+        
+        let task = DispatchWorkItem {
+            print("TASK RUN")
+            if Reachability.shared.reachabilityManager?.networkReachabilityStatus == Alamofire.NetworkReachabilityManager.NetworkReachabilityStatus.reachable(NetworkReachabilityManager.ConnectionType.ethernetOrWiFi) {
+                    if Reachability.shared.warningBanner.isDisplaying == false {
+                        Reachability.shared.dangerBanner.dismiss()
+                        Reachability.shared.warningBanner.show()
+                        }
+                }
+            return
+        }
+        
+        // execute task in 5 seconds
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 5, execute: {
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now(), execute: task)
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1, execute: {
+                task.cancel()
+                print("task canceled?: \(task.isCancelled)")
+            })
+            
+        })
+        
+        
+        let strURL = "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780"
+        Alamofire.request(strURL,
+                          method: .head,
+                          parameters: nil)
+            .validate()
+            .responseJSON { response in
+                // Put an async await for the response
+                print("Check connection response: \(response)")
+                guard response.result.isSuccess else {
+                    
+                    //TODO - When changing a board name, need to update it in Neo4j, or use a secondary name, test images for this
+                    print("Alamofire error: \(String(describing: response.result.error!))")
+                    if String(describing: response.result.error!).trunc(length: 65) == """
+                        Error Domain=NSURLErrorDomain Code=-1001 "The request timed out."
+                        """ {
+                            print("Unsecure parsed")
+                            if task.isCancelled == false {
+                                print("Not secure")
+                                Reachability.shared.dangerBanner.dismiss()
+                                Reachability.shared.warningBanner.show()
+                            }
+                        } else if String(describing: response.result.error!).trunc(length: 117) == "responseValidationFailed(reason: Alamofire.AFError.ResponseValidationFailureReason.unacceptableStatusCode(code: 401))" {
+                            print("Internet")
+                            task.cancel()
+                            Reachability.shared.warningBanner.dismiss()
+                            Reachability.shared.dangerBanner.dismiss()
+                            Reachability.shared.successBanner.show()
+                    }
+                    return
+                }
+        }
+        
     }
     
     func applicationWillResignActive(_ application: UIApplication) {

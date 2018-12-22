@@ -12,6 +12,8 @@ import TextFieldEffects
 import ViewAnimator
 import IQKeyboardManagerSwift
 import Hero
+import Theo
+
 
 /* Stores all of the current board topics, loads from Core Data. */
 class MasterViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate, UITextFieldDelegate, SegueDelegate {
@@ -26,22 +28,49 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
     @IBOutlet weak var leftButton: UIBarButtonItem!
     @IBOutlet weak var collectionView: UICollectionView!
     
+    var gradient: CAGradientLayer!
+    
+    var cellName = ""
     
     var newValue = ""
     var editingStatus = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+        
+        gradient = CAGradientLayer()
+        gradient.frame = collectionView.bounds
+        gradient.colors = [
+            UIColor(white: 1, alpha: 0).cgColor,
+            UIColor(white: 1, alpha: 1).cgColor,
+            UIColor(white: 1, alpha: 1).cgColor,
+            UIColor(white: 1, alpha: 0).cgColor
+        ]
+        
+        var top = 0.05
+        var bottom = 0.95
+        if 0.05*collectionView.frame.height > 20 {
+            top = Double(20/collectionView.frame.height)
+            bottom = 1.0 - top
+        }
+        
+        
+        gradient.locations = [0, top, bottom, 1] as [NSNumber]
+        self.collectionView.layer.mask = gradient
+        
         textField.delegate = self
-        //textField.alpha = 0.0
+
+        editButtonItem.tintColor = UIColor(rgb: 0x34E5FF)
+        editButtonItem.image = UIImage(named: "Edit")
+        editButtonItem.setTitleTextAttributes([NSAttributedStringKey.font : UIFont(name: "DINAlternate-Bold", size: 20)!], for: .normal)
         toolbar.items![0] = editButtonItem
-        //self.leftButton = toolbar.items![0]
-        //textField.addTarget(self, action: #selector(textFieldDidChange(_:)), for: .editingChanged)
-        //let saveButton = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(preInsertNewObject(_:)))
-        //saveButton.isEnabled = false
-        //saveButton.tintColor = .clear
-        //navigationItem.rightBarButtonItem = saveButton
+        
+        toolbar.clipsToBounds = true
+        toolbar.layer.masksToBounds = true
+        
+        toolbar.layer.shadowColor = UIColor.clear.cgColor
+        toolbar.layer.cornerRadius = 25.0
+        
         //////////////////
         self.collectionView.reloadData()
         self.load() { (success) -> Void in
@@ -52,11 +81,19 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
                 self.collectionView.animateViews(animations: [AnimationType.from(direction: .right, offset: self.view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0, duration: 0.5, animationInterval: 0.1, completion: {})
             }
         }
+        
         self.setUpOrientation()
     }
     
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
+        print("setEditing")
+        if editingStatus {
+            editButtonItem.image = UIImage(named: "Edit")
+        } else {
+            editButtonItem.image = nil
+            editButtonItem.title = "Done"
+        }
         self.editingStatus = editing
         if let indexPaths = collectionView?.indexPathsForVisibleItems {
             for indexPath in indexPaths {
@@ -118,20 +155,17 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
     var didRotate: (Notification) -> Void = { notification in
         switch UIDevice.current.orientation {
         case .landscapeLeft:
-            print("landscapeLeft")
-            ItemFrames.shared.rotate(toOrientation: "toLeft")
+            ItemFrames.shared.rotate(toOrientation: "toLeft", sender: self)
         case .landscapeRight:
-            print("landscapeRight")
-            ItemFrames.shared.rotate(toOrientation: "toRight")
+            ItemFrames.shared.rotate(toOrientation: "toRight", sender: self)
         case .portrait:
             if ItemFrames.shared.orientation == "left" {
-                ItemFrames.shared.rotate(toOrientation: "backFromLeft")
+                ItemFrames.shared.rotate(toOrientation: "backFromLeft", sender: self)
             } else if ItemFrames.shared.orientation == "right" {
-                ItemFrames.shared.rotate(toOrientation: "backFromRight")
+                ItemFrames.shared.rotate(toOrientation: "backFromRight", sender: self)
             }
-            print("Portrait")
         default:
-            print("other")
+            print("Default")
         }
     }
     
@@ -141,47 +175,51 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
             let context:NSManagedObjectContext = appDel.managedObjectContext
             context.delete(boards.remove(at: indexPath.row))
             collectionView.deleteItems(at: [indexPath])
+            do {
+                try context.save()
+            } catch {
+                print("Could not save")
+            }
         }
     }
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
-        //let textFieldFrame = CGRect(x: 0, y: 0, width: 140, height: 20)
+
         let saveButton = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(saveNewObject(_:)))
-        saveButton.tintColor = .purple
-        //let addCancelButton = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancelNewObject(_:)))
-        //navigationItem.rightBarButtonItem?.tintColor = .none
-        //navigationItem.setRightBarButtonItems([addSaveButton, addCancelButton], animated: true)
-        toolbar.items![0] = saveButton
-        //navigationItem.setLeftBarButton(saveButton, animated: true)
+        saveButton.setTitleTextAttributes([NSAttributedStringKey.font : UIFont(name: "DINAlternate-Bold", size: 20)!], for: .normal)
+        saveButton.tintColor = UIColor(rgb: 0x34E5FF)
         
-        //let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(MasterViewController.dismissKeyboard))
-        //self.tintView.addGestureRecognizer(tap)
-        tintView.backgroundColor = UIColor(red: 46/255, green: 177/255, blue: 135/255, alpha: 0.5)
+        toolbar.items![0] = saveButton
+        
+        tintView.backgroundColor = UIColor(rgb: 0xADBDFF)
         self.tintView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height)
         self.view.insertSubview(tintView, aboveSubview: self.collectionView)
         self.view.bringSubview(toFront: toolbar)
         
-        //self.view.sendSubview(toBack: tableView)
     }
     
     func textFieldDidEndEditing(_ textField: UITextField) {
 
-        if ((textField.text?.trimmingCharacters(in: .whitespaces).isEmpty) == true) {
-//            toolbar.items![0].tintColor = .blue
-//            toolbar.items![0].title = "Edit"
-//            toolbar.items![0].action = editButtonItem.action
-            toolbar.items![0] = editButtonItem
-        }
+        editButtonItem.image = UIImage(named: "Edit")
+        toolbar.items![0] = editButtonItem
+        textField.text?.removeAll()
         self.view.sendSubview(toBack: tintView)
         tintView.backgroundColor = UIColor.clear
-        //view.gestureRecognizers?.removeAll()
+    }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentCharacterCount = textField.text?.count ?? 0
+        if (range.length + range.location > currentCharacterCount){
+            return false
+        }
+        let newLength = currentCharacterCount + string.count - range.length
+        
+        return newLength <= 30
     }
     
     @objc
     func dismissKeyboard(_ sender: Any) {
         textField.endEditing(true)
-        //self.view.sendSubview(toBack: tintView)
-        //view.endEditing(true)
         
     }
     
@@ -192,70 +230,45 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
     
     @objc
     func saveNewObject(_ sender: Any) {
-        print("saveNewObject")
-        let appDel: AppDelegate = UIApplication.shared.delegate as! AppDelegate
-        let context: NSManagedObjectContext = appDel.managedObjectContext
         
-        let entity =  NSEntityDescription.entity(forEntityName: "Board", in: context)
-        
-        let adding = NSManagedObject(entity: entity!, insertInto: context)
-        adding.setValue(Date(), forKey: "timestamp")
-        adding.setValue(textField.text, forKey: "name")
-        
-        do {
+        if textField.text?.trimmingCharacters(in: .whitespaces).isEmpty != true {
+            let appDel: AppDelegate = UIApplication.shared.delegate as! AppDelegate
+            let context: NSManagedObjectContext = appDel.managedObjectContext
             
-            try context.save()
-            //let insertIndexPath = IndexPath(item: self.boards.count, section: 0)
-            //self.collectionView.insertItems(at: [insertIndexPath])
-            self.boards.append(adding)
-            print("boards append")
-            textField.text = ""
+            let entity =  NSEntityDescription.entity(forEntityName: "Board", in: context)
+            
+            let adding = NSManagedObject(entity: entity!, insertInto: context)
+            adding.setValue(Date(), forKey: "timestamp")
+            adding.setValue(textField.text, forKey: "name")
+            
+            do {
+                
+                try context.save()
+                self.boards.append(adding)
+                print("boards append")
+                textField.text = ""
+                textField.endEditing(true)
+                
+            } catch let error as NSError  {
+                print("Could not save \(error), \(error.userInfo)")
+            }
+            
+            self.collectionView.reloadData()
+            
+            let indexedPath = IndexPath(item: self.boards.count - 1, section: 0)
+
+            // Delay needed to offset tableView reloading
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.005) {
+                self.collectionView.cellForItem(at: indexedPath)?.animate(animations: [AnimationType.from(direction: .right, offset: self.view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: nil)
+            }
+            self.view.sendSubview(toBack: tintView)
+            tintView.backgroundColor = UIColor.clear
+        } else {
             textField.endEditing(true)
-            //self.dismissKeyboard(self.view)
-            
-        } catch let error as NSError  {
-            print("Could not save \(error), \(error.userInfo)")
         }
-        
-        
-        
-        
-        //tableView.reloadRows(at: [IndexPath.init(row: boards.count-1, section: 0)], with: UITableViewRowAnimation.automatic)
-        ///////////////////////
-        self.collectionView.reloadData()
-        
-        // you need to press the done aspect
-        // something to do with reloading the data itself
-        // not editing when reload and then animate
-        //let when = DispatchTime.now() + 2
-        //DispatchQueue.main.asyncAfter(deadline: when) {
-//        self.collectionView.cellForRow(at: IndexPath.init(row: self.boards.count-1, section: 0))?.animate(animations: [AnimationType.from(direction: .right, offset: self.view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: {})
-        print("boards: \(self.boards.count)")
-        // now indexpath(0, 0) works
-        let indexedPath = IndexPath(item: self.boards.count-1, section: 0)
-        print("indexPath: \(indexedPath)")
-        //self.setupActivityIndicator()
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.005) {
-            self.collectionView.cellForItem(at: indexedPath)?.animate(animations: [AnimationType.from(direction: .right, offset: self.view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: {
-                    print("animate")
-            })
-        }
-//        self.collectionView.animateViews(animations: [AnimationType.from(direction: .right, offset: self.view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0, duration: 0.5, animationInterval: 0.1, completion: {
-//                //self.activityIndicator.stopAnimating()
-//            })
-        self.view.sendSubview(toBack: tintView)
-        tintView.backgroundColor = UIColor.clear
-        
-        //}
-        //        [AnimationType.from(direction: .right, offset: view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0, duration: 0.5, animationInterval: 0.1, completion: {    }
-        
-//        view.gestureRecognizers?.removeAll()
-//        textField.endEditing(true)
-//        view.isUserInteractionEnabled = true
-//        print("view: \(view.interactions)")
-        
     }
     
+    // Edit the persistent data when the user changes a board name
     func editObject(sub: String) {
     
         let appDelegate =
@@ -282,6 +295,127 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
             print("Could not fetch. \(error), \(error.userInfo)")
             
         }
+        
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
+        
+            self.updateNeo4jBoard(fromBoard: self.newValue, toBoard: sub)
+            
+        }
+    }
+    
+    func updateNeo4jBoard(fromBoard: String, toBoard: String) {
+        print("updateBoard")
+
+        let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(fromBoard)'}) RETURN n"
+        let resultDataContents = ["row", "graph"]
+        let statement = ["statement" : cypherQuery, "resultDataContents" : resultDataContents] as [String : Any]
+        let statements = [statement]
+
+        let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
+        
+        ///* For some reason, loading nexus always fails on the first attempt. Maybe theo needs time to link through RestClient
+        theo.executeTransaction(statements, completionBlock: { (response, error) in
+            ///*
+            if error != nil {
+                print("loadIndividual error: \(error)")
+                
+            } else {
+                print("response2: \(response)")
+                for respond in response {
+                    print("respond2: \(respond.key)")
+                }
+                // (key: NSObject, value: AnyObject) is a unit FOR A DICTIONARY
+                print("results2: \(response["results"]!)")
+                let resultobject = response["results"]!
+                let mirrorResult = Mirror(reflecting: resultobject)
+                print("mirror2: \(mirrorResult.subjectType)")
+                let resulted = resultobject as! Array<AnyObject>
+                print("resulted2: \(resulted)")
+                // Array
+                for res in resulted {
+                    print("res2: \(res)")
+                    let mirrorRes = Mirror(reflecting: res)
+                    print("mirrorres2: \(mirrorRes.subjectType)")
+                    let resp = res as! Dictionary<String, AnyObject>
+                    // Dictionary
+                    print("resp2[\"data\"]: \(resp["data"]!)")
+                    let mirrordata = Mirror(reflecting: resp["data"]!)
+                    print("mirrordata2: \(mirrordata.subjectType)")
+                    let reyd = resp["data"]! as! Array<AnyObject>
+                    // Array
+                    for reyd2 in reyd {
+                        print("reyd2.2: \(reyd2)")
+                        let mirrorreyd2 = Mirror(reflecting: reyd2)
+                        print("mirrorreyd2.2: \(mirrorreyd2.subjectType)")
+                        let reydd = reyd2 as! Dictionary<String, AnyObject>
+                        print("reyddgraph.2: \(reydd["graph"]!)")
+                        let mirrorgraph = Mirror(reflecting: reydd["graph"]!)
+                        print("mirrorgraph.2: \(mirrorgraph.subjectType)")
+                        let rat = reydd["graph"]! as! Dictionary<String, AnyObject>
+                        print("ratnodes.2: \(rat["nodes"]!)")
+                        let mirrort = Mirror(reflecting: rat["nodes"]!)
+                        print("mirrorrt.2: \(mirrort.subjectType)")
+                        let mirrortarray = rat["nodes"]! as! Array<AnyObject>
+                        // These loop through the nodes
+                        for rort in mirrortarray {
+                            
+                            let rortarray = rort as! Dictionary<String, AnyObject>
+                            print("rortarray: \(rortarray)")
+                            // Pull id and properties from this dictionary
+                            print("rortid: \(rortarray["id"])")
+                            let id = rortarray["id"] as! String
+                            var note: String!
+                            var imageRef: String!
+                            var xCoord = ""
+                            var yCoord = ""
+                            var updatedBoardProps = ["":""]
+                            // Pulls other properties to preserve in update
+                            let rortprop = rortarray["properties"] as! Dictionary<String, AnyObject>
+                            for ror in rortprop {
+                                if (ror.key == "note") {
+                                    note = ror.value as! String
+                                    
+                                } else if (ror.key == "image") {
+                                    imageRef = ror.value as! String
+                                    
+                                }
+                                if (ror.key == "x coordinate") {
+                                    xCoord = ror.value as! String
+                                }
+                                if (ror.key == "y coordinate") {
+                                    yCoord = ror.value as! String
+                                    
+                                }
+                                
+                            }
+
+                            if note != nil {
+                                
+                                updatedBoardProps = ["note": "\(note!)", "board": "\(toBoard)", "x coordinate": "\(xCoord)", "y coordinate": "\(yCoord)"]
+                                
+                            } else if imageRef != nil {
+
+                                updatedBoardProps = ["image": "\(imageRef!)", "board": "\(toBoard)", "x coordinate": "\(xCoord)", "y coordinate": "\(yCoord)"]
+                                
+                            }
+                            
+                            theo.fetchNode(id, completionBlock: {(node, error) in
+                                print("update id node: \(node)")
+                                
+                                theo.updateNode(node!, properties: updatedBoardProps, completionBlock: {(node, error) in
+                                    print("updateboard error: \(error)")
+                                })
+                                
+                            })
+                            
+                            
+                            
+                            }
+                        
+                        }
+                    }
+                }
+          })
     }
     
     @objc
@@ -296,7 +430,9 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
 //
 //    }
     
-    var cellName = ""
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        gradient.frame = collectionView.bounds
+    }
     
     // MARK: - Segues
 
@@ -310,16 +446,16 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
             print(cellName)
         } else if segue.identifier == "toEdit" {
             print("sender: \(sender), destination: \(segue.destination)")
-            if let view = sender as? UITextView, let editController = segue.destination as? EditNameController {
+            if let view = sender as? CenteredTextView, let editController = segue.destination as? EditNameController {
                 
                 editController.textView = view
-                editController.transition = view.heroID!
-                editController.heroModalAnimationType = .zoomSlide(direction: .left)
+                editController.transition = view.hero.id!
+                editController.hero.modalAnimationType = .zoomSlide(direction: .left)
                 
                 //view.heroModifiers = [.backgroundColor(.red)]
                 //editController.textView.heroModifiers = [.backgroundColor(.blue)]
                 
-                print("toEdit: \(view.heroID), \(editController.textView.heroID)")
+                print("toEdit: \(view.hero.id), \(editController.textView.hero.id)")
             }
         }
     }
@@ -365,7 +501,7 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as! Cell
         let board = boards[indexPath.row]
-        cell.textView.text = board.value(forKey: "name") as! String
+        cell.textView.text = board.value(forKey: "name") as? String
         cell.labelName = cell.textView.text
         cell.delegate = self
         cell.setUp(editing: self.editingStatus)
@@ -379,55 +515,16 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
         self.performSegue(withIdentifier: "showDetail", sender: cell)
     }
     
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: CGFloat((collectionView.frame.size.width / 2) - 40), height: CGFloat((collectionView.frame.size.width / 2) - 40))
+    }
+    
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1 // row count
     }
     
-//    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-//        return CGSize(width: 155, height: 155)
-//    }
-    
     // MARK: TableViewController Overrides
 
-    // MARK: - Fetched results controller
-    
-    
-
-//    func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-//        tableView.beginUpdates()
-//    }
-
-//    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange sectionInfo: NSFetchedResultsSectionInfo, atSectionIndex sectionIndex: Int, for type: NSFetchedResultsChangeType) {
-//        switch type {
-//            case .insert:
-//                tableView.insertSections(IndexSet(integer: sectionIndex), with: .fade)
-//            case .delete:
-//                tableView.deleteSections(IndexSet(integer: sectionIndex), with: .fade)
-//            default:
-//                return
-//        }
-//    }
-
-//    func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
-//        switch type {
-//            case .insert:
-//                tableView.insertRows(at: [newIndexPath!], with: .fade)
-//            case .delete:
-//                tableView.deleteRows(at: [indexPath!], with: .fade)
-//            case .update:
-//                configureCell(tableView.cellForRow(at: indexPath!)!, withEvent: anObject as! Event)
-//            case .move:
-//                configureCell(tableView.cellForRow(at: indexPath!)!, withEvent: anObject as! Event)
-//                tableView.moveRow(at: indexPath!, to: newIndexPath!)
-//        }
-//    }
-
-//    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
-//        tableView.endUpdates()
-//    }
-
-    
-    
     /*
      // Implementing the above methods to update the table view in response to individual changes may have performance implications if a large number of changes are made simultaneously. If this proves to be an issue, you can instead just implement controllerDidChangeContent: which notifies the delegate that all section and object changes have been processed.
      

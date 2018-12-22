@@ -9,28 +9,46 @@
 import UIKit
 import Hero
 
-class EditNameController: UIViewController {
+class EditNameController: UIViewController, UITextViewDelegate {
 
-    @IBOutlet weak var textView: UITextView!
+    @IBOutlet weak var textView: CenteredTextView!
+    @IBOutlet weak var toolBar: UIToolbar!
+    @IBOutlet weak var homeButton: UIBarButtonItem!
+    
     
     var transition = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        textView.heroID = transition
+        
+        homeButton.setTitleTextAttributes([NSAttributedStringKey.font : UIFont(name: "DINAlternate-Bold", size: 20)!], for: .normal)
+        
+        textView.hero.id = transition
         textView.text = transition
+        textView.delegate = self
         
+        textView.layer.borderWidth = 3.0
+        textView.layer.borderColor = UIColor(rgb: 0x34E5FF).cgColor
         
-        // Do any additional setup after loading the view.
+        ItemFrames.shared.updateTextFont(oneTextView: textView, fontSize: 25)
+        
+        toolBar.clipsToBounds = true
+        toolBar.layer.masksToBounds = true
+        
+        toolBar.layer.cornerRadius = 25.0
+        
     }
-
+    
+    override func viewDidLayoutSubviews() {
+        textView.textAlignment = .center
+        textView.centerVertically()
+    }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
-
     /*
     // MARK: - Navigation
     */
@@ -44,4 +62,12 @@ class EditNameController: UIViewController {
         }
     }
  
+    // Limits characters in note creation to 60
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+        let newText = (textView.text as NSString).replacingCharacters(in: range, with: text)
+        ItemFrames.shared.updateTextFont(oneTextView: textView, fontSize: 25)
+        let numberOfChars = newText.count // for Swift use count(newText)
+        return numberOfChars < 30
+    }
+    
 }

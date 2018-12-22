@@ -9,13 +9,13 @@
     {
       "size" : "20x20",
       "idiom" : "iphone",
-      "filename" : "cliff-5.png",
+      "filename" : "cliff-3.png",
       "scale" : "3x"
     },
     {
       "size" : "29x29",
       "idiom" : "iphone",
-      "filename" : "cliff-6.png",
+      "filename" : "cliff-7.png",
       "scale" : "2x"
     },
     {
@@ -27,31 +27,31 @@
     {
       "size" : "40x40",
       "idiom" : "iphone",
-      "filename" : "cliff-9.png",
+      "filename" : "cliff-4.png",
       "scale" : "2x"
     },
     {
       "size" : "40x40",
       "idiom" : "iphone",
-      "filename" : "cliff-11.png",
+      "filename" : "cliff-12.png",
       "scale" : "3x"
     },
     {
       "size" : "60x60",
       "idiom" : "iphone",
-      "filename" : "cliff-12.png",
+      "filename" : "cliff-11.png",
       "scale" : "2x"
     },
     {
       "size" : "60x60",
       "idiom" : "iphone",
-      "filename" : "cliff-13.png",
+      "filename" : "cliff-15.png",
       "scale" : "3x"
     },
     {
       "size" : "20x20",
       "idiom" : "ipad",
-      "filename" : "cliff-3.png",
+      "filename" : "cliff-6.png",
       "scale" : "1x"
     },
     {
@@ -63,13 +63,13 @@
     {
       "size" : "29x29",
       "idiom" : "ipad",
-      "filename" : "cliff-4.png",
+      "filename" : "cliff-9.png",
       "scale" : "1x"
     },
     {
       "size" : "29x29",
       "idiom" : "ipad",
-      "filename" : "cliff-7.png",
+      "filename" : "cliff-8.png",
       "scale" : "2x"
     },
     {
@@ -81,19 +81,19 @@
     {
       "size" : "40x40",
       "idiom" : "ipad",
-      "filename" : "cliff-8.png",
+      "filename" : "cliff-5.png",
       "scale" : "2x"
     },
     {
       "size" : "76x76",
       "idiom" : "ipad",
-      "filename" : "cliff-14.png",
+      "filename" : "cliff-13.png",
       "scale" : "1x"
     },
     {
       "size" : "76x76",
       "idiom" : "ipad",
-      "filename" : "cliff-15.png",
+      "filename" : "cliff-14.png",
       "scale" : "2x"
     },
     {

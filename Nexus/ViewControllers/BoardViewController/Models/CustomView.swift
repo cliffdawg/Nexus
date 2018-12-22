@@ -102,7 +102,7 @@ class CustomView: UIView, UITextFieldDelegate {
         //line.close()
         
         //If you want to stroke it with a red color
-        UIColor.red.setStroke()
+        UIColor.white.setStroke()
         line.stroke()
         
         // Draws all the connections' lines
@@ -207,7 +207,7 @@ class CustomView: UIView, UITextFieldDelegate {
                 line.addLine(to: CGPoint(x: Double(item.downloadFinish.frame.minX) + twoWidth, y: Double(item.downloadFinish.frame.minY) + twoHeight))
             }
             
-            UIColor.red.setStroke()
+            UIColor.white.setStroke()
             line.stroke()
             //////// Still have the issue where note is being pushed back
             
@@ -222,6 +222,8 @@ class CustomView: UIView, UITextFieldDelegate {
     
     // Add Neo4j objects and connections
     func loadFrames(sender: DetailViewController) {
+        
+        // Load notes
         for obj in ItemFrames.shared.frames {
             
             if ItemFrames.shared.orientation != "" {
@@ -229,7 +231,7 @@ class CustomView: UIView, UITextFieldDelegate {
             }
             
             if (obj.imageLink == nil) {
-                //obj.loadImage()
+                ItemFrames.shared.updateTextFont(oneTextView: obj.noteFrame, fontSize: Int(obj.noteFrame.font!.pointSize))
                 self.addSubview(obj)
                 obj.delegate = sender
             }
@@ -276,6 +278,9 @@ class CustomView: UIView, UITextFieldDelegate {
                 let insets = UIEdgeInsets(top: 0, left: -2, bottom: 0, right: -2)
                 label.frame = UIEdgeInsetsInsetRect(CGRect(x: newX - 60.0, y: newY - 15.0, width: 120.0, height: 30.0), insets)
             }
+            label.dropShadow()
+            label.font = UIFont(name: "Futura", size: 15)
+            
             item.label = label
             self.addSubview(label)
             
@@ -398,6 +403,8 @@ class CustomView: UIView, UITextFieldDelegate {
             label.layer.cornerRadius = 3.0
             label.textAlignment = .center
             label.adjustsFontSizeToFitWidth = true
+            label.dropShadow()
+            label.font = UIFont(name: "Futura", size: 15)
             
             item.label = label
             //self.addSubview(label)
@@ -407,6 +414,7 @@ class CustomView: UIView, UITextFieldDelegate {
         }
     }
     
+    // Adds the image objects to the board
     func loadImages(sender: DetailViewController) {
         for obj in ItemFrames.shared.frames {
             if (obj.imageLink != nil) {
@@ -419,78 +427,105 @@ class CustomView: UIView, UITextFieldDelegate {
         
     }
     
-    // When connection is added, be able to name it
+    // Implementation of the entry view used to add a connection
     @objc
     func labelConnect(_ sender: UIButton) {
+        
+        var textField: UITextField!
         
         var text = ""
         let animation = AnimationType.rotate(angle: 0.0)
         
-        // Remove text field
-        sender.animate(animations: [animation], initialAlpha: 1.0, finalAlpha: 0.5, delay: 0.0, duration: 0.1, completion: {
-            
+        // Remove the field, and its parent view
+            sender.animate(animations: [animation], initialAlpha: 1.0, finalAlpha: 0.5, delay: 0.0, duration: 0.1, completion: {
+                
                 let awayAnimation = AnimationType.rotate(angle: 0.0)
                 let intoAnimation = AnimationType.zoom(scale: 0.5)
-                sender.superview?.animate(animations: [awayAnimation], initialAlpha: 1.0, finalAlpha: 0.0, delay: 0.2, duration: 1.0, completion: {
-                sender.superview?.removeFromSuperview()
-            })
-            
-            // Set up the label
-            let xCoord = (self.startObject.center.x + self.endObject.center.x)/2
-            let yCoord = (self.startObject.center.y + self.endObject.center.y)/2
-            let label = UILabel(frame: CGRect(x: xCoord - 50, y: yCoord - 17.5, width: 100.0, height: 35.0))
-            label.backgroundColor = .blue
-            label.layer.masksToBounds = true
-            label.layer.cornerRadius = 3.0
-            label.textAlignment = .center
-            label.adjustsFontSizeToFitWidth = true
-        
-            print("create connection objects: \(self.startObject), \(self.endObject)")
-            // Assigns the label the input textField's text
-            for view in (sender.superview?.subviews)! {
-                let viewString = "\(view)"
-                let start = viewString.index(viewString.startIndex, offsetBy: 8)
-                let start2 = viewString[start...].index(of: ":")
-                let resulting = viewString[start..<start2!]
-                if (resulting == "ield") {
-                    let textField = view as! UITextField
-                    label.text = textField.text
-                    if (label.text?.count)! < 14 {
-                        label.sizeToFit()
-                        let insets = UIEdgeInsets(top: -2, left: -4, bottom: -2, right: -4)
-                        //label.drawText(in: UIEdgeInsetsInsetRect(label.frame, insets))
-                        label.frame = UIEdgeInsetsInsetRect(label.frame, insets)
-                    } else {
-                        let insets = UIEdgeInsets(top: 0, left: -2, bottom: 0, right: -2)
-                        label.frame = UIEdgeInsetsInsetRect(CGRect(x: xCoord - 60.0, y: yCoord - 15.0, width: 120.0, height: 30.0), insets)
+                
+                // Removes this input view from ItemFrames tracked views to rotate
+                for (index, element) in ItemFrames.shared.controllerViews.enumerated() {
+                    if element.tag == 999 {
+                        ItemFrames.shared.controllerViews.remove(at: index)
                     }
-                    
-                    label.textColor = .white
-                    text = textField.text!
                 }
-            }
+                
+                sender.superview?.animate(animations: [awayAnimation], initialAlpha: 1.0, finalAlpha: 0.0, delay: 0.2, duration: 1.0, completion: {
+                        sender.superview?.removeFromSuperview()
+                })
             
-            self.addSubview(label)
-            label.animate(animations: [intoAnimation], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: { label.backgroundColor = .blue })
+                // Set up the label
+                let xCoord = (self.startObject.center.x + self.endObject.center.x)/2
+                let yCoord = (self.startObject.center.y + self.endObject.center.y)/2
+                let label = UILabel(frame: CGRect(x: xCoord - 50, y: yCoord - 17.5, width: 100.0, height: 35.0))
+                label.backgroundColor = .blue
+                label.layer.masksToBounds = true
+                label.layer.cornerRadius = 3.0
+                label.textAlignment = .center
+                label.adjustsFontSizeToFitWidth = true
             
-            let connect = Connection()
-            connect.label = label
-            print("origin: \(self.startObject.specific), end: \(self.endObject.specific)")
-            connect.set(origin: self.startObject, final: self.endObject, connect: text)
-//            startSub.xCoord = Double(self.startObject.frame.minX)
-//            startSub.yCoord = Double(self.startObject.frame.minY)
-//            endSub.xCoord = Double(self.endObject.frame.minX)
-//            endSub.yCoord = Double(self.endObject.frame.minY)
-            connect.initialBegin = self.startObject
-            connect.initialFinish = self.endObject
-            //connect.initialOrigin = self.startObject.specific
-           // connect.initialEnd = self.endObject.specific
-            ItemFrames.shared.connections.append(connect)
-            print("connect: \(connect.connection), \(connect.origin), \(connect.end), \(connect.beginID), \(connect.finishID)")
-            self.start = CGPoint(x: 0.0, y: 0.0)
-            self.end = CGPoint(x: 0.0, y: 0.0)
-            self.setNeedsDisplay()
-        })
+                print("create connection objects: \(self.startObject), \(self.endObject)")
+                // Assigns the label the input textField's text
+                for view in (sender.superview?.subviews)! {
+                    let viewString = "\(view)"
+                    let start = viewString.index(viewString.startIndex, offsetBy: 8)
+                    let start2 = viewString[start...].index(of: ":")
+                    let resulting = viewString[start..<start2!]
+                    if (resulting == "ield") {
+                        textField = view as! UITextField
+                        label.text = textField.text
+                        if (label.text?.count)! < 14 {
+                            label.sizeToFit()
+                            let insets = UIEdgeInsets(top: -2, left: -4, bottom: -2, right: -4)
+                            //label.drawText(in: UIEdgeInsetsInsetRect(label.frame, insets))
+                            label.frame = UIEdgeInsetsInsetRect(label.frame, insets)
+                            label.frame = CGRect(x: xCoord - label.frame.width/2, y: yCoord - label.frame.height/2, width: label.frame.width, height: label.frame.height)
+                        } else {
+                            let insets = UIEdgeInsets(top: 0, left: -2, bottom: 0, right: -2)
+                            label.frame = UIEdgeInsetsInsetRect(CGRect(x: xCoord - 60.0, y: yCoord - 15.0, width: 120.0, height: 30.0), insets)
+                        }
+                        
+                        label.textColor = .white
+                        text = textField.text!
+                    }
+                }
+                
+                label.dropShadow()
+                label.font = UIFont(name: "Futura", size: 15)
+                
+                // If text is blank, want to skip across all actual label creation
+                if textField.text?.trimmingCharacters(in: .whitespaces).isEmpty == true {
+                    self.start = CGPoint(x: 0.0, y: 0.0)
+                    self.end = CGPoint(x: 0.0, y: 0.0)
+                    self.setNeedsDisplay()
+                    return
+                }
+                
+                // Add/animate the label to the board's view
+                self.addSubview(label)
+                if ItemFrames.shared.orientation != "" {
+                    ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: label)
+                }
+                label.animate(animations: [intoAnimation], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: { label.backgroundColor = .blue })
+                
+                print("Return didn't work")
+                let connect = Connection()
+                connect.label = label
+                print("origin: \(self.startObject.specific), end: \(self.endObject.specific)")
+                connect.set(origin: self.startObject, final: self.endObject, connect: text)
+    //            startSub.xCoord = Double(self.startObject.frame.minX)
+    //            startSub.yCoord = Double(self.startObject.frame.minY)
+    //            endSub.xCoord = Double(self.endObject.frame.minX)
+    //            endSub.yCoord = Double(self.endObject.frame.minY)
+                connect.initialBegin = self.startObject
+                connect.initialFinish = self.endObject
+                //connect.initialOrigin = self.startObject.specific
+               // connect.initialEnd = self.endObject.specific
+                ItemFrames.shared.connections.append(connect)
+                print("connect: \(connect.connection), \(connect.origin), \(connect.end), \(connect.beginID), \(connect.finishID)")
+                self.start = CGPoint(x: 0.0, y: 0.0)
+                self.end = CGPoint(x: 0.0, y: 0.0)
+                self.setNeedsDisplay()
+            })
         
         /////
         for obj in ItemFrames.shared.frames {
@@ -513,13 +548,13 @@ class CustomView: UIView, UITextFieldDelegate {
             }
         }
         
-        // If the connecting just ended (begin and end == (0.0, 0.0)) and current line ends in frame
+        // If the connecting just ended (begin and end == (0.0, 0.0)) and current line ends in frame, present a view to add a connection
         if ((begin == point) && (stop == point) && (objected == true)) {
             
             // Initially false, if frame contains end of line, will be set to true
             var inObject = false
             
-            // If already existing connect label, remove
+            // If already existing input view for naming connection, remove it
             for single in self.subviews {
                 print(single.tag)
                 if (single.tag == 999) {
@@ -532,11 +567,13 @@ class CustomView: UIView, UITextFieldDelegate {
             let newY = CGFloat((self.end.y + self.start.y)/2)
             let labelRect = CGRect(x: newX - 65, y: newY - 30, width: 130, height: 60)
             let labelView = UIView(frame: labelRect)
-            labelView.backgroundColor = .yellow
+            labelView.backgroundColor = UIColor(rgb: 0xADEAFF)
             labelView.tag = 999
             let labelText = UITextField()
             labelText.placeholder = "Enter..."
             labelText.textAlignment = .center
+            labelText.font = UIFont(name: "Futura-Medium", size: 17.0)
+            labelText.textColor = .darkGray
             labelText.borderStyle = .bezel
             labelText.isUserInteractionEnabled = true
             labelText.allowsEditingTextAttributes = true
@@ -544,24 +581,31 @@ class CustomView: UIView, UITextFieldDelegate {
             labelText.autocorrectionType = UITextAutocorrectionType.no
             labelText.autocapitalizationType = UITextAutocapitalizationType.none
             labelText.delegate = self as! UITextFieldDelegate
+            
             labelView.addSubview(labelText)
             labelText.edges(to: labelView, insets: UIEdgeInsets(top: 0, left: 0, bottom: -labelView.frame.height/2, right: 0))
             labelView.bringSubview(toFront: labelText)
             
             let button = UIButton()
-            button.setTitleColor(.blue, for: .normal)
+            button.setTitleColor(UIColor(rgb: 0x34E5FF), for: .normal)
             button.setTitle("Connect", for: .normal)
-            button.backgroundColor = .green
+            button.backgroundColor = UIColor(rgb: 0xB74F6F)
+            button.titleLabel!.font = UIFont(name: "Futura-Medium", size: 17.0)
             button.isUserInteractionEnabled = true
             button.isEnabled = true
             button.addTarget(self, action: #selector(labelConnect(_:)), for: .touchUpInside)
+            
             labelView.addSubview(button)
             button.edges(to: labelView, insets: UIEdgeInsets(top: labelView.frame.height/2, left: 0, bottom: 0, right: 0))
             labelView.bringSubview(toFront: button)
-            //labelText.top(to: labelView)
+           
+            ItemFrames.shared.controllerViews.append(labelView)
             
             self.addSubview(labelView)
             
+            if ItemFrames.shared.orientation != "" {
+                ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: labelView)
+            }
             
             let animation = AnimationType.from(direction: .right, offset: 50)
             labelView.animate(animations: [animation], initialAlpha: 0.5, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: nil)

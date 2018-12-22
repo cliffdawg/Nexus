@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "0700"
+   LastUpgradeVersion = "0930"
    version = "1.3">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -13,11 +13,11 @@
             buildForProfiling = "YES"
             buildForArchiving = "YES">
             <BuildableReference
-               BuildableIdentifier = 'primary'
-               BlueprintIdentifier = '4E4C07C2B9AA4359EAA10200500FCAB6'
-               BlueprintName = 'Theo'
-               ReferencedContainer = 'container:Pods.xcodeproj'
-               BuildableName = 'Theo.framework'>
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "73F8E9F066C12692CDC0C2829472A01E"
+               BlueprintName = "Theo"
+               ReferencedContainer = "container:Pods.xcodeproj"
+               BuildableName = "Theo.framework">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>

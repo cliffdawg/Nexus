@@ -7,17 +7,15 @@ target 'Nexus' do
 
   # Pods for Nexus
 
-  pod 'IQKeyboardManagerSwift'
-  pod 'TextFieldEffects'
-  pod 'PanelKit'
-  pod 'ViewAnimator'
+  pod 'IQKeyboardManagerSwift', '5.0.7'
+  pod 'TextFieldEffects', '1.4.0'
+  pod 'ViewAnimator', '1.0.2'
   pod 'Hero'
   pod ‘ChameleonFramework/Swift’
   pod ‘HGPlaceholders’
   pod ‘TinyConstraints’
   pod ‘Hero’
-  pod ‘Whisper’
-  pod ‘Theo’
+  pod ‘Theo’, '3.2.0'
   pod 'Firebase'
   pod 'Firebase/Core'
   pod 'Firebase/Storage'
@@ -25,5 +23,7 @@ target 'Nexus' do
   pod 'FirebaseUI/Storage'
   pod 'AlamofireImage'
   pod 'NVActivityIndicatorView'  
+  pod 'NotificationBannerSwift', '1.6.3'
+  pod 'Alamofire'
 
 end

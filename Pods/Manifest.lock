@@ -1,10 +1,10 @@
 PODS:
-  - Alamofire (4.6.0)
-  - AlamofireImage (3.3.0):
-    - Alamofire (~> 4.5)
-  - BlueSocket (0.12.79)
-  - BlueSSLService (0.12.68):
-    - BlueSocket (~> 0.12.79)
+  - Alamofire (4.8.0)
+  - AlamofireImage (3.4.1):
+    - Alamofire (~> 4.7)
+  - BlueSocket (0.12.94)
+  - BlueSSLService (0.12.84):
+    - BlueSocket (~> 0.12.94)
   - BoltProtocol (0.9.6):
     - BlueSocket (~> 0.12.76)
     - BlueSSLService (~> 0.12.64)
@@ -12,66 +12,99 @@ PODS:
   - ChameleonFramework/Default (2.1.0)
   - ChameleonFramework/Swift (2.1.0):
     - ChameleonFramework/Default
-  - Firebase (4.8.0):
-    - Firebase/Core (= 4.8.0)
-  - Firebase/Core (4.8.0):
-    - FirebaseAnalytics (= 4.0.5)
-    - FirebaseCore (= 4.0.13)
-  - Firebase/Database (4.8.0):
-    - Firebase/Core
-    - FirebaseDatabase (= 4.1.3)
-  - Firebase/Storage (4.8.0):
-    - Firebase/Core
-    - FirebaseStorage (= 2.1.1)
-  - FirebaseAnalytics (4.0.5):
-    - FirebaseCore (~> 4.0)
-    - FirebaseInstanceID (~> 2.0)
-    - GoogleToolboxForMac/NSData+zlib (~> 2.1)
+  - Firebase (5.13.0):
+    - Firebase/Core (= 5.13.0)
+  - Firebase/Core (5.13.0):
+    - Firebase/CoreOnly
+    - FirebaseAnalytics (= 5.3.0)
+  - Firebase/CoreOnly (5.13.0):
+    - FirebaseCore (= 5.1.8)
+  - Firebase/Database (5.13.0):
+    - Firebase/CoreOnly
+    - FirebaseDatabase (= 5.0.3)
+  - Firebase/Storage (5.13.0):
+    - Firebase/CoreOnly
+    - FirebaseStorage (= 3.0.3)
+  - FirebaseAnalytics (5.3.0):
+    - FirebaseCore (~> 5.1)
+    - FirebaseInstanceID (~> 3.3)
+    - GoogleAppMeasurement (~> 5.3)
+    - GoogleUtilities/AppDelegateSwizzler (~> 5.2)
+    - GoogleUtilities/MethodSwizzler (~> 5.2)
+    - GoogleUtilities/Network (~> 5.2)
+    - "GoogleUtilities/NSData+zlib (~> 5.2)"
     - nanopb (~> 0.3)
-  - FirebaseCore (4.0.13):
-    - GoogleToolboxForMac/NSData+zlib (~> 2.1)
-  - FirebaseDatabase (4.1.3):
-    - FirebaseAnalytics (~> 4.0)
-    - FirebaseCore (~> 4.0)
+  - FirebaseAuthInterop (1.0.0)
+  - FirebaseCore (5.1.8):
+    - GoogleUtilities/Logger (~> 5.2)
+  - FirebaseDatabase (5.0.3):
+    - FirebaseCore (~> 5.0)
     - leveldb-library (~> 1.18)
-  - FirebaseInstanceID (2.0.8):
-    - FirebaseCore (~> 4.0)
-  - FirebaseStorage (2.1.1):
-    - FirebaseAnalytics (~> 4.0)
-    - FirebaseCore (~> 4.0)
+  - FirebaseInstanceID (3.3.0):
+    - FirebaseCore (~> 5.1)
+    - GoogleUtilities/Environment (~> 5.3)
+    - GoogleUtilities/UserDefaults (~> 5.3)
+  - FirebaseStorage (3.0.3):
+    - FirebaseAuthInterop (~> 1.0)
+    - FirebaseCore (~> 5.1)
     - GTMSessionFetcher/Core (~> 1.1)
-  - FirebaseUI/Storage (4.5.0):
-    - Firebase/Storage (~> 4.0)
+  - FirebaseUI/Storage (5.2.2):
+    - Firebase/Storage (~> 5.0)
     - SDWebImage (~> 4.0)
-  - GoogleToolboxForMac/Defines (2.1.3)
-  - GoogleToolboxForMac/NSData+zlib (2.1.3):
-    - GoogleToolboxForMac/Defines (= 2.1.3)
-  - GTMSessionFetcher/Core (1.1.12)
-  - Hero (1.0.1)
-  - HGPlaceholders (0.2.6)
+  - GoogleAppMeasurement (5.3.0):
+    - GoogleUtilities/AppDelegateSwizzler (~> 5.2)
+    - GoogleUtilities/MethodSwizzler (~> 5.2)
+    - GoogleUtilities/Network (~> 5.2)
+    - "GoogleUtilities/NSData+zlib (~> 5.2)"
+    - nanopb (~> 0.3)
+  - GoogleUtilities/AppDelegateSwizzler (5.3.6):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Network
+  - GoogleUtilities/Environment (5.3.6)
+  - GoogleUtilities/Logger (5.3.6):
+    - GoogleUtilities/Environment
+  - GoogleUtilities/MethodSwizzler (5.3.6):
+    - GoogleUtilities/Logger
+  - GoogleUtilities/Network (5.3.6):
+    - GoogleUtilities/Logger
+    - "GoogleUtilities/NSData+zlib"
+    - GoogleUtilities/Reachability
+  - "GoogleUtilities/NSData+zlib (5.3.6)"
+  - GoogleUtilities/Reachability (5.3.6):
+    - GoogleUtilities/Logger
+  - GoogleUtilities/UserDefaults (5.3.6):
+    - GoogleUtilities/Logger
+  - GTMSessionFetcher/Core (1.2.1)
+  - Hero (1.4.0)
+  - HGPlaceholders (0.3.0)
   - IQKeyboardManagerSwift (5.0.7)
   - leveldb-library (1.20)
-  - nanopb (0.3.8):
-    - nanopb/decode (= 0.3.8)
-    - nanopb/encode (= 0.3.8)
-  - nanopb/decode (0.3.8)
-  - nanopb/encode (0.3.8)
-  - NVActivityIndicatorView (4.1.1):
-    - NVActivityIndicatorView/Presenter (= 4.1.1)
-  - NVActivityIndicatorView/Presenter (4.1.1)
+  - MarqueeLabel/Swift (3.2.0)
+  - nanopb (0.3.901):
+    - nanopb/decode (= 0.3.901)
+    - nanopb/encode (= 0.3.901)
+  - nanopb/decode (0.3.901)
+  - nanopb/encode (0.3.901)
+  - NotificationBannerSwift (1.6.3):
+    - MarqueeLabel/Swift
+    - SnapKit (~> 4.0)
+  - NVActivityIndicatorView (4.4.0):
+    - NVActivityIndicatorView/Presenter (= 4.4.0)
+  - NVActivityIndicatorView/Presenter (4.4.0)
   - PackStream (0.9.8)
-  - PanelKit (2.0.1)
-  - SDWebImage (4.2.2):
-    - SDWebImage/Core (= 4.2.2)
-  - SDWebImage/Core (4.2.2)
+  - SDWebImage (4.4.2):
+    - SDWebImage/Core (= 4.4.2)
+  - SDWebImage/Core (4.4.2)
+  - SnapKit (4.2.0)
   - TextFieldEffects (1.4.0)
   - Theo (3.2.0):
     - BoltProtocol (~> 0.9.2)
-  - TinyConstraints (3.1.0)
+  - TinyConstraints (3.3.1)
   - ViewAnimator (1.0.2)
-  - Whisper (6.0.2)
 
 DEPENDENCIES:
+  - Alamofire
   - AlamofireImage
   - ChameleonFramework/Swift
   - Firebase
@@ -81,46 +114,83 @@ DEPENDENCIES:
   - FirebaseUI/Storage
   - Hero
   - HGPlaceholders
-  - IQKeyboardManagerSwift
+  - IQKeyboardManagerSwift (= 5.0.7)
+  - NotificationBannerSwift (= 1.6.3)
   - NVActivityIndicatorView
-  - PanelKit
-  - TextFieldEffects
-  - Theo
+  - TextFieldEffects (= 1.4.0)
+  - Theo (= 3.2.0)
   - TinyConstraints
-  - ViewAnimator
-  - Whisper
+  - ViewAnimator (= 1.0.2)
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Alamofire
+    - AlamofireImage
+    - BlueSocket
+    - BlueSSLService
+    - BoltProtocol
+    - ChameleonFramework
+    - Firebase
+    - FirebaseAnalytics
+    - FirebaseAuthInterop
+    - FirebaseCore
+    - FirebaseDatabase
+    - FirebaseInstanceID
+    - FirebaseStorage
+    - FirebaseUI
+    - GoogleAppMeasurement
+    - GoogleUtilities
+    - GTMSessionFetcher
+    - Hero
+    - HGPlaceholders
+    - IQKeyboardManagerSwift
+    - leveldb-library
+    - MarqueeLabel
+    - nanopb
+    - NotificationBannerSwift
+    - NVActivityIndicatorView
+    - PackStream
+    - SDWebImage
+    - SnapKit
+    - TextFieldEffects
+    - Theo
+    - TinyConstraints
+    - ViewAnimator
 
 SPEC CHECKSUMS:
-  Alamofire: f41a599bd63041760b26d393ec1069d9d7b917f4
-  AlamofireImage: 2e784dc5d00f04903a52c1d169181469c805c3df
-  BlueSocket: e48444dc7f72ecddbd854feab62e4ba27c1d08e1
-  BlueSSLService: 1155ad6a659bfcdabb5865c38154218f13995950
+  Alamofire: 3ec537f71edc9804815215393ae2b1a8ea33a844
+  AlamofireImage: 78d67ccbb763d87ba44b21583d2153500a195630
+  BlueSocket: 184ff448002475bfb5d676286c2458da5d971f47
+  BlueSSLService: 27ddc87221e714aa0cc0f4f18a703b2570a62827
   BoltProtocol: 88ddb5a3006830cd8d71877b3d247e2e427b88ce
   ChameleonFramework: d21a3cc247abfe5e37609a283a8238b03575cf64
-  Firebase: 710decbbc6d9d48530e9a5dba3209740c3532e05
-  FirebaseAnalytics: 5b02a63ead2c3f0259cfc7f15e053e440587ecf8
-  FirebaseCore: 3c02ec652db3d03fdc8bc6d9154af3e20d64b6f5
-  FirebaseDatabase: 7088bfc4af2cc00231bb36e1404fc2d7509eb4dc
-  FirebaseInstanceID: 81df5805a08001e69138664bdd02c6719a9ac80f
-  FirebaseStorage: ab08d1c93a2feffa038fdd6693088b310ab1e6c6
-  FirebaseUI: 883482fea73b73bbb488c55176f4c6ad128957eb
-  GoogleToolboxForMac: 2501e2ad72a52eb3dfe7bd9aee7dad11b858bd20
-  GTMSessionFetcher: ebaa1f79a5366922c1735f1566901f50beba23b7
-  Hero: cee286821578e170d8c0c9c9cda7897357401112
-  HGPlaceholders: b05be87025781e6fe9f7739d3529f2209b92ed80
+  Firebase: 6df9a6114bc9f106a98fe83d5438d4d9833c2019
+  FirebaseAnalytics: 63202d2665de4e6adcbdce189135255d8b5962ba
+  FirebaseAuthInterop: 0ffa57668be100582bb7643d4fcb7615496c41fc
+  FirebaseCore: fba2bfaa691c49028309b92e4dd37cc4b5512fbe
+  FirebaseDatabase: e2bcbc106adc4b11a2da3ec2eb63c0c4a44f2f54
+  FirebaseInstanceID: e2fa4cb35ef5558c200f7f0ad8a53e212215f93e
+  FirebaseStorage: 3d22c041370593e639fba013d1eb698a8dae2881
+  FirebaseUI: 09519bf436a055cd696bf68687d624423150e4c0
+  GoogleAppMeasurement: 5029d78f2b438bd30ffb44e6c558b57c21622727
+  GoogleUtilities: 95996bea7c7d9b8fb811b7507669a4a8762f80c7
+  GTMSessionFetcher: 32aeca0aa144acea523e1c8e053089dec2cb98ca
+  Hero: bac92350d7201a1a940003e0767c7b52ce7c99a1
+  HGPlaceholders: 2df01c51b04a30acd0b8c9c7161c7cdde4541109
   IQKeyboardManagerSwift: 30fb3a61de1af53a95e02b80fb54ed0a19d5ede5
   leveldb-library: 08cba283675b7ed2d99629a4bc5fd052cd2bb6a5
-  nanopb: 5601e6bca2dbf1ed831b519092ec110f66982ca3
-  NVActivityIndicatorView: 60109b9bf46efc2e71ab81453196ccdfdfeea870
+  MarqueeLabel: 440a502b91a9179bd98f9fff00ba1150650a1c0e
+  nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
+  NotificationBannerSwift: b231e4c3244848ef300e1c53ce027b9756b9b06f
+  NVActivityIndicatorView: ec7440a57af2450319d3a4181cca7da6fc127064
   PackStream: cede8c7e5ebcb86b1f60f2c83d5d341defad4d12
-  PanelKit: d05cecac1ab39af375b56ff21c7b5a9915a3eb5b
-  SDWebImage: 89a9d32cd520bbb46eb14e541d5109b3564af198
+  SDWebImage: 624d6e296c69b244bcede364c72ae0430ac14681
+  SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
   TextFieldEffects: 4ee41b5216e674d55fb6ac25107bf1af7629176f
   Theo: 4054bcf402559cbb48aad70ed626712fc84f7ea4
-  TinyConstraints: 4721a4b303c799328867078ade6560e152df54d1
+  TinyConstraints: dbf7519aefc01ea59d62244300c7718aec68e280
   ViewAnimator: d7b18e0be98e05807f61ad886a36363727209377
-  Whisper: 169760fc4bab0abf24d5529f9276f95c25cf1025
 
-PODFILE CHECKSUM: 3a7a4874c8913aeb5f74bcd34ba21c47eb629344
+PODFILE CHECKSUM: fe7a89f943ba446824ee45992c3eca3ef1f3e9de
 
-COCOAPODS: 1.1.1
+COCOAPODS: 1.5.3

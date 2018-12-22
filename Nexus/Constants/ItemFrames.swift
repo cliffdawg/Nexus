@@ -39,6 +39,8 @@ class ItemFrames {
         
         ItemFrames.shared.editing = true
         for frame in frames {
+            frame.layer.borderWidth = 3.0
+            frame.layer.cornerRadius = 5.0
             
             for subframe in frame.subviews {
                 let viewString = "\(subframe)"
@@ -47,7 +49,6 @@ class ItemFrames {
                 let resulting = viewString[start..<start2!]
                 print("view: \(resulting)")
                 if (resulting == "enteredTextView") {
-                    //frame.bringSubview(toFront: subframe)
                     subframe.isUserInteractionEnabled = true
                 }
             }
@@ -59,6 +60,7 @@ class ItemFrames {
         
         ItemFrames.shared.editing = false
         for frame in frames {
+            frame.layer.borderWidth = 0.0
             
             for subframe in frame.subviews {
                 let viewString = "\(subframe)"
@@ -67,7 +69,6 @@ class ItemFrames {
                 let resulting = viewString[start..<start2!]
                 
                 if (resulting == "enteredTextView") {
-                    //frame.sendSubview(toBack: subframe)
                     subframe.isUserInteractionEnabled = false
                 }
             }
@@ -179,10 +180,10 @@ class ItemFrames {
         }
     }
     
-    func rotate(toOrientation: String) {
+    func rotate(toOrientation: String, sender: Any) {
         
         ///*
-        print("rotate frames")
+        print("rotate frames: \(controllerViews)")
         
         if toOrientation == "toRight" && ItemFrames.shared.orientation != "right" {
             //
@@ -217,6 +218,7 @@ class ItemFrames {
                     
                 })
             }
+            
             ItemFrames.shared.orientation = "right"
         }
         if toOrientation == "toLeft" && ItemFrames.shared.orientation != "left" {
@@ -254,6 +256,7 @@ class ItemFrames {
                     
                 })
             }
+            
             ItemFrames.shared.orientation = "left"
         }
         if toOrientation == "backFromRight" && ItemFrames.shared.orientation != "" {
@@ -289,6 +292,7 @@ class ItemFrames {
                     
                 })
             }
+            
             ItemFrames.shared.orientation = ""
         }
         if toOrientation == "backFromLeft"  && ItemFrames.shared.orientation != "" {
@@ -324,12 +328,40 @@ class ItemFrames {
                     
                 })
             }
+                
             ItemFrames.shared.orientation = ""
+            
+            // TODO: Add UI designs from free use kit
+            
         }
     }
     
-    func makeImagesEditable() {
+    // Scale textView font to fit inside it
+    func updateTextFont(oneTextView: UITextView, fontSize: Int) {
+        if (oneTextView.text.isEmpty || oneTextView.bounds.size.equalTo(CGSize.zero)) {
+            return
+        }
         
+        let textViewSize = oneTextView.frame.size
+        let fixedWidth = textViewSize.width
+        let expectSize = oneTextView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat(MAXFLOAT)))
+        
+        var expectFont = oneTextView.font
+        // Decreases until it fits in textView
+        if (expectSize.height > textViewSize.height) {
+            while (oneTextView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat(MAXFLOAT))).height > textViewSize.height) {
+                expectFont = oneTextView.font!.withSize(oneTextView.font!.pointSize - 1)
+                oneTextView.font = expectFont
+            }
+        } else {
+            // Increases until it reaches the default font size
+            while (oneTextView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat(MAXFLOAT))).height < textViewSize.height && Int((oneTextView.font?.pointSize)!) < fontSize) {
+                expectFont = oneTextView.font
+                oneTextView.font = oneTextView.font!.withSize(oneTextView.font!.pointSize + 1)
+            }
+            oneTextView.font = expectFont
+        }
     }
     
 }
+

@@ -8,7 +8,6 @@
 
 import Foundation
 import UIKit
-import PanelKit
 import ViewAnimator
 import Theo
 import Firebase
@@ -17,6 +16,32 @@ import FirebaseDatabase
 import AlamofireImage
 import Alamofire
 import NVActivityIndicatorView
+import NotificationBannerSwift
+
+// Convert hex to UIColor
+// Color scheme:
+// 007AFF - main blue
+// A533FF - main purple
+// B74F6F - cherry red
+// ADBDFF - pastel blue
+// 34E5FF - tael
+extension UIColor {
+    convenience init(red: Int, green: Int, blue: Int) {
+        assert(red >= 0 && red <= 255, "Invalid red component")
+        assert(green >= 0 && green <= 255, "Invalid green component")
+        assert(blue >= 0 && blue <= 255, "Invalid blue component")
+        
+        self.init(red: CGFloat(red) / 255.0, green: CGFloat(green) / 255.0, blue: CGFloat(blue) / 255.0, alpha: 1.0)
+    }
+    
+    convenience init(rgb: Int) {
+        self.init(
+            red: (rgb >> 16) & 0xFF,
+            green: (rgb >> 8) & 0xFF,
+            blue: rgb & 0xFF
+        )
+    }
+}
 
 /* ViewController that presents the Nexus as a pin-board type view. */
 class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPopoverPresentationControllerDelegate, ChooseAddDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, DrawLineDelegate, UITextViewDelegate {
@@ -28,14 +53,18 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     var downloadItems = [DownloadItem]()
     
     var individualItems = [DownloadItem]()
-    
+
     var imagePickerController: UIImagePickerController?
     
     var popoverViewController: AddType!
     
+    @IBOutlet weak var backButton: UIBarButtonItem!
+    
     @IBOutlet weak var detailDescriptionLabel: UILabel!
     
     @IBOutlet weak var addSymbol: UIBarButtonItem!
+    
+    @IBOutlet weak var saveButton: UIBarButtonItem!
     
     @IBOutlet weak var createNote: UIView!
     
@@ -47,9 +76,15 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     
     @IBOutlet weak var bottomBar: UIToolbar!
     
+    @IBOutlet weak var topView: UIView!
+    
+    @IBOutlet weak var bottomView: UIView!
+    
     @IBOutlet weak var customView: CustomView!
     
     @IBOutlet weak var newNoteLabel: UITextView!
+    
+    @IBOutlet weak var addNoteButton: UIButton!
     
     @IBOutlet weak var connectingBanner: UILabel!
     
@@ -64,17 +99,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     var activity = NVActivityIndicatorView(frame: CGRect(x: 0.0, y: 0.0, width: 0.0, height: 0.0))
     
     var imageToChange: CustomImage!
-    
-    // last one before uI
-    
-    func configureView() {
-        // Update the user interface for the detail item.
-        //titleView.frame = CGRect(x: titleView.frame.midX, y: titleView.frame.midY, width: 300, height: 20)
-        //self.backButton.frame = CGRect(x: -20, y: 20, width: 40, height: 20)
-        //self.navigationItem.title = detail.name
-        //let fromAnimation = AnimationType.from(direction: .right, offset: 30.0)
-        
-    }
+
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -85,24 +110,31 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         super.viewDidLoad()
         
         
-        // Do any additional setup after loading the view, typically from a nib.
-        // Have to learn safe areas
-        
-        
         //self.customView.loadneo4j()
         
+
+        self.addSymbol.setTitleTextAttributes([NSAttributedStringKey.font : UIFont(name: "DINAlternate-Bold", size: 20)!], for: .normal)
+        
         self.endConnect.isEnabled = false
+        self.endConnect.setTitleTextAttributes([NSAttributedStringKey.font : UIFont(name: "DINAlternate-Bold", size: 20)!], for: .normal)
+        
+        self.saveButton.setTitleTextAttributes([NSAttributedStringKey.font : UIFont(name: "DINAlternate-Bold", size: 20)!], for: .normal)
+        
         self.label.text = self.name
         
-        let backButton = UIBarButtonItem(barButtonSystemItem: .rewind, target: self, action: #selector(back(_:)))
-        //navigationItem.leftBarButtonItem = backButton
+        self.backButton.setTitleTextAttributes([NSAttributedStringKey.font : UIFont(name: "DINAlternate-Bold", size: 20)!], for: .normal)
+        
         let zoomAnimation = AnimationType.zoom(scale: 0.2)
         self.titleView.animate(animations: [zoomAnimation], initialAlpha: 0.5, finalAlpha: 1.0, delay: 0.0, duration: 1.0, completion: { })
         
+        // Controller views is used to rotate views on any screen
         ItemFrames.shared.controllerViews.append(self.createNote)
+        ItemFrames.shared.controllerViews.append(self.connectingBanner)
         self.createNote.alpha = 0.0
-        self.newNoteLabel.layer.borderWidth = 5.0
-        self.newNoteLabel.layer.borderColor = UIColor.blue.cgColor
+        self.newNoteLabel.layer.borderWidth = 3.0
+        self.newNoteLabel.layer.borderColor = UIColor(rgb: 0x34E5FF).cgColor
+        self.newNoteLabel.dropShadow()
+        self.addNoteButton.dropShadow()
         self.newNoteLabel.delegate = self
         /* Dragging image implementation */
     
@@ -140,8 +172,15 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         self.view.bringSubview(toFront: topBar)
         self.view.bringSubview(toFront: bottomBar)
         
+        topBar.clipsToBounds = true
+        topBar.layer.masksToBounds = true
         
+        topBar.layer.cornerRadius = 25.0
         
+        bottomBar.clipsToBounds = true
+        bottomBar.layer.masksToBounds = true
+        
+        bottomBar.layer.cornerRadius = 25.0
         /////////
         self.setUpOrientation()
     }
@@ -167,12 +206,18 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: activity)
         }
         activity.startAnimating()
+        safeDisable(wantToDisable: true)
         
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
             print("loadNexus")
             self.loadNexus()
         }
     }
+    
+    // TODO: Investigate why loading issues are back
+    // maybe something to do with loadnexus and updateconnections at same time?
+    // updateconnections error, and then loadnexus error
+    // Right now, it doesn't load the first time, and then second time returns error but loads
     
     // The new flow of downloading image data has an improvement over initial method, now tries to place and then load
     func loadNexus() {
@@ -403,6 +448,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 ///*
                 DispatchQueue.main.async {
                     self.activity.stopAnimating()
+                    self.safeDisable(wantToDisable: false)
                     //self.updateConnections()
                 }
             } else {
@@ -544,6 +590,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                     self.loadBoard()
                     //self.updateConnections()
                     self.activity.stopAnimating()
+                    self.safeDisable(wantToDisable: false)
                     }
                     
                     
@@ -649,15 +696,15 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         switch UIDevice.current.orientation {
         case .landscapeLeft:
             print("landscapeLeft")
-                ItemFrames.shared.rotate(toOrientation: "toLeft")
+            ItemFrames.shared.rotate(toOrientation: "toLeft", sender: self)
         case .landscapeRight:
             print("landscapeRight")
-                ItemFrames.shared.rotate(toOrientation: "toRight")
+            ItemFrames.shared.rotate(toOrientation: "toRight", sender: self)
         case .portrait:
             if ItemFrames.shared.orientation == "left" {
-                ItemFrames.shared.rotate(toOrientation: "backFromLeft")
+                ItemFrames.shared.rotate(toOrientation: "backFromLeft", sender: self)
             } else if ItemFrames.shared.orientation == "right" {
-                ItemFrames.shared.rotate(toOrientation: "backFromRight")
+                ItemFrames.shared.rotate(toOrientation: "backFromRight", sender: self)
             }
             print("Portrait")
         default:
@@ -668,14 +715,16 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     // Selecting which item to add 
     func chooseAdd(chosenAdd: String) {
         print(chosenAdd)
-        if (chosenAdd == "Picture") {
+        if chosenAdd == "Add Picture" {
             
             self.endEditing()
             
             // Allows user to choose between photo library and camera
             let alertController = UIAlertController(title: nil, message: "Where do you want to get your picture from?", preferredStyle: .actionSheet)
             
-            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) in
+                self.imageToChange = nil
+            })
             alertController.addAction(cancelAction)
             
             let photoLibraryAction = UIAlertAction(title: "Photo from Library", style: .default) { (action) in
@@ -700,15 +749,16 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 self.dismiss(animated: true, completion: nil)
                 present(alertController, animated: true, completion: nil)
             }
-        } else if (chosenAdd == "Note") {
+        } else if chosenAdd == "Add Note" {
             
             self.endEditing()
-            
             self.createNote.alpha = 1.0
-            if (self.presentedViewController == nil) {
-                let newView = self.createNote
-                newView?.transform = CGAffineTransform(scaleX: 0.4, y: 0.4)
-                UIView.animate(withDuration: 2.0,
+            if (self.presentedViewController != nil) {
+                self.dismiss(animated: true, completion: nil)
+            }
+            let newView = self.createNote
+            newView?.transform = CGAffineTransform(scaleX: 0.4, y: 0.4)
+            UIView.animate(withDuration: 2.0,
                                delay: 0,
                                usingSpringWithDamping: CGFloat(0.9),
                                initialSpringVelocity: CGFloat(6.0),
@@ -719,75 +769,74 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 },
                                completion: { Void in()  }
                 )
-                if ItemFrames.shared.orientation != "" {
-                    ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: newView!)
-                }
-                self.view.addSubview(newView!)
+            if ItemFrames.shared.orientation != "" {
+                ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: newView!)
             }
-            else {
-                self.dismiss(animated: true, completion: nil)
-                let newView = self.createNote
-                newView?.transform = CGAffineTransform(scaleX: 0.4, y: 0.4)
-                UIView.animate(withDuration: 2.0,
-                               delay: 0,
-                               usingSpringWithDamping: CGFloat(0.9),
-                               initialSpringVelocity: CGFloat(6.0),
-                               options: UIViewAnimationOptions.allowUserInteraction,
-                               animations: {
-                                //self.createNote.alpha = 1.0
-                                newView?.transform = CGAffineTransform.identity
-                },
-                               completion: { Void in()  }
-                )
-                if ItemFrames.shared.orientation != "" {
-                    ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: newView!)
-                }
-                self.view.addSubview(newView!)
-            }
+            self.view.addSubview(newView!)
             
-        } else if (chosenAdd == "Connection") {
+            
+        } else if chosenAdd == "Create Connection" {
             self.connectingBanner.text = "Connecting"
+            connectingBanner.sizeToFit()
+            self.view.bringSubview(toFront: connectingBanner)
             ItemFrames.shared.connectingState = true
             ItemFrames.shared.positioning = false
             ItemFrames.shared.deleting = false
             self.connectingBanner.alpha = 1.0
+            if ItemFrames.shared.orientation != "" {
+                ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: connectingBanner)
+            }
             let animate = AnimationType.from(direction: .right, offset: 100)
             self.connectingBanner.animate(animations: [animate], initialAlpha: 0.5, finalAlpha: 1.0, delay: 0.0, duration: 1.0, completion: nil)
             self.endConnect.title = "Done"
             self.endConnect.isEnabled = true
             ItemFrames.shared.sendNotesToBack()
-        } else if (chosenAdd == "Re-position") {
+        } else if chosenAdd == "Re-position Element" {
             self.connectingBanner.text = "Re-positioning"
+            connectingBanner.sizeToFit()
+            self.view.bringSubview(toFront: connectingBanner)
             ItemFrames.shared.connectingState = false
             ItemFrames.shared.editing = false
             ItemFrames.shared.deleting = false
             ItemFrames.shared.positioning = true
             self.connectingBanner.alpha = 1.0
+            if ItemFrames.shared.orientation != "" {
+                ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: connectingBanner)
+            }
             let animate = AnimationType.from(direction: .right, offset: 100)
             self.connectingBanner.animate(animations: [animate], initialAlpha: 0.5, finalAlpha: 1.0, delay: 0.0, duration: 1.0, completion: nil)
             self.endConnect.title = "Done"
             self.endConnect.isEnabled = true
             ItemFrames.shared.sendNotesToBack()
-        } else if (chosenAdd == "Edit") {
+        } else if chosenAdd == "Edit Element" {
             self.connectingBanner.text = "Editing"
+            connectingBanner.sizeToFit()
+            self.view.bringSubview(toFront: connectingBanner)
             ItemFrames.shared.connectingState = false
             ItemFrames.shared.positioning = false
             ItemFrames.shared.deleting = false
             self.connectingBanner.alpha = 1.0
+            if ItemFrames.shared.orientation != "" {
+                ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: connectingBanner)
+            }
             let animate = AnimationType.from(direction: .right, offset: 100)
             self.connectingBanner.animate(animations: [animate], initialAlpha: 0.5, finalAlpha: 1.0, delay: 0.0, duration: 1.0, completion: nil)
             self.endConnect.title = "Done"
             self.endConnect.isEnabled = true
             ItemFrames.shared.bringNotesToFront()
-            ///*
-            ItemFrames.shared.makeImagesEditable()
-        } else if (chosenAdd == "Delete") {
+            
+        } else if chosenAdd == "Delete Element" {
             self.connectingBanner.text = "Deleting"
+            connectingBanner.sizeToFit()
+            self.view.bringSubview(toFront: connectingBanner)
             ItemFrames.shared.connectingState = false
             ItemFrames.shared.positioning = false
             ItemFrames.shared.editing = false
             ItemFrames.shared.deleting = true
             self.connectingBanner.alpha = 1.0
+            if ItemFrames.shared.orientation != "" {
+                ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: connectingBanner)
+            }
             let animate = AnimationType.from(direction: .right, offset: 100)
             self.connectingBanner.animate(animations: [animate], initialAlpha: 0.5, finalAlpha: 1.0, delay: 0.0, duration: 1.0, completion: nil)
             self.endConnect.title = "Done"
@@ -800,20 +849,22 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     
     @IBAction func pressAdd(_ sender: Any) {
         print("pressAdd")
+        
         popoverViewController = self.storyboard?.instantiateViewController(withIdentifier: "addType") as! AddType
         popoverViewController.modalPresentationStyle = .popover
         popoverViewController.preferredContentSize = CGSize(width:200, height:200)
         popoverViewController.delegate2 = self
         
-        // Reference to it so it can rotate as well
+        // Reference to it so it can rotate as well when presented
         ItemFrames.shared.rotatingTypeMenu = popoverViewController
         
         let popoverPresentationViewController = popoverViewController.popoverPresentationController
-        popoverPresentationViewController?.permittedArrowDirections = UIPopoverArrowDirection.down
+        popoverPresentationViewController?.permittedArrowDirections = UIPopoverArrowDirection.init(rawValue: 0)
         popoverPresentationViewController?.delegate = self
         //popoverPresentationViewController?.sourceView = self.add
         popoverPresentationViewController?.barButtonItem = self.addSymbol
         popoverPresentationViewController?.sourceRect = CGRect(x:0, y:0, width: addSymbol.width/2, height: 30)
+        popoverPresentationViewController?.backgroundColor = UIColor(rgb: 0x007AFF)
         
         if ItemFrames.shared.orientation != "" {
             ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: popoverViewController.view)
@@ -845,6 +896,9 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 //imageView.frame = CGRect(x: view.center.x - 200/2 , y: view.center.y - 200/2, width: 200, height: 200)
                 imageView.tag = 5
                 view.addSubview(imageView)
+                if ItemFrames.shared.orientation != "" {
+                    ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: imageView)
+                }
                 ItemFrames.shared.recenterNoteviews()
             } else {
                 ///*
@@ -874,11 +928,6 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         dismiss(animated: true, completion: nil)
     }
     
-    ///* TODO
-    // - Disable anything that can mess with it during loading/saving
-    // - Refactor noteDimensions
-    // - Limit the character count of note creation
-    // - On one instance, we added an image, deleted before saving, yet it still saved
     func changeImage(custom: CustomImage) {
         
         self.imageToChange = custom
@@ -1011,7 +1060,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         self.customView.loadLabelAfterRedraw(connections: connections)
     }
     
-    //limit number of char in note text
+    // Adds a note object to the current board
     @IBAction func addNote(_ sender: Any) {
         
         if newNoteLabel.text?.trimmingCharacters(in: .whitespaces).isEmpty == false {
@@ -1026,13 +1075,15 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             }
             ItemFrames.shared.frames.append(newView)
             print("phone orientation: \(ItemFrames.shared.orientation)")
+            
+            ItemFrames.shared.updateTextFont(oneTextView: newView.noteFrame, fontSize: Int(newView.noteFrame.font!.pointSize))
             self.view.addSubview(newView)
             newView.delegate = self
             self.view.bringSubview(toFront: newView)
             self.newNoteLabel.endEditing(true)
             
             UIView.animate(withDuration: 1.0, delay: 0.0, options: .curveEaseOut, animations: {
-                self.createNote.transform = CGAffineTransform.init(scaleX: 0.1, y: 0.1)
+                self.createNote.transform = CGAffineTransform.init(scaleX: 0.01, y: 0.01)
             }, completion: {_ in
                 print("attempt transform complete")
                 self.view.sendSubview(toBack: self.createNote)
@@ -1041,10 +1092,8 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             })
         } else {
             print("no text")
-            // notify that there is no text
-            // or just send to back/gives user a way to quit out
             UIView.animate(withDuration: 1.0, delay: 0.0, options: .curveEaseOut, animations: {
-                self.createNote.transform = CGAffineTransform.init(scaleX: 0.1, y: 0.1)
+                self.createNote.transform = CGAffineTransform.init(scaleX: 0.01, y: 0.01)
             }, completion: {_ in
                 print("attempt transform complete")
                 self.view.sendSubview(toBack: self.createNote)
@@ -1062,7 +1111,10 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     func endEditing() {
         print("endConnect")
         let animate = AnimationType.from(direction: .left, offset: 0)
-        self.connectingBanner.animate(animations: [animate], initialAlpha: 1.0, finalAlpha: 0.0, delay: 0.0, duration: 1.0, completion: nil)
+        self.connectingBanner.text = ""
+        self.connectingBanner.animate(animations: [animate], initialAlpha: 1.0, finalAlpha: 0.0, delay: 0.0, duration: 1.0, completion: {
+            self.view.sendSubview(toBack: self.connectingBanner)
+        })
         self.endConnect.title = ""
         self.endConnect.isEnabled = false
         ItemFrames.shared.connectingState = false
@@ -1127,10 +1179,11 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                             semaphore.signal() // once you make the signal(), then only next loop will get executed.
                         })
                     } else if item.type == "image" {
+                       
                         print("image1")
                         let image = item.image
                         let refd = ref.childByAutoId()
-                        let refdStore = refd.key
+                        let refdStore = String(describing: refd.key!)
                         let ided = UIDevice.current.identifierForVendor!.uuidString
                         let path = storageRef.child("\(ided)/\(refdStore)")
                         origin.setProp("image", propertyValue: "\(path)")
@@ -1180,7 +1233,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                             deleteFirebaseImage(link: item.imageLink)
                             
                             let refd = ref.childByAutoId()
-                            let refdStore = refd.key
+                            let refdStore = String(describing: refd.key!)
                             let ided = UIDevice.current.identifierForVendor!.uuidString
                             let path = storageRef.child("\(ided)/\(refdStore)")
                             updatedImageProperties = ["image": "\(path)", "board": "\(self.label.text!)", "x coordinate": "\(item.frame.minX)", "y coordinate": "\(item.frame.minY)"]
@@ -1266,7 +1319,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         print("image2")
                         let image = item.image
                         let refd = ref.childByAutoId()
-                        let refdStore = refd.key
+                        let refdStore = String(describing: refd.key!)
                         let ided = UIDevice.current.identifierForVendor!.uuidString
                         let path = storageRef.child("\(ided)/\(refdStore)")
                         end.setProp("image", propertyValue: "\(path)")
@@ -1311,7 +1364,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                             deleteFirebaseImage(link: item.imageLink)
                             
                             let refd = ref.childByAutoId()
-                            let refdStore = refd.key
+                            let refdStore = String(describing: refd.key!)
                             let ided = UIDevice.current.identifierForVendor!.uuidString
                             let path = storageRef.child("\(ided)/\(refdStore)")
                             updatedImageProperties = ["image": "\(path)", "board": "\(self.label.text!)", "x coordinate": "\(item.frame.minX)", "y coordinate": "\(item.frame.minY)"]
@@ -1388,7 +1441,6 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 }
                 
             } else {
-                ///////// use Whisper to show that internet is slow/down
                 print("no new nodes")
             }
             
@@ -1453,7 +1505,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 } else if (item.type == "image") {
                     print("image")
                     let refd = self.ref.childByAutoId()
-                    let refdStore = refd.key
+                    let refdStore = String(describing: refd.key!)
                     let ided = UIDevice.current.identifierForVendor!.uuidString
                     let path = self.storageRef.child("\(ided)/\(refdStore)")
                     node.setProp("image", propertyValue: "\(path)")
@@ -1522,6 +1574,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             })
         }
         self.activity.stopAnimating()
+        safeDisable(wantToDisable: false)
     }
     
     func loadAnimate() {
@@ -1531,8 +1584,11 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         blurEffectView.frame = view.bounds
         blurEffectView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(blurEffectView)
+        self.view.bringSubview(toFront: topView)
+        self.view.bringSubview(toFront: bottomView)
         self.view.bringSubview(toFront: topBar)
         self.view.bringSubview(toFront: bottomBar)
+        
         
         let frame = CGRect(x: self.view.frame.midX - 45, y: self.view.frame.midY - 45, width: 90, height: 90)
         activity = NVActivityIndicatorView(frame: frame, type: NVActivityIndicatorType(rawValue: 12), color: .blue, padding: nil)
@@ -1541,13 +1597,34 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: activity)
         }
         activity.startAnimating()
+        safeDisable(wantToDisable: true)
     }
     
-    // Limits characters in note creation to 60
+    func safeDisable(wantToDisable value: Bool) {
+        if value == true {
+            backButton.isEnabled = false
+            addSymbol.isEnabled = false
+            endConnect.isEnabled = false
+            saveButton.isEnabled = false
+        } else {
+            backButton.isEnabled = true
+            addSymbol.isEnabled = true
+            endConnect.isEnabled = true
+            saveButton.isEnabled = true
+        }
+    }
+    
+    // Limits characters in note creation to 45
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         let newText = (textView.text as NSString).replacingCharacters(in: range, with: text)
         let numberOfChars = newText.count // for Swift use count(newText)
-        return numberOfChars < 60
+        ItemFrames.shared.updateTextFont(oneTextView: textView, fontSize: 17)
+        if numberOfChars == 0 {
+            addNoteButton.setTitle("Cancel", for: .normal)
+        } else {
+            addNoteButton.setTitle("Add Note", for: .normal)
+        }
+        return numberOfChars <= 45
     }
     
     func adaptivePresentationStyle(for controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {

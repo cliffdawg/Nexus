@@ -23,10 +23,10 @@
 		FC31193420A6561100B8E547 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC31192120A6561100B8E547 /* AppDelegate.swift */; };
 		FC31193520A6561100B8E547 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FC31192220A6561100B8E547 /* Assets.xcassets */; };
 		FC31193620A6561100B8E547 /* CustomSegue.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC31192320A6561100B8E547 /* CustomSegue.swift */; };
-		FC31193720A6561100B8E547 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FC31192420A6561100B8E547 /* Info.plist */; };
 		FC31193820A6561100B8E547 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC31192520A6561100B8E547 /* LaunchScreen.storyboard */; };
 		FC31193920A6561100B8E547 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC31192620A6561100B8E547 /* Main.storyboard */; };
 		FC31193A20A6561100B8E547 /* Nexus.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC31192720A6561100B8E547 /* Nexus.xcdatamodeld */; };
+		FCA7A10B21992B530096E821 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCA7A10A21992B530096E821 /* Reachability.swift */; };
 		FCAEFD5B20B5535700F64F49 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FCAEFD5A20B5535700F64F49 /* GoogleService-Info.plist */; };
 		FCDF45C320CCE6340030FF12 /* EditNameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCDF45C220CCE6340030FF12 /* EditNameController.swift */; };
 /* End PBXBuildFile section */
@@ -55,6 +55,7 @@
 		FC31192620A6561100B8E547 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		FC31192820A6561100B8E547 /* Nexus.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Nexus.xcdatamodel; sourceTree = "<group>"; };
 		FC40BB3320088A3700C7BA25 /* Nexus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nexus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FCA7A10A21992B530096E821 /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		FCAEFD5A20B5535700F64F49 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		FCDF45C220CCE6340030FF12 /* EditNameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditNameController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -166,6 +167,7 @@
 			isa = PBXGroup;
 			children = (
 				FC31191E20A6561100B8E547 /* ItemFrames.swift */,
+				FCA7A10A21992B530096E821 /* Reachability.swift */,
 				FC31191F20A6561100B8E547 /* TransitionManager.swift */,
 			);
 			path = Constants;
@@ -234,7 +236,6 @@
 				FC40BB3020088A3700C7BA25 /* Frameworks */,
 				FC40BB3120088A3700C7BA25 /* Resources */,
 				12B6CEC166638D51D4B60379 /* [CP] Embed Pods Frameworks */,
-				E40DA7D524EB7FDA46B1C354 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -285,7 +286,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				FC31193820A6561100B8E547 /* LaunchScreen.storyboard in Resources */,
-				FC31193720A6561100B8E547 /* Info.plist in Resources */,
 				FCAEFD5B20B5535700F64F49 /* GoogleService-Info.plist in Resources */,
 				FC31193520A6561100B8E547 /* Assets.xcassets in Resources */,
 				FC31193920A6561100B8E547 /* Main.storyboard in Resources */,
@@ -301,9 +301,56 @@
 			files = (
 			);
 			inputPaths = (
+				"${SRCROOT}/Pods/Target Support Files/Pods-Nexus/Pods-Nexus-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework",
+				"${BUILT_PRODUCTS_DIR}/AlamofireImage/AlamofireImage.framework",
+				"${BUILT_PRODUCTS_DIR}/BlueSSLService/SSLService.framework",
+				"${BUILT_PRODUCTS_DIR}/BlueSocket/Socket.framework",
+				"${BUILT_PRODUCTS_DIR}/BoltProtocol/Bolt.framework",
+				"${BUILT_PRODUCTS_DIR}/ChameleonFramework/ChameleonFramework.framework",
+				"${BUILT_PRODUCTS_DIR}/GTMSessionFetcher/GTMSessionFetcher.framework",
+				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
+				"${BUILT_PRODUCTS_DIR}/HGPlaceholders/HGPlaceholders.framework",
+				"${BUILT_PRODUCTS_DIR}/Hero/Hero.framework",
+				"${BUILT_PRODUCTS_DIR}/IQKeyboardManagerSwift/IQKeyboardManagerSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/MarqueeLabel/MarqueeLabel.framework",
+				"${BUILT_PRODUCTS_DIR}/NVActivityIndicatorView/NVActivityIndicatorView.framework",
+				"${BUILT_PRODUCTS_DIR}/NotificationBannerSwift/NotificationBannerSwift.framework",
+				"${BUILT_PRODUCTS_DIR}/PackStream/PackStream.framework",
+				"${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework",
+				"${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework",
+				"${BUILT_PRODUCTS_DIR}/TextFieldEffects/TextFieldEffects.framework",
+				"${BUILT_PRODUCTS_DIR}/Theo/Theo.framework",
+				"${BUILT_PRODUCTS_DIR}/TinyConstraints/TinyConstraints.framework",
+				"${BUILT_PRODUCTS_DIR}/ViewAnimator/ViewAnimator.framework",
+				"${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework",
+				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Alamofire.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AlamofireImage.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SSLService.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Socket.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Bolt.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ChameleonFramework.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GTMSessionFetcher.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/HGPlaceholders.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Hero.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IQKeyboardManagerSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MarqueeLabel.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/NVActivityIndicatorView.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/NotificationBannerSwift.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PackStream.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SDWebImage.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SnapKit.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TextFieldEffects.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Theo.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TinyConstraints.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ViewAnimator.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/leveldb.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -316,28 +363,16 @@
 			files = (
 			);
 			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-Nexus-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-		E40DA7D524EB7FDA46B1C354 /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Nexus/Pods-Nexus-resources.sh\"\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -353,6 +388,7 @@
 				FC31192D20A6561100B8E547 /* CustomView.swift in Sources */,
 				FC31192B20A6561100B8E547 /* DetailViewController.swift in Sources */,
 				FC31192920A6561100B8E547 /* AddType.swift in Sources */,
+				FCA7A10B21992B530096E821 /* Reachability.swift in Sources */,
 				FC31193120A6561100B8E547 /* Cell.swift in Sources */,
 				FC31193620A6561100B8E547 /* CustomSegue.swift in Sources */,
 				FC2EDB1520C07C89005ADBE4 /* DownloadItem.swift in Sources */,
@@ -484,9 +520,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 32A3WC8DJ6;
 				INFOPLIST_FILE = "$(SRCROOT)/Nexus/Resources/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cliffordYin.Nexus;
+				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -501,9 +538,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 32A3WC8DJ6;
 				INFOPLIST_FILE = "$(SRCROOT)/Nexus/Resources/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.3;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.cliffordYin.Nexus;
+				PRODUCT_MODULE_NAME = "$(PRODUCT_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
