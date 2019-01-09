@@ -311,7 +311,7 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
         let statement = ["statement" : cypherQuery, "resultDataContents" : resultDataContents] as [String : Any]
         let statements = [statement]
 
-        let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
+        let theo = RestClient(baseURL: APIKeys.shared.baseURL, user: APIKeys.shared.user, pass: APIKeys.shared.pass)
         
         ///* For some reason, loading nexus always fails on the first attempt. Maybe theo needs time to link through RestClient
         theo.executeTransaction(statements, completionBlock: { (response, error) in

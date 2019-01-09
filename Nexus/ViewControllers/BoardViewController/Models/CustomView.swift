@@ -10,7 +10,6 @@ import Foundation
 import UIKit
 import ViewAnimator
 import TinyConstraints
-import Theo
 
 /* Enables all the interaction/implementation of the Nexus board. */
 class CustomView: UIView, UITextFieldDelegate {
@@ -24,8 +23,6 @@ class CustomView: UIView, UITextFieldDelegate {
     var endObject: CustomImage!
     
     let border = 15
-    
-    var theo: RestClient!
     
     var sub1: CustomImage!
     var sub2: CustomImage!
@@ -43,7 +40,6 @@ class CustomView: UIView, UITextFieldDelegate {
 
 //    func loadneo4j() {
 //        
-//        let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
 //        
 //        //var noded = Node()
 //        

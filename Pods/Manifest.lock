@@ -19,9 +19,6 @@ PODS:
     - FirebaseAnalytics (= 5.3.0)
   - Firebase/CoreOnly (5.13.0):
     - FirebaseCore (= 5.1.8)
-  - Firebase/Database (5.13.0):
-    - Firebase/CoreOnly
-    - FirebaseDatabase (= 5.0.3)
   - Firebase/Storage (5.13.0):
     - Firebase/CoreOnly
     - FirebaseStorage (= 3.0.3)
@@ -109,9 +106,9 @@ DEPENDENCIES:
   - ChameleonFramework/Swift
   - Firebase
   - Firebase/Core
-  - Firebase/Database
-  - Firebase/Storage
-  - FirebaseUI/Storage
+  - FirebaseDatabase (= 5.0.3)
+  - FirebaseStorage (= 3.0.3)
+  - FirebaseUI/Storage (= 5.2.2)
   - Hero
   - HGPlaceholders
   - IQKeyboardManagerSwift (= 5.0.7)
@@ -191,6 +188,6 @@ SPEC CHECKSUMS:
   TinyConstraints: dbf7519aefc01ea59d62244300c7718aec68e280
   ViewAnimator: d7b18e0be98e05807f61ad886a36363727209377
 
-PODFILE CHECKSUM: fe7a89f943ba446824ee45992c3eca3ef1f3e9de
+PODFILE CHECKSUM: 77fdbf39abf35d68cf6f4551aaa816681d86ab78
 
 COCOAPODS: 1.5.3

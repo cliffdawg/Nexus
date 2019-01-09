@@ -142,8 +142,6 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         self.connectTheo()
         //self.loadNexus()
         
-        self.updateConnections()
-        
         let halfSizeOfView = 25.0
 //        let maxViews = 3
 //        let insetSize = self.view.bounds.insetBy(dx: CGFloat(Int(2 * halfSizeOfView)), dy: CGFloat(Int(2 * halfSizeOfView))).size
@@ -196,32 +194,96 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         ItemFrames.shared.frames.removeAll()
         ItemFrames.shared.connections.removeAll()
         
-        self.theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
+        self.theo = RestClient(baseURL: APIKeys.shared.baseURL, user: APIKeys.shared.user, pass: APIKeys.shared.pass)
         
-        activity = NVActivityIndicatorView(frame: CGRect(x: 0.0, y: 0.0, width: 0.0, height: 0.0))
+        //activity = NVActivityIndicatorView(frame: CGRect(x: 0.0, y: 0.0, width: 0.0, height: 0.0))
         let frame = CGRect(x: self.view.frame.midX - 45, y: self.view.frame.midY - 45, width: 90, height: 90)
-        activity = NVActivityIndicatorView(frame: frame, type: NVActivityIndicatorType(rawValue: 9), color: .blue, padding: nil)
-        self.view.addSubview(activity)
+        self.activity = NVActivityIndicatorView(frame: frame, type: NVActivityIndicatorType(rawValue: 9), color: .blue, padding: nil)
+        self.view.addSubview(self.activity)
         if ItemFrames.shared.orientation != "" {
-            ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: activity)
+            ItemFrames.shared.initialOrientation(direction: ItemFrames.shared.orientation, view: self.activity)
         }
-        activity.startAnimating()
+        self.activity.startAnimating()
         safeDisable(wantToDisable: true)
+        // TODO: loads twice for some reason
+        //self.initialUpdateConnections()
         
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
-            print("loadNexus")
-            self.loadNexus()
+            self.initialUpdateConnections()
         }
     }
     
-    // TODO: Investigate why loading issues are back
+    // Pulls connections right before loading to make sure local data is up-to-date
+    func initialUpdateConnections() {
+        ItemFrames.shared.downloadedConnections.removeAll()
+        
+        let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'})-[r]->(m:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'}) RETURN n, r, m"
+        
+        let resultDataContents = ["row", "graph"]
+        let statement = ["statement" : cypherQuery, "resultDataContents" : resultDataContents] as [String : Any]
+        let statements = [statement]
+        
+        theo.executeTransaction(statements, completionBlock: { (response, error) in
+            ///*
+            if error != nil {
+                print("initialupdateconnections error: \(error)")
+                self.initialUpdateConnections()
+            } else {
+                let resultobject = response["results"]!
+                let mirrorResult = Mirror(reflecting: resultobject)
+                let resulted = resultobject as! Array<AnyObject>
+                // Array
+                for res in resulted {
+                    let mirrorRes = Mirror(reflecting: res)
+                    let resp = res as! Dictionary<String, AnyObject>
+                    // Dictionary
+                    let mirrordata = Mirror(reflecting: resp["data"]!)
+                    let reyd = resp["data"]! as! Array<AnyObject>
+                    print("connectreyd:\(reyd)")
+                    // Array
+                    for reyd2 in reyd {
+                        let mirrorreyd2 = Mirror(reflecting: reyd2)
+                        let reydd = reyd2 as! Dictionary<String, AnyObject>
+                        let mirrorgraph = Mirror(reflecting: reydd["graph"]!)
+                        let rat = reydd["graph"]! as! Dictionary<String, AnyObject>
+                        let mirrort = Mirror(reflecting: rat["nodes"]!)
+                        let mirrortarray = rat["nodes"]! as! Array<AnyObject>
+                        let mirrorrat = Mirror(reflecting: rat["relationships"]!)
+                        let ratarray = rat["relationships"]! as! Array<AnyObject>
+                        print("connectratarray:\(ratarray)")
+                        // This prints out all the relationships
+                        for ratt in ratarray {
+                            let connection = Connection()
+                            let mirrat = Mirror(reflecting: ratt)
+                            print("connectmirrat: \(mirrat)")
+                            let mirt = ratt as! Dictionary<String, AnyObject>
+                            connection.end = mirt["endNode"] as! String
+                            connection.origin = mirt["startNode"] as! String
+                            connection.connection = mirt["type"] as! String
+                            
+                            // Also check for same beginNode and endNode
+                            if ((ItemFrames.shared.downloadedConnections.contains(where: {($0.connection == connection.connection) && ($0.end == connection.end) && ($0.origin == connection.origin)}) == false)) {
+                                ItemFrames.shared.downloadedConnections.append(connection)
+                            }
+                        }
+                    }
+                }
+                self.loadNexus()
+            }
+            //            DispatchQueue.main.async {
+            //                self.activity.stopAnimating()
+            //            }
+        })
+    }
+    
+    // TODO: Investigate why loading issues are back, try to put in loop
     // maybe something to do with loadnexus and updateconnections at same time?
     // updateconnections error, and then loadnexus error
     // Right now, it doesn't load the first time, and then second time returns error but loads
     
     // The new flow of downloading image data has an improvement over initial method, now tries to place and then load
     func loadNexus() {
-        
+        print("loadNexus")
         //let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: `\(self.name)`}) RETURN n"
         let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'})-[r]->(m:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'}) RETURN n, r, m"
 //        MATCH ({name : "A"})-[r]->({name : "B"})
@@ -240,6 +302,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             ///*
             if error != nil {
                 // what if we try to load again in response to the error
+                // TODO: Add warning notifications to errors and segue back to home
                 print("loadnexus error: \(error)")
             } else {
                 print("response: \(response)")
@@ -384,6 +447,10 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 }
             //}
             ///*
+                // TODO: Move this into completion and it may work
+               // dispatchGroup.notify(queue: DispatchQueue.main) {
+                    self.loadIndividual()
+                //}
             }
         
         })
@@ -393,45 +460,13 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             
             // put activity indicator and thread at top of function
         
-        dispatchGroup.notify(queue: DispatchQueue.main) {
-            self.loadIndividual()
-//            self.loadBoard()
-//            activity.stopAnimating()
-            // MOVE THESE ABOVE TWO TO LOADINDIVIDUAL AND 
-        }
         
         
     }
     
-    func loadBoard() {
-        
-//        for item in downloadItems {
-//            var obj = CustomImage()
-//            if (item.imageRef != nil) {
-//                let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: 50.0, height: 50.0)
-//                obj = CustomImage(frame: rect)
-//                obj.configureImage(setImage: (item.image)!)
-//                obj.configureImage(setImage: item.image)
-//                obj.imageLink = item.imageRef
-//                obj.uniqueID = item.uniqueID
-//                ItemFrames.shared.frames.append(obj)
-//            } else if (item.note != nil) {
-//                let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: 100.0, height: 100.0)
-//                obj = CustomImage(frame: rect)
-//                obj.configureNote(setNote: (item.note)!)
-//                obj.uniqueID = item.uniqueID
-//                ItemFrames.shared.frames.append(obj)
-//            }
-//
-//        }
-        self.draw(start: CGPoint(x: 0.0, y: 0.0), end: CGPoint(x: 0.0, y: 0.0))
-        self.customView.loadFrames(sender: self)
-    }
-    
-    // Prior was for connections, this one is for individual
+    // Prior was for connections with objects, this one is for individual ones
     func loadIndividual() {
-        
-        let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
+        print("load individual")
         let cypherQuery2 = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'}) RETURN n"
         let resultDataContents2 = ["row", "graph"]
         let statement2 = ["statement" : cypherQuery2, "resultDataContents" : resultDataContents2] as [String : Any]
@@ -441,16 +476,16 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             ///*
             if error != nil {
                 print("loadIndividual error: \(error)")
-                self.customView.loadImages(sender: self)
-                
-                print("loadBoard with error")
-                self.loadBoard()
-                ///*
-                DispatchQueue.main.async {
-                    self.activity.stopAnimating()
-                    self.safeDisable(wantToDisable: false)
-                    //self.updateConnections()
-                }
+//                self.customView.loadImages(sender: self)
+//                
+//                print("loadBoard with error")
+//                self.loadBoard()
+//                ///*
+//                DispatchQueue.main.async {
+//                    self.activity.stopAnimating()
+//                    self.safeDisable(wantToDisable: false)
+//                    //self.updateConnections()
+//                }
             } else {
                 print("response2: \(response)")
                 for respond in response {
@@ -605,11 +640,34 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         })
     }
     
+    func loadBoard() {
+        
+        //        for item in downloadItems {
+        //            var obj = CustomImage()
+        //            if (item.imageRef != nil) {
+        //                let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: 50.0, height: 50.0)
+        //                obj = CustomImage(frame: rect)
+        //                obj.configureImage(setImage: (item.image)!)
+        //                obj.configureImage(setImage: item.image)
+        //                obj.imageLink = item.imageRef
+        //                obj.uniqueID = item.uniqueID
+        //                ItemFrames.shared.frames.append(obj)
+        //            } else if (item.note != nil) {
+        //                let rect = CGRect(x: (item.xCoord)!, y: (item.yCoord)!, width: 100.0, height: 100.0)
+        //                obj = CustomImage(frame: rect)
+        //                obj.configureNote(setNote: (item.note)!)
+        //                obj.uniqueID = item.uniqueID
+        //                ItemFrames.shared.frames.append(obj)
+        //            }
+        //
+        //        }
+        self.draw(start: CGPoint(x: 0.0, y: 0.0), end: CGPoint(x: 0.0, y: 0.0))
+        self.customView.loadFrames(sender: self)
+    }
+    
     ///* On startup, loadNexus doesn't work but updateConnections does
     func updateConnections() {
         ItemFrames.shared.downloadedConnections.removeAll()
-        
-        let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
 
         let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'})-[r]->(m:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'}) RETURN n, r, m"
     
@@ -1006,8 +1064,6 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     
         self.draw(start: CGPoint(x: 0.0, y: 0.0), end: CGPoint(x: 0.0, y: 0.0))
         
-        let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
-        
         //F5D8A989-C917-46F0-995E-F4B46F3BBE99
         //MATCH (p:`F5D8A989-C917-46F0-995E-F4B46F3BBE99` { board: 'anoher'}) where ID(p)=40 OPTIONAL MATCH (p)-[r]-() DELETE r,p
         let cypher = "MATCH (p:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'}) where ID(p)=\(object.uniqueID) OPTIONAL MATCH (p)-[r]-() DELETE r,p"
@@ -1089,6 +1145,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 self.view.sendSubview(toBack: self.createNote)
                 self.createNote.alpha = 0.0
                 self.newNoteLabel.text = ""
+                self.addNoteButton.setTitle("Cancel", for: .normal)
             })
         } else {
             print("no text")
@@ -1099,6 +1156,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 self.view.sendSubview(toBack: self.createNote)
                 self.createNote.alpha = 0.0
                 self.newNoteLabel.text = ""
+                self.addNoteButton.setTitle("Cancel", for: .normal)
             })
         }
         
@@ -1144,7 +1202,6 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     }
     
     func saveNexus() {
-        let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
         
         // Creates nodes and connections in database
         for connect in ItemFrames.shared.connections {
@@ -1261,14 +1318,14 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         print("item note: \(item.note)")
                         if noteUpdate {
                         
-                            theo.updateNode(node!, properties: updatedNoteProperties, completionBlock: {(node, error) in
+                            self.theo.updateNode(node!, properties: updatedNoteProperties, completionBlock: {(node, error) in
                                     print("updatenote 1 error: \(error)")
                                     semaphore.signal()
                                 })
                             
                         } else if imageUpdate {
                             
-                            theo.updateNode(node!, properties: updatedImageProperties, completionBlock: {(node, error) in
+                            self.theo.updateNode(node!, properties: updatedImageProperties, completionBlock: {(node, error) in
                                 print("updateimage 1 error: \(error)")
                                 semaphore.signal()
                             })
@@ -1390,14 +1447,14 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         /////
                         if noteUpdate {
                             
-                            theo.updateNode(node!, properties: updatedNoteProperties, completionBlock: {(node, error) in
+                            self.theo.updateNode(node!, properties: updatedNoteProperties, completionBlock: {(node, error) in
                                     print("updatenote 2 error: \(error)")
                                     semaphore2.signal()
                                 })
                             
                         } else if imageUpdate {
                             
-                            theo.updateNode(node!, properties: updatedImageProperties, completionBlock: {(node, error) in
+                            self.theo.updateNode(node!, properties: updatedImageProperties, completionBlock: {(node, error) in
                                 print("updateimage 2 error: \(error)")
                                 semaphore2.signal()
                             })
@@ -1469,7 +1526,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     
     func saveIndividuals() {
         print("save individuals")
-        let theo = RestClient(baseURL: "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780", user: "general", pass: "b.ViGagdahQiVM.Uq0mEcCiZCl4Bc5W")
+
         // MultipleConnect: Each object is confirmed to have a uniqueID by the time this runs, and the correct number is present
         for item in ItemFrames.shared.frames {
             print("UNIQUEID: \(item.uniqueID)")
@@ -1614,7 +1671,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         }
     }
     
-    // Limits characters in note creation to 45
+    // Limits characters in note creation to 45, and displays cancel button if empty
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         let newText = (textView.text as NSString).replacingCharacters(in: range, with: text)
         let numberOfChars = newText.count // for Swift use count(newText)

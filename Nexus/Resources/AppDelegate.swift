@@ -95,7 +95,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
                 print("Check connection response: \(response)")
                 guard response.result.isSuccess else {
                     
-                    //TODO - When changing a board name, need to update it in Neo4j, or use a secondary name, test images for this
+                    // TODO: Refactor everything and make neat
                     print("Alamofire error: \(String(describing: response.result.error!))")
                     if String(describing: response.result.error!).trunc(length: 65) == """
                         Error Domain=NSURLErrorDomain Code=-1001 "The request timed out."
