@@ -94,6 +94,7 @@ PODS:
     - SDWebImage/Core (= 4.4.2)
   - SDWebImage/Core (4.4.2)
   - SnapKit (4.2.0)
+  - SwipeableTabBarController (1.4.0)
   - TextFieldEffects (1.4.0)
   - Theo (3.2.0):
     - BoltProtocol (~> 0.9.2)
@@ -114,6 +115,7 @@ DEPENDENCIES:
   - IQKeyboardManagerSwift (= 5.0.7)
   - NotificationBannerSwift (= 1.6.3)
   - NVActivityIndicatorView
+  - SwipeableTabBarController
   - TextFieldEffects (= 1.4.0)
   - Theo (= 3.2.0)
   - TinyConstraints
@@ -149,6 +151,7 @@ SPEC REPOS:
     - PackStream
     - SDWebImage
     - SnapKit
+    - SwipeableTabBarController
     - TextFieldEffects
     - Theo
     - TinyConstraints
@@ -183,11 +186,12 @@ SPEC CHECKSUMS:
   PackStream: cede8c7e5ebcb86b1f60f2c83d5d341defad4d12
   SDWebImage: 624d6e296c69b244bcede364c72ae0430ac14681
   SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
+  SwipeableTabBarController: 3a393aa51f1c49c4517b05047c2688a6175c634c
   TextFieldEffects: 4ee41b5216e674d55fb6ac25107bf1af7629176f
   Theo: 4054bcf402559cbb48aad70ed626712fc84f7ea4
   TinyConstraints: dbf7519aefc01ea59d62244300c7718aec68e280
   ViewAnimator: d7b18e0be98e05807f61ad886a36363727209377
 
-PODFILE CHECKSUM: 77fdbf39abf35d68cf6f4551aaa816681d86ab78
+PODFILE CHECKSUM: 31d51b2560bd2c8dbe210aadec4830cb2e678f16
 
 COCOAPODS: 1.5.3

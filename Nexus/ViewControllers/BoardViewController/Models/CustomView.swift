@@ -297,7 +297,7 @@ class CustomView: UIView, UITextFieldDelegate {
         }
         let newLength = currentCharacterCount + string.count - range.length
         
-        return newLength <= 20
+        return newLength <= 25
     }
     
     func loadLabelAfterRedraw(connections: [Connection]) {

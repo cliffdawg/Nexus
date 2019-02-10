@@ -25,5 +25,6 @@ target 'Nexus' do
   pod 'NVActivityIndicatorView'  
   pod 'NotificationBannerSwift', '1.6.3'
   pod 'Alamofire'
+  pod 'SwipeableTabBarController'
 
 end

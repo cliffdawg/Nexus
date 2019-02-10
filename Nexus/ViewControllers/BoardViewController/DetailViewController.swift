@@ -44,7 +44,8 @@ extension UIColor {
 }
 
 /* ViewController that presents the Nexus as a pin-board type view. */
-class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPopoverPresentationControllerDelegate, ChooseAddDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, DrawLineDelegate, UITextViewDelegate {
+class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPopoverPresentationControllerDelegate, ChooseAddDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, DrawLineDelegate, UITextViewDelegate, NotificationBannerDelegate {
+    
     
     var theo: RestClient!
     
@@ -100,6 +101,8 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     
     var imageToChange: CustomImage!
 
+    let banner = NotificationBanner(title: "Error Pulling Connections", subtitle: "Returning to home page", style: .danger)
+    var returnBoolean = false
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -140,6 +143,8 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     
         ///*
         self.connectTheo()
+        self.theo = RestClient(baseURL: APIKeys.shared.baseURL, user: APIKeys.shared.user, pass: APIKeys.shared.pass)
+        
         //self.loadNexus()
         
         let halfSizeOfView = 25.0
@@ -194,8 +199,6 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         ItemFrames.shared.frames.removeAll()
         ItemFrames.shared.connections.removeAll()
         
-        self.theo = RestClient(baseURL: APIKeys.shared.baseURL, user: APIKeys.shared.user, pass: APIKeys.shared.pass)
-        
         //activity = NVActivityIndicatorView(frame: CGRect(x: 0.0, y: 0.0, width: 0.0, height: 0.0))
         let frame = CGRect(x: self.view.frame.midX - 45, y: self.view.frame.midY - 45, width: 90, height: 90)
         self.activity = NVActivityIndicatorView(frame: frame, type: NVActivityIndicatorType(rawValue: 9), color: .blue, padding: nil)
@@ -205,8 +208,6 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         }
         self.activity.startAnimating()
         safeDisable(wantToDisable: true)
-        // TODO: loads twice for some reason
-        //self.initialUpdateConnections()
         
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
             self.initialUpdateConnections()
@@ -215,6 +216,10 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     
     // Pulls connections right before loading to make sure local data is up-to-date
     func initialUpdateConnections() {
+        
+        banner.delegate = self
+        
+        print("initial connections update")
         ItemFrames.shared.downloadedConnections.removeAll()
         
         let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'})-[r]->(m:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(self.name)'}) RETURN n, r, m"
@@ -227,7 +232,26 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             ///*
             if error != nil {
                 print("initialupdateconnections error: \(error)")
-                self.initialUpdateConnections()
+                
+//                if self.returnBoolean {
+//                    return
+//                }
+//                DispatchQueue.main.async {
+//                    if !self.banner.isDisplaying {
+//                        self.banner.show()
+//                    }
+//                }
+                //self.initialUpdateConnections()
+//                DispatchQueue.main.async {
+//                    self.connectTheo()
+//                }
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 5) {
+                    self.initialUpdateConnections()
+                }
+//                DispatchQueue.main.async {
+//                self.activity.stopAnimating()
+//                self.safeDisable(wantToDisable: false)
+//                }
             } else {
                 let resultobject = response["results"]!
                 let mirrorResult = Mirror(reflecting: resultobject)
@@ -274,6 +298,24 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
             //                self.activity.stopAnimating()
             //            }
         })
+    }
+    
+    func notificationBannerWillAppear(_ banner: BaseNotificationBanner) {
+        // Dud
+    }
+    
+    func notificationBannerDidAppear(_ banner: BaseNotificationBanner) {
+        // Dud
+    }
+    
+    func notificationBannerWillDisappear(_ banner: BaseNotificationBanner) {
+        // Dud
+    }
+    
+    func notificationBannerDidDisappear(_ banner: BaseNotificationBanner){
+        print("notification disappear")
+        self.returnBoolean = true
+        self.performSegue(withIdentifier: "backToMaster", sender: self)
     }
     
     // TODO: Investigate why loading issues are back, try to put in loop
@@ -447,9 +489,9 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 }
             //}
             ///*
-                // TODO: Move this into completion and it may work
+                
                // dispatchGroup.notify(queue: DispatchQueue.main) {
-                    self.loadIndividual()
+                self.loadIndividual()
                 //}
             }
         
@@ -580,7 +622,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         }
                     }
                 }
-                
+                // TODO: have deleting a board delete all its data too
                 // Manually download the image for each image object
     //            for item in self.downloadItems {
     //                if (item.imageRef != nil) {
@@ -1049,6 +1091,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         if object.type == "image" {
             let storagePath = object.imageLink
             if let storedImage = storagePath as? String {
+                print("storedImage: \(storedImage)")
                 deleteFirebaseImage(link: storedImage)
             } else {
                 print("image hasn't been uploaded")
@@ -1081,8 +1124,9 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     func deleteFirebaseImage(link: String) {
         let storagePath = link
         let storage = Storage.storage()
+        print("storagepath: \(storagePath)")
         let storageRef = storage.reference(forURL: storagePath)
-        
+        print("stor")
         storageRef.delete { error in
             if let error = error {
                 print("delete image error: \(error)")
@@ -1615,6 +1659,8 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         print("upload pic: \(path)")
                         path.putData(localFile!, metadata: nil)
                         item.imageCache = ""
+                        // Replace path key with actual download link
+                        item.imageLink = "\(path)"
                     }
                 }
             }
@@ -1671,17 +1717,20 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         }
     }
     
+    
+    
     // Limits characters in note creation to 45, and displays cancel button if empty
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         let newText = (textView.text as NSString).replacingCharacters(in: range, with: text)
         let numberOfChars = newText.count // for Swift use count(newText)
+        print("newNum: \(newText.count)")
         ItemFrames.shared.updateTextFont(oneTextView: textView, fontSize: 17)
         if numberOfChars == 0 {
             addNoteButton.setTitle("Cancel", for: .normal)
         } else {
             addNoteButton.setTitle("Add Note", for: .normal)
         }
-        return numberOfChars <= 45
+        return numberOfChars <= 75
     }
     
     func adaptivePresentationStyle(for controller: UIPresentationController, traitCollection: UITraitCollection) -> UIModalPresentationStyle {

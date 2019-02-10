@@ -85,7 +85,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         })
         
         
-        let strURL = "https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780"
+        let strURL = APIKeys.shared.baseURL
         Alamofire.request(strURL,
                           method: .head,
                           parameters: nil)

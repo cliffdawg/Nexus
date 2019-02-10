@@ -92,6 +92,7 @@ class Cell: UICollectionViewCell, UITextViewDelegate {
             deleteButton.alpha = 0.0
             deleteButton.isUserInteractionEnabled = false
             self.textView.alpha = 1.0
+            self.textView.backgroundColor = UIColor(rgb: 0xA533FF)
             self.layer.borderWidth = 2.0
             self.layer.borderColor = UIColor.white.cgColor
             self.textView.isUserInteractionEnabled = false

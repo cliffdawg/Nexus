@@ -27,6 +27,8 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
     @IBOutlet weak var toolbar: UIToolbar!
     @IBOutlet weak var leftButton: UIBarButtonItem!
     @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var tutorialButton: UIBarButtonItem!
+    
     
     var gradient: CAGradientLayer!
     
@@ -83,18 +85,25 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
         }
         
         self.setUpOrientation()
+        
+        //* Maybe put a loading animation until it pushes through?
+        self.setupTheo()
     }
     
+    // Tracks the editing status of the boards
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
-        print("setEditing")
         if editingStatus {
+            // Currently editing
             editButtonItem.image = UIImage(named: "Edit")
+            self.textField.isEnabled = true
         } else {
             editButtonItem.image = nil
             editButtonItem.title = "Done"
+            self.textField.isEnabled = false
         }
         self.editingStatus = editing
+        print("setEditing: \(editingStatus)")
         if let indexPaths = collectionView?.indexPathsForVisibleItems {
             for indexPath in indexPaths {
                 if let cell = collectionView?.cellForItem(at: indexPath) as? Cell {
@@ -194,6 +203,8 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
         tintView.backgroundColor = UIColor(rgb: 0xADBDFF)
         self.tintView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height)
         self.view.insertSubview(tintView, aboveSubview: self.collectionView)
+        //* make button clear on input shift
+        tutorialButton.tintColor = .clear
         self.view.bringSubview(toFront: toolbar)
         
     }
@@ -203,10 +214,12 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
         editButtonItem.image = UIImage(named: "Edit")
         toolbar.items![0] = editButtonItem
         textField.text?.removeAll()
+        tutorialButton.tintColor = UIColor(rgb: 0x34E5FF)
         self.view.sendSubview(toBack: tintView)
         tintView.backgroundColor = UIColor.clear
     }
     
+    // Limits title of board name
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let currentCharacterCount = textField.text?.count ?? 0
         if (range.length + range.location > currentCharacterCount){
@@ -214,7 +227,7 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
         }
         let newLength = currentCharacterCount + string.count - range.length
         
-        return newLength <= 30
+        return newLength <= 35
     }
     
     @objc
@@ -301,6 +314,33 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
             self.updateNeo4jBoard(fromBoard: self.newValue, toBoard: sub)
             
         }
+    }
+    
+    // This is meant to establish an initial connection to database from the start
+    func setupTheo() {
+        print("setup theo")
+        //let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: `\(self.name)`}) RETURN n"
+        //MATCH (n:`30496B97-0AAB-4B7E-9423-50F37BC372A9`) RETURN n
+        let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)`) RETURN n"
+
+        print("cypherQuery: \(cypherQuery)")
+        let resultDataContents = ["row", "graph"]
+        let statement = ["statement" : cypherQuery, "resultDataContents" : resultDataContents] as [String : Any]
+        let statements = [statement]
+        
+        let theo = RestClient(baseURL: APIKeys.shared.baseURL, user: APIKeys.shared.user, pass: APIKeys.shared.pass)
+
+        theo.executeTransaction(statements, completionBlock: { (response, error) in
+    
+            if error != nil {
+                // what if we try to load again in response to the error
+                // TODO: Add warning notifications to errors and segue back to home
+                print("setup theo error: \(error)")
+                self.setupTheo()
+            } else {
+                print("setup theo: \(response)")
+            }
+        })
     }
     
     func updateNeo4jBoard(fromBoard: String, toBoard: String) {
@@ -416,6 +456,12 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
                     }
                 }
           })
+    }
+    
+    // Display the tutorials to the user
+    @IBAction func displayTutorials(_ sender: Any) {
+        let tutorial = self.storyboard?.instantiateViewController(withIdentifier: "tutorialViewController") as! TutorialViewController
+        present(tutorial, animated: true, completion: nil)
     }
     
     @objc

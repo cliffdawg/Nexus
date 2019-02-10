@@ -14,7 +14,7 @@
             buildForArchiving = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "73F8E9F066C12692CDC0C2829472A01E"
+               BlueprintIdentifier = "9E8BC2594CFA5B61CDCC84A813CDDE8E"
                BlueprintName = "Theo"
                ReferencedContainer = "container:Pods.xcodeproj"
                BuildableName = "Theo.framework">

@@ -155,6 +155,18 @@ class CustomImage: UIView {
         noteView.text = setNote
         noteView.font = UIFont(name: "Futura", size: 17)
         
+        // Set auto-correction options
+        noteView.autocapitalizationType = .none
+        noteView.autocorrectionType = .no
+        noteView.spellCheckingType = .no
+        if #available(iOS 11.0, *) {
+            noteView.smartDashesType = .no
+            noteView.smartInsertDeleteType = .no
+            noteView.smartQuotesType = .no
+        } else {
+            // Fallback on earlier versions
+        }
+
         // Set object background color
         noteView.backgroundColor = UIColor(rgb: 0x007AFF)
         noteView.textColor = UIColor.white

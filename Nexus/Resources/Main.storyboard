@@ -107,7 +107,7 @@
                                                 <color key="backgroundColor" red="0.67843137249999996" green="0.91764705879999997" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 <fontDescription key="fontDescription" name="Futura-Medium" family="Futura" pointSize="17"/>
-                                                <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                                <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" smartDashesType="no" smartInsertDeleteType="no" smartQuotesType="no"/>
                                             </textView>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="saj-eQ-Vg7">
                                                 <rect key="frame" x="0.0" y="65" width="200" height="35"/>
@@ -250,6 +250,21 @@
             </objects>
             <point key="canvasLocation" x="1820" y="-546.47676161919048"/>
         </scene>
+        <!--Tutorial View Controller-->
+        <scene sceneID="sJo-8h-DUH">
+            <objects>
+                <viewController storyboardIdentifier="tutorialViewController" id="xOy-dA-FST" customClass="TutorialViewController" customModule="Nexus" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="43k-OE-7C8">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <viewLayoutGuide key="safeArea" id="cDL-iA-yVj"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="7JR-3g-wvG" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1763" y="232"/>
+        </scene>
         <!--Master View Controller-->
         <scene sceneID="kVF-Hu-RT9">
             <objects>
@@ -290,7 +305,7 @@
                                                     <color key="backgroundColor" red="0.6470588235294118" green="0.20000000000000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     <fontDescription key="fontDescription" name="Futura-Medium" family="Futura" pointSize="16"/>
-                                                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                                    <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" smartDashesType="no" smartInsertDeleteType="no" smartQuotesType="no"/>
                                                 </textView>
                                                 <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Bmy-AQ-qTz">
                                                     <rect key="frame" x="5" y="2" width="16" height="22"/>
@@ -340,7 +355,7 @@
                                             <color key="backgroundColor" red="0.67843137249999996" green="0.91764705879999997" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                             <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <fontDescription key="fontDescription" name="Futura-Medium" family="Futura" pointSize="17"/>
-                                            <textInputTraits key="textInputTraits"/>
+                                            <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" smartDashesType="no" smartInsertDeleteType="no" smartQuotesType="no"/>
                                             <userDefinedRuntimeAttributes>
                                                 <userDefinedRuntimeAttribute type="color" keyPath="foregroundColor">
                                                     <color key="value" red="0.0" green="0.47843137254901957" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -349,6 +364,12 @@
                                         </textField>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="TBs-3g-xkt"/>
+                                    <barButtonItem title="Tutorial" image="Info" id="uKo-4I-YtH">
+                                        <color key="tintColor" red="0.20392156859999999" green="0.8980392157" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <connections>
+                                            <action selector="displayTutorials:" destination="D2Z-RX-l86" id="fvj-xs-emr"/>
+                                        </connections>
+                                    </barButtonItem>
                                 </items>
                                 <color key="barTintColor" red="0.71764705882352942" green="0.30980392156862746" blue="0.43529411764705883" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </toolbar>
@@ -378,6 +399,7 @@
                         <outlet property="textField" destination="Efe-Nh-Tbm" id="Sxf-uW-OAf"/>
                         <outlet property="tintView" destination="hAI-gG-6Jb" id="GWb-en-jjs"/>
                         <outlet property="toolbar" destination="e9p-oa-Zp8" id="5pL-md-1vw"/>
+                        <outlet property="tutorialButton" destination="uKo-4I-YtH" id="eXf-WD-pos"/>
                         <segue destination="rv6-lc-D0S" kind="show" identifier="toEdit" id="lDK-sv-Pfo"/>
                         <segue destination="JEX-9P-axG" kind="custom" identifier="showDetail" customClass="CustomSegue" customModule="Nexus" customModuleProvider="target" id="rfF-EF-sgy"/>
                     </connections>
@@ -424,7 +446,7 @@
                                         <color key="backgroundColor" red="0.67843137254901964" green="0.91764705882352937" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                         <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <fontDescription key="fontDescription" name="Futura-Medium" family="Futura" pointSize="25"/>
-                                        <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                                        <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" smartDashesType="no" smartInsertDeleteType="no" smartQuotesType="no"/>
                                     </textView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="t1x-iT-4Ia">
                                         <rect key="frame" x="0.0" y="128" width="240" height="35"/>
@@ -475,6 +497,7 @@
     <resources>
         <image name="Edit" width="22" height="23"/>
         <image name="Home" width="22" height="22"/>
+        <image name="Info" width="22" height="22"/>
         <image name="Save" width="22" height="22"/>
         <image name="X" width="16" height="16"/>
     </resources>

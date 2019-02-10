@@ -62,7 +62,7 @@ class EditNameController: UIViewController, UITextViewDelegate {
         }
     }
  
-    // Limits characters in note creation to 60
+    // Limits characters in board creation to 60
     func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         let newText = (textView.text as NSString).replacingCharacters(in: range, with: text)
         ItemFrames.shared.updateTextFont(oneTextView: textView, fontSize: 25)

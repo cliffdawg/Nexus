@@ -331,8 +331,6 @@ class ItemFrames {
                 
             ItemFrames.shared.orientation = ""
             
-            // TODO: Add UI designs from free use kit
-            
         }
     }
     
@@ -349,11 +347,13 @@ class ItemFrames {
         var expectFont = oneTextView.font
         // Decreases until it fits in textView
         if (expectSize.height > textViewSize.height) {
+            print("1")
             while (oneTextView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat(MAXFLOAT))).height > textViewSize.height) {
                 expectFont = oneTextView.font!.withSize(oneTextView.font!.pointSize - 1)
                 oneTextView.font = expectFont
             }
         } else {
+            print("2")
             // Increases until it reaches the default font size
             while (oneTextView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat(MAXFLOAT))).height < textViewSize.height && Int((oneTextView.font?.pointSize)!) < fontSize) {
                 expectFont = oneTextView.font

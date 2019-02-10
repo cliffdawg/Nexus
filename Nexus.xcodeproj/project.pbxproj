@@ -27,6 +27,9 @@
 		FC31193820A6561100B8E547 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC31192520A6561100B8E547 /* LaunchScreen.storyboard */; };
 		FC31193920A6561100B8E547 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FC31192620A6561100B8E547 /* Main.storyboard */; };
 		FC31193A20A6561100B8E547 /* Nexus.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FC31192720A6561100B8E547 /* Nexus.xcdatamodeld */; };
+		FC7E08CA21EEAA3B00968A5E /* TutorialViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7E08C921EEAA3B00968A5E /* TutorialViewController.swift */; };
+		FC7E08CC21EEADF100968A5E /* NexusTut1.mov in Resources */ = {isa = PBXBuildFile; fileRef = FC7E08CB21EEADF100968A5E /* NexusTut1.mov */; };
+		FC7E08CE21EEADF900968A5E /* NexusTut2.mov in Resources */ = {isa = PBXBuildFile; fileRef = FC7E08CD21EEADF900968A5E /* NexusTut2.mov */; };
 		FCA7A10B21992B530096E821 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCA7A10A21992B530096E821 /* Reachability.swift */; };
 		FCAEFD5B20B5535700F64F49 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FCAEFD5A20B5535700F64F49 /* GoogleService-Info.plist */; };
 		FCDF45C320CCE6340030FF12 /* EditNameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCDF45C220CCE6340030FF12 /* EditNameController.swift */; };
@@ -57,6 +60,9 @@
 		FC31192620A6561100B8E547 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		FC31192820A6561100B8E547 /* Nexus.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Nexus.xcdatamodel; sourceTree = "<group>"; };
 		FC40BB3320088A3700C7BA25 /* Nexus.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Nexus.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FC7E08C921EEAA3B00968A5E /* TutorialViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorialViewController.swift; sourceTree = "<group>"; };
+		FC7E08CB21EEADF100968A5E /* NexusTut1.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; name = NexusTut1.mov; path = ../NexusTut1.mov; sourceTree = "<group>"; };
+		FC7E08CD21EEADF900968A5E /* NexusTut2.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; name = NexusTut2.mov; path = ../NexusTut2.mov; sourceTree = "<group>"; };
 		FCA7A10A21992B530096E821 /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		FCAEFD5A20B5535700F64F49 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		FCDF45C220CCE6340030FF12 /* EditNameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditNameController.swift; sourceTree = "<group>"; };
@@ -98,6 +104,7 @@
 				FC31191920A6561000B8E547 /* MasterViewController */,
 				FC31191120A6561000B8E547 /* BoardViewController */,
 				FC31190D20A6561000B8E547 /* AddTypeController */,
+				FC7E08C821EEA92B00968A5E /* TutorialViewController */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -212,11 +219,21 @@
 		FC40BB3520088A3700C7BA25 /* Nexus */ = {
 			isa = PBXGroup;
 			children = (
+				FC7E08CB21EEADF100968A5E /* NexusTut1.mov */,
+				FC7E08CD21EEADF900968A5E /* NexusTut2.mov */,
 				FC31190C20A6561000B8E547 /* ViewControllers */,
 				FC31191D20A6561100B8E547 /* Constants */,
 				FC31192020A6561100B8E547 /* Resources */,
 			);
 			path = Nexus;
+			sourceTree = "<group>";
+		};
+		FC7E08C821EEA92B00968A5E /* TutorialViewController */ = {
+			isa = PBXGroup;
+			children = (
+				FC7E08C921EEAA3B00968A5E /* TutorialViewController.swift */,
+			);
+			path = TutorialViewController;
 			sourceTree = "<group>";
 		};
 		FCDF45C120CCE6030030FF12 /* EditNameController */ = {
@@ -289,7 +306,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				FC31193820A6561100B8E547 /* LaunchScreen.storyboard in Resources */,
+				FC7E08CE21EEADF900968A5E /* NexusTut2.mov in Resources */,
 				FCAEFD5B20B5535700F64F49 /* GoogleService-Info.plist in Resources */,
+				FC7E08CC21EEADF100968A5E /* NexusTut1.mov in Resources */,
 				FC31193520A6561100B8E547 /* Assets.xcassets in Resources */,
 				FC31193920A6561100B8E547 /* Main.storyboard in Resources */,
 			);
@@ -322,6 +341,7 @@
 				"${BUILT_PRODUCTS_DIR}/PackStream/PackStream.framework",
 				"${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework",
 				"${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework",
+				"${BUILT_PRODUCTS_DIR}/SwipeableTabBarController/SwipeableTabBarController.framework",
 				"${BUILT_PRODUCTS_DIR}/TextFieldEffects/TextFieldEffects.framework",
 				"${BUILT_PRODUCTS_DIR}/Theo/Theo.framework",
 				"${BUILT_PRODUCTS_DIR}/TinyConstraints/TinyConstraints.framework",
@@ -348,6 +368,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/PackStream.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SDWebImage.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SnapKit.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SwipeableTabBarController.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TextFieldEffects.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Theo.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TinyConstraints.framework",
@@ -393,6 +414,7 @@
 				FC31192920A6561100B8E547 /* AddType.swift in Sources */,
 				FCA7A10B21992B530096E821 /* Reachability.swift in Sources */,
 				FC31193120A6561100B8E547 /* Cell.swift in Sources */,
+				FC7E08CA21EEAA3B00968A5E /* TutorialViewController.swift in Sources */,
 				FC31193620A6561100B8E547 /* CustomSegue.swift in Sources */,
 				FC2EDB1520C07C89005ADBE4 /* DownloadItem.swift in Sources */,
 				FC31192A20A6561100B8E547 /* AddTypeCell.swift in Sources */,
