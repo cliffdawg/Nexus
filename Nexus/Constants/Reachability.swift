@@ -57,8 +57,6 @@ class Reachability: NSObject {
                 let appDelegate = UIApplication.shared.delegate as! AppDelegate
                 appDelegate.listenForNetwork()
                 
-                // This seems to make it work better
-                // How about running startListening in appDelegate again every time it reaches here?
             }
         }
         

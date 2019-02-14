@@ -30,56 +30,6 @@ class CustomView: UIView, UITextFieldDelegate {
     var beginOffset = 0.0
     var finishOffset = 0.0
     
-    /*
-    // Only override draw() if you perform custom drawing.
-    // An empty implementation adversely affects performance during animation.
-    override func draw(_ rect: CGRect) {
-        // Drawing code
-    }
-    */
-
-//    func loadneo4j() {
-//        
-//        
-//        //var noded = Node()
-//        
-//        
-//        ////////// RELATIONSHIP
-//        
-////        var tester1: Node!
-////        var tester2: Node!
-////
-////        var relate = Relationship()
-////
-////        theo.fetchNode("41", completionBlock: {(node, error) in
-////            print("fetch error: \(error)")
-////            tester1 = node!
-////        })
-////
-////        theo.fetchNode("24", completionBlock: {(node, error) in
-////            print("fetch error: \(error)")
-////            tester2 = node!
-////        })
-////
-////        let when = DispatchTime.now() + 2
-////        DispatchQueue.main.asyncAfter(deadline: when) {
-////            relate.relate(tester1, toNode: tester2, type: "friends")
-////
-////            theo.createRelationship(relate, completionBlock: {(node, error) in
-////               print("relate error: \(error)")
-////            })
-////        }
-//        /////////// CREATE
-//        //noded.addLabel("tester1")
-////        noded.setProp("key1", propertyValue: "value1")
-////
-////        // error: "{ URL: https://hobby-nalpfmhdkkbegbkehohghgbl.dbs.graphenedb.com:24780/db/data/db/data/node }"
-////        theo.createNode(noded, labels: ["friend1"], completionBlock: { (node, error) in
-////            print("error: \(error)")
-////        })
-//        
-//    }
-    
     // Drawing the connection(s)
     override func draw(_ rect: CGRect) {
         

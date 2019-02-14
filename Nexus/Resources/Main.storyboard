@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="D2Z-RX-l86">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="CiM-kp-UIf">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -493,15 +493,47 @@
             </objects>
             <point key="canvasLocation" x="860" y="494.30284857571218"/>
         </scene>
+        <!--Loading View Controller-->
+        <scene sceneID="Fgn-gS-vQ9">
+            <objects>
+                <viewController storyboardIdentifier="loadingController" id="CiM-kp-UIf" customClass="LoadingViewController" customModule="Nexus" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="9Al-9N-WPN">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Nexus" translatesAutoresizingMaskIntoConstraints="NO" id="HUj-dk-30v">
+                                <rect key="frame" x="87.5" y="233.5" width="200" height="200"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="200" id="PaS-SD-EuR"/>
+                                    <constraint firstAttribute="width" constant="200" id="caR-TD-MsP"/>
+                                </constraints>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" red="0.60784313729999995" green="0.34901960780000002" blue="0.71372549019999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="HUj-dk-30v" firstAttribute="centerY" secondItem="9Al-9N-WPN" secondAttribute="centerY" id="M93-VU-ail"/>
+                            <constraint firstItem="HUj-dk-30v" firstAttribute="centerX" secondItem="9Al-9N-WPN" secondAttribute="centerX" id="Xaa-0M-GhV"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="EEd-Gg-V51"/>
+                    </view>
+                    <connections>
+                        <segue destination="D2Z-RX-l86" kind="custom" identifier="startUp" customClass="StartUpCustomSegue" customModule="Nexus" customModuleProvider="target" id="Y98-di-hsF"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="iBf-xC-wGK" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2391" y="361"/>
+        </scene>
     </scenes>
     <resources>
         <image name="Edit" width="22" height="23"/>
         <image name="Home" width="22" height="22"/>
         <image name="Info" width="22" height="22"/>
+        <image name="Nexus" width="512" height="512"/>
         <image name="Save" width="22" height="22"/>
         <image name="X" width="16" height="16"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="7zD-A2-tDS"/>
+        <segue reference="Y98-di-hsF"/>
     </inferredMetricsTieBreakers>
 </document>

@@ -109,9 +109,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
                         } else if String(describing: response.result.error!).trunc(length: 117) == "responseValidationFailed(reason: Alamofire.AFError.ResponseValidationFailureReason.unacceptableStatusCode(code: 401))" {
                             print("Internet")
                             task.cancel()
-                            Reachability.shared.warningBanner.dismiss()
-                            Reachability.shared.dangerBanner.dismiss()
-                            Reachability.shared.successBanner.show()
+                        // Connectivity alerts for successes are obsolete
+//                            Reachability.shared.warningBanner.dismiss()
+//                            Reachability.shared.dangerBanner.dismiss()
+//                            Reachability.shared.successBanner.show()
                     }
                     return
                 }

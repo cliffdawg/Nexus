@@ -76,6 +76,7 @@ class TutorialViewController: SwipeableTabBarController {
         leftDot.centerX(to: button, nil, offset: -10.0, priority: LayoutPriority(rawValue: 1), isActive: true)
         rightDot.centerX(to: button, nil, offset: 10.0, priority: LayoutPriority(rawValue: 1), isActive: true)
         
+        avPlayerMaster.play()
     }
     
 //    override func beginAppearanceTransition(_ isAppearing: Bool, animated: Bool) {
@@ -89,10 +90,14 @@ class TutorialViewController: SwipeableTabBarController {
             leftDot.image = UIImage(named: "Unfilled Indicator")
             rightDot.image = UIImage(named: "Filled Indicator")
             onRight = false
+            avPlayerBoard.seek(to: kCMTimeZero)
+            avPlayerBoard.play()
         } else {
             leftDot.image = UIImage(named: "Filled Indicator")
             rightDot.image = UIImage(named: "Unfilled Indicator")
             onRight = true
+            avPlayerMaster.seek(to: kCMTimeZero)
+            avPlayerMaster.play()
         }
     }
     

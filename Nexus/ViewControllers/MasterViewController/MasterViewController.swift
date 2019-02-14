@@ -19,8 +19,11 @@ import Theo
 class MasterViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate, UITextFieldDelegate, SegueDelegate {
 
     var boards = [NSManagedObject]()
-    
-    private let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+    var gradient: CAGradientLayer!
+    var cellName = ""
+    // New name for renaming board
+    var newValue = ""
+    var editingStatus = false
     
     @IBOutlet weak var textField: UITextField!
     @IBOutlet weak var tintView: UIView!
@@ -29,17 +32,18 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var tutorialButton: UIBarButtonItem!
     
+    // Display the tutorials to the user
+    @IBAction func displayTutorials(_ sender: Any) {
+        let tutorial = self.storyboard?.instantiateViewController(withIdentifier: "tutorialViewController") as! TutorialViewController
+        present(tutorial, animated: true, completion: nil)
+    }
     
-    var gradient: CAGradientLayer!
-    
-    var cellName = ""
-    
-    var newValue = ""
-    var editingStatus = false
+    // MARK: Lifecycle functions
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Attach a fade to the top and bottom of the scroll
         gradient = CAGradientLayer()
         gradient.frame = collectionView.bounds
         gradient.colors = [
@@ -48,15 +52,12 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
             UIColor(white: 1, alpha: 1).cgColor,
             UIColor(white: 1, alpha: 0).cgColor
         ]
-        
         var top = 0.05
         var bottom = 0.95
         if 0.05*collectionView.frame.height > 20 {
             top = Double(20/collectionView.frame.height)
             bottom = 1.0 - top
         }
-        
-        
         gradient.locations = [0, top, bottom, 1] as [NSNumber]
         self.collectionView.layer.mask = gradient
         
@@ -66,35 +67,25 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
         editButtonItem.image = UIImage(named: "Edit")
         editButtonItem.setTitleTextAttributes([NSAttributedStringKey.font : UIFont(name: "DINAlternate-Bold", size: 20)!], for: .normal)
         toolbar.items![0] = editButtonItem
-        
         toolbar.clipsToBounds = true
         toolbar.layer.masksToBounds = true
-        
         toolbar.layer.shadowColor = UIColor.clear.cgColor
         toolbar.layer.cornerRadius = 25.0
         
-        //////////////////
         self.collectionView.reloadData()
         self.load() { (success) -> Void in
             if success {
-                self.setupActivityIndicator()
-                self.activityIndicator.stopAnimating()
-                
                 self.collectionView.animateViews(animations: [AnimationType.from(direction: .right, offset: self.view.frame.width - 60)], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0, duration: 0.5, animationInterval: 0.1, completion: {})
             }
         }
         
         self.setUpOrientation()
-        
-        //* Maybe put a loading animation until it pushes through?
-        self.setupTheo()
     }
     
-    // Tracks the editing status of the boards
+    // Tracks the editing status of the boards and updates options based on it
     override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)
         if editingStatus {
-            // Currently editing
             editButtonItem.image = UIImage(named: "Edit")
             self.textField.isEnabled = true
         } else {
@@ -103,7 +94,6 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
             self.textField.isEnabled = false
         }
         self.editingStatus = editing
-        print("setEditing: \(editingStatus)")
         if let indexPaths = collectionView?.indexPathsForVisibleItems {
             for indexPath in indexPaths {
                 if let cell = collectionView?.cellForItem(at: indexPath) as? Cell {
@@ -119,16 +109,31 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-    private func setupActivityIndicator() {
-        activityIndicator.center = CGPoint(x: view.center.x, y: 100.0)
-        activityIndicator.hidesWhenStopped = true
-        view.addSubview(activityIndicator)
-        activityIndicator.startAnimating()
     }
     
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        
+        if segue.identifier == "showDetail" {
+            let destined = segue.destination as! DetailViewController
+            destined.name = cellName
+        } else if segue.identifier == "toEdit" {
+            if let view = sender as? CenteredTextView, let editController = segue.destination as? EditNameController {
+                
+                editController.textView = view
+                editController.transition = view.hero.id!
+                editController.hero.modalAnimationType = .zoomSlide(direction: .left)
+            }
+        }
+    }
+    
+    // MARK: Construction functions
+    
+    // As it scrolls, clip the gradient to the edges
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        gradient.frame = collectionView.bounds
+    }
+    
+    // Load boards from Core Data
     func load(completion: @escaping (_ success: Bool) -> Void) {
     
         let appDelegate =
@@ -152,15 +157,15 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
         
     }
     
+    // Attaches an orientation observer
     func setUpOrientation() {
-        print("setuporientation")
         NotificationCenter.default.addObserver(forName: .UIDeviceOrientationDidChange,
                                                object: nil,
                                                queue: .main,
                                                using: didRotate)
     }
     
-    // This works for orientation
+    // Rotate elements based on orientation
     var didRotate: (Notification) -> Void = { notification in
         switch UIDevice.current.orientation {
         case .landscapeLeft:
@@ -178,6 +183,7 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
         }
     }
     
+    // Delete a board from Core Data
     func delete(from: UITextView, cell: Cell) {
         if let indexPath = collectionView.indexPath(for: cell) {
             let appDel:AppDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -187,30 +193,29 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
             do {
                 try context.save()
             } catch {
-                print("Could not save")
+                print("Could not successfully delete")
             }
         }
     }
+    
+    // MARK: TextField delegate functions
     
     func textFieldDidBeginEditing(_ textField: UITextField) {
 
         let saveButton = UIBarButtonItem(barButtonSystemItem: .save, target: self, action: #selector(saveNewObject(_:)))
         saveButton.setTitleTextAttributes([NSAttributedStringKey.font : UIFont(name: "DINAlternate-Bold", size: 20)!], for: .normal)
         saveButton.tintColor = UIColor(rgb: 0x34E5FF)
-        
         toolbar.items![0] = saveButton
-        
         tintView.backgroundColor = UIColor(rgb: 0xADBDFF)
         self.tintView.frame = CGRect(x: 0, y: 0, width: view.frame.width, height: view.frame.height)
         self.view.insertSubview(tintView, aboveSubview: self.collectionView)
-        //* make button clear on input shift
         tutorialButton.tintColor = .clear
         self.view.bringSubview(toFront: toolbar)
         
     }
     
+    // Resets status when naming a board is finished
     func textFieldDidEndEditing(_ textField: UITextField) {
-
         editButtonItem.image = UIImage(named: "Edit")
         toolbar.items![0] = editButtonItem
         textField.text?.removeAll()
@@ -219,7 +224,7 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
         tintView.backgroundColor = UIColor.clear
     }
     
-    // Limits title of board name
+    // Limits title length of board
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         let currentCharacterCount = textField.text?.count ?? 0
         if (range.length + range.location > currentCharacterCount){
@@ -233,41 +238,33 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
     @objc
     func dismissKeyboard(_ sender: Any) {
         textField.endEditing(true)
-        
     }
     
-    @objc
-    func preInsertNewObject(_ sender: Any) {
-       
-    }
+    // MARK: Saving board functions
     
+    // Saving a new board
     @objc
     func saveNewObject(_ sender: Any) {
         
         if textField.text?.trimmingCharacters(in: .whitespaces).isEmpty != true {
+            
             let appDel: AppDelegate = UIApplication.shared.delegate as! AppDelegate
             let context: NSManagedObjectContext = appDel.managedObjectContext
-            
             let entity =  NSEntityDescription.entity(forEntityName: "Board", in: context)
-            
             let adding = NSManagedObject(entity: entity!, insertInto: context)
             adding.setValue(Date(), forKey: "timestamp")
             adding.setValue(textField.text, forKey: "name")
             
             do {
-                
                 try context.save()
                 self.boards.append(adding)
-                print("boards append")
                 textField.text = ""
                 textField.endEditing(true)
-                
             } catch let error as NSError  {
                 print("Could not save \(error), \(error.userInfo)")
             }
             
             self.collectionView.reloadData()
-            
             let indexedPath = IndexPath(item: self.boards.count - 1, section: 0)
 
             // Delay needed to offset tableView reloading
@@ -309,100 +306,41 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
             
         }
         
+        // Call function to update database
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2) {
-        
             self.updateNeo4jBoard(fromBoard: self.newValue, toBoard: sub)
-            
         }
     }
     
-    // This is meant to establish an initial connection to database from the start
-    func setupTheo() {
-        print("setup theo")
-        //let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: `\(self.name)`}) RETURN n"
-        //MATCH (n:`30496B97-0AAB-4B7E-9423-50F37BC372A9`) RETURN n
-        let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)`) RETURN n"
-
-        print("cypherQuery: \(cypherQuery)")
-        let resultDataContents = ["row", "graph"]
-        let statement = ["statement" : cypherQuery, "resultDataContents" : resultDataContents] as [String : Any]
-        let statements = [statement]
-        
-        let theo = RestClient(baseURL: APIKeys.shared.baseURL, user: APIKeys.shared.user, pass: APIKeys.shared.pass)
-
-        theo.executeTransaction(statements, completionBlock: { (response, error) in
-    
-            if error != nil {
-                // what if we try to load again in response to the error
-                // TODO: Add warning notifications to errors and segue back to home
-                print("setup theo error: \(error)")
-                self.setupTheo()
-            } else {
-                print("setup theo: \(response)")
-            }
-        })
-    }
-    
     func updateNeo4jBoard(fromBoard: String, toBoard: String) {
-        print("updateBoard")
-
+     
         let cypherQuery = "MATCH (n:`\(UIDevice.current.identifierForVendor!.uuidString)` { board: '\(fromBoard)'}) RETURN n"
         let resultDataContents = ["row", "graph"]
         let statement = ["statement" : cypherQuery, "resultDataContents" : resultDataContents] as [String : Any]
         let statements = [statement]
-
-        let theo = RestClient(baseURL: APIKeys.shared.baseURL, user: APIKeys.shared.user, pass: APIKeys.shared.pass)
         
-        ///* For some reason, loading nexus always fails on the first attempt. Maybe theo needs time to link through RestClient
-        theo.executeTransaction(statements, completionBlock: { (response, error) in
-            ///*
+        APIKeys.shared.theo.executeTransaction(statements, completionBlock: { (response, error) in
             if error != nil {
-                print("loadIndividual error: \(error)")
-                
+                print("Updating Neo4j board error: \(error)")
             } else {
-                print("response2: \(response)")
-                for respond in response {
-                    print("respond2: \(respond.key)")
-                }
-                // (key: NSObject, value: AnyObject) is a unit FOR A DICTIONARY
-                print("results2: \(response["results"]!)")
+                // Parse data from Neo4j response
+                // Dictionary
                 let resultobject = response["results"]!
-                let mirrorResult = Mirror(reflecting: resultobject)
-                print("mirror2: \(mirrorResult.subjectType)")
                 let resulted = resultobject as! Array<AnyObject>
-                print("resulted2: \(resulted)")
                 // Array
                 for res in resulted {
-                    print("res2: \(res)")
-                    let mirrorRes = Mirror(reflecting: res)
-                    print("mirrorres2: \(mirrorRes.subjectType)")
                     let resp = res as! Dictionary<String, AnyObject>
                     // Dictionary
-                    print("resp2[\"data\"]: \(resp["data"]!)")
-                    let mirrordata = Mirror(reflecting: resp["data"]!)
-                    print("mirrordata2: \(mirrordata.subjectType)")
                     let reyd = resp["data"]! as! Array<AnyObject>
                     // Array
                     for reyd2 in reyd {
-                        print("reyd2.2: \(reyd2)")
-                        let mirrorreyd2 = Mirror(reflecting: reyd2)
-                        print("mirrorreyd2.2: \(mirrorreyd2.subjectType)")
                         let reydd = reyd2 as! Dictionary<String, AnyObject>
-                        print("reyddgraph.2: \(reydd["graph"]!)")
-                        let mirrorgraph = Mirror(reflecting: reydd["graph"]!)
-                        print("mirrorgraph.2: \(mirrorgraph.subjectType)")
                         let rat = reydd["graph"]! as! Dictionary<String, AnyObject>
-                        print("ratnodes.2: \(rat["nodes"]!)")
-                        let mirrort = Mirror(reflecting: rat["nodes"]!)
-                        print("mirrorrt.2: \(mirrort.subjectType)")
                         let mirrortarray = rat["nodes"]! as! Array<AnyObject>
-                        // These loop through the nodes
+                        // Loop through the nodes for the board
                         for rort in mirrortarray {
-                            
                             let rortarray = rort as! Dictionary<String, AnyObject>
-                            print("rortarray: \(rortarray)")
                             // Pull id and properties from this dictionary
-                            print("rortid: \(rortarray["id"])")
                             let id = rortarray["id"] as! String
                             var note: String!
                             var imageRef: String!
@@ -414,131 +352,36 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
                             for ror in rortprop {
                                 if (ror.key == "note") {
                                     note = ror.value as! String
-                                    
                                 } else if (ror.key == "image") {
                                     imageRef = ror.value as! String
-                                    
                                 }
                                 if (ror.key == "x coordinate") {
                                     xCoord = ror.value as! String
                                 }
                                 if (ror.key == "y coordinate") {
                                     yCoord = ror.value as! String
-                                    
                                 }
-                                
                             }
 
                             if note != nil {
-                                
                                 updatedBoardProps = ["note": "\(note!)", "board": "\(toBoard)", "x coordinate": "\(xCoord)", "y coordinate": "\(yCoord)"]
-                                
                             } else if imageRef != nil {
-
                                 updatedBoardProps = ["image": "\(imageRef!)", "board": "\(toBoard)", "x coordinate": "\(xCoord)", "y coordinate": "\(yCoord)"]
-                                
                             }
                             
-                            theo.fetchNode(id, completionBlock: {(node, error) in
-                                print("update id node: \(node)")
-                                
-                                theo.updateNode(node!, properties: updatedBoardProps, completionBlock: {(node, error) in
-                                    print("updateboard error: \(error)")
+                            APIKeys.shared.theo.fetchNode(id, completionBlock: {(node, error) in
+                                APIKeys.shared.theo.updateNode(node!, properties: updatedBoardProps, completionBlock: {(node, error) in
+                                    print("Updating node error: \(error)")
                                 })
-                                
                             })
-                            
-                            
-                            
-                            }
-                        
                         }
                     }
                 }
+            }
           })
     }
     
-    // Display the tutorials to the user
-    @IBAction func displayTutorials(_ sender: Any) {
-        let tutorial = self.storyboard?.instantiateViewController(withIdentifier: "tutorialViewController") as! TutorialViewController
-        present(tutorial, animated: true, completion: nil)
-    }
-    
-    @objc
-    func insertNewObject(_ sender: Any) {
-        print("insertNewObject")
-    }
-    
-//    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-//        let cell = self.tableView.cellForRow(at: indexPath) as! Cell
-//        cellName = cell.textView.text!
-//        self.performSegue(withIdentifier: "showDetail", sender: cell)
-//
-//    }
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        gradient.frame = collectionView.bounds
-    }
-    
-    // MARK: - Segues
-
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        
-        if segue.identifier == "showDetail" {
-            let destined = segue.destination as! DetailViewController
-            //self.addChildViewController(destined)
-            destined.name = cellName
-            print("prepare for segue")
-            print(cellName)
-        } else if segue.identifier == "toEdit" {
-            print("sender: \(sender), destination: \(segue.destination)")
-            if let view = sender as? CenteredTextView, let editController = segue.destination as? EditNameController {
-                
-                editController.textView = view
-                editController.transition = view.hero.id!
-                editController.hero.modalAnimationType = .zoomSlide(direction: .left)
-                
-                //view.heroModifiers = [.backgroundColor(.red)]
-                //editController.textView.heroModifiers = [.backgroundColor(.blue)]
-                
-                print("toEdit: \(view.hero.id), \(editController.textView.hero.id)")
-            }
-        }
-    }
-
-    // MARK: - Table View
-
-//    override func numberOfSections(in tableView: UITableView) -> Int {
-//        return 1
-//    }
-//
-//    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-//        return boards.count
-//    }
-
-//    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-//        if editingStyle == .delete {
-//            let appDel:AppDelegate = UIApplication.shared.delegate as! AppDelegate
-//            let context:NSManagedObjectContext = appDel.managedObjectContext
-//            context.delete(boards.remove(at: indexPath.row))
-//
-//            do {
-//                try context.save()
-//            } catch {
-//                // Replace this implementation with code to handle the error appropriately.
-//                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-//                let nserror = error as NSError
-//                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
-//            }
-//            tableView.deleteRows(at: [indexPath as IndexPath], with: UITableViewRowAnimation.automatic)
-//        }
-//    }
-    
-    
-    
-//    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//        return 80.0
-//    }
+    // MARK: CollectionView delegate functions
 
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return self.boards.count
@@ -555,7 +398,6 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print("cell select")
         let cell = self.collectionView.cellForItem(at: indexPath) as! Cell
         cellName = cell.textView.text!
         self.performSegue(withIdentifier: "showDetail", sender: cell)
@@ -566,21 +408,8 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
     }
     
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1 // row count
+        return 1
     }
     
-    // MARK: TableViewController Overrides
-
-    /*
-     // Implementing the above methods to update the table view in response to individual changes may have performance implications if a large number of changes are made simultaneously. If this proves to be an issue, you can instead just implement controllerDidChangeContent: which notifies the delegate that all section and object changes have been processed.
-     
-     func controllerDidChangeContent(controller: NSFetchedResultsController) {
-         // In the simplest, most efficient, case, reload the table view.
-         tableView.reloadData()
-     }
-     */
-    
-    // we override this method to manage what style status bar is shown
-
 }
 

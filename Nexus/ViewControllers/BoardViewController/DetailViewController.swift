@@ -46,9 +46,6 @@ extension UIColor {
 /* ViewController that presents the Nexus as a pin-board type view. */
 class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPopoverPresentationControllerDelegate, ChooseAddDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate, DrawLineDelegate, UITextViewDelegate, NotificationBannerDelegate {
     
-    
-    var theo: RestClient!
-    
     var name = ""
     
     var downloadItems = [DownloadItem]()
@@ -143,7 +140,6 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     
         ///*
         self.connectTheo()
-        self.theo = RestClient(baseURL: APIKeys.shared.baseURL, user: APIKeys.shared.user, pass: APIKeys.shared.pass)
         
         //self.loadNexus()
         
@@ -228,26 +224,25 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         let statement = ["statement" : cypherQuery, "resultDataContents" : resultDataContents] as [String : Any]
         let statements = [statement]
         
-        theo.executeTransaction(statements, completionBlock: { (response, error) in
+        APIKeys.shared.theo.executeTransaction(statements, completionBlock: { (response, error) in
             ///*
+            
             if error != nil {
                 print("initialupdateconnections error: \(error)")
                 
-//                if self.returnBoolean {
-//                    return
-//                }
-//                DispatchQueue.main.async {
-//                    if !self.banner.isDisplaying {
-//                        self.banner.show()
-//                    }
-//                }
-                //self.initialUpdateConnections()
-//                DispatchQueue.main.async {
-//                    self.connectTheo()
-//                }
-                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 5) {
-                    self.initialUpdateConnections()
+                DispatchQueue.main.async {
+                    if !self.banner.isDisplaying {
+                        self.banner.show()
+                        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2, execute: {
+                            self.banner.isHidden = true
+                            let loading = self.storyboard?.instantiateViewController(withIdentifier: "loadingController") as! LoadingViewController
+                            loading.nextController = "board"
+                            //self.performSegue(withIdentifier: "backToMaster", sender: nil)
+                            self.present(loading, animated: true, completion: nil)
+                        })
+                    }
                 }
+                //* TODO: Show error banner and segue back to main Actually, just pop up the buffering screen and keep looping
 //                DispatchQueue.main.async {
 //                self.activity.stopAnimating()
 //                self.safeDisable(wantToDisable: false)
@@ -315,7 +310,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
     func notificationBannerDidDisappear(_ banner: BaseNotificationBanner){
         print("notification disappear")
         self.returnBoolean = true
-        self.performSegue(withIdentifier: "backToMaster", sender: self)
+        //self.performSegue(withIdentifier: "backToMaster", sender: self)
     }
     
     // TODO: Investigate why loading issues are back, try to put in loop
@@ -338,7 +333,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         let dispatchGroup = DispatchGroup()
         
         ///* For some reason, loading nexus always fails on the first attempt. Maybe theo needs time to link through RestClient
-        theo.executeTransaction(statements, completionBlock: { (response, error) in
+        APIKeys.shared.theo.executeTransaction(statements, completionBlock: { (response, error) in
 //            for node in response {
             //responsecount = 2
             ///*
@@ -514,7 +509,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         let statement2 = ["statement" : cypherQuery2, "resultDataContents" : resultDataContents2] as [String : Any]
         let statements2 = [statement2]
         
-        theo.executeTransaction(statements2, completionBlock: { (response, error) in
+        APIKeys.shared.theo.executeTransaction(statements2, completionBlock: { (response, error) in
             ///*
             if error != nil {
                 print("loadIndividual error: \(error)")
@@ -717,7 +712,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         let statement = ["statement" : cypherQuery, "resultDataContents" : resultDataContents] as [String : Any]
         let statements = [statement]
         
-        theo.executeTransaction(statements, completionBlock: { (response, error) in
+        APIKeys.shared.theo.executeTransaction(statements, completionBlock: { (response, error) in
             ///*
             if error != nil {
                 print("updateconnections error: \(error)")
@@ -1116,7 +1111,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
         let resultDataContents = ["row", "graph"]
         let statement = ["statement" : cypher, "resultDataContents" : resultDataContents] as [String : Any]
         let statements = [statement]
-        theo.executeTransaction(statements, completionBlock: { (response, error) in
+        APIKeys.shared.theo.executeTransaction(statements, completionBlock: { (response, error) in
             print("delete response: \(response), delete error: \(error)")
         })
     }
@@ -1269,7 +1264,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         origin.setProp("board", propertyValue: "\(self.label.text!)")
                         origin.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
                         origin.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
-                        theo.createNode(origin, labels: ["\(ided)"], completionBlock: { (node, error) in
+                        APIKeys.shared.theo.createNode(origin, labels: ["\(ided)"], completionBlock: { (node, error) in
                             relateOrigin = node
                             print("note error: \(error)")
                             let rawID = node?.id
@@ -1291,7 +1286,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         origin.setProp("board", propertyValue: "\(self.label.text!)")
                         origin.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
                         origin.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
-                        theo.createNode(origin, labels: ["\(ided)"], completionBlock: { (node, error) in
+                        APIKeys.shared.theo.createNode(origin, labels: ["\(ided)"], completionBlock: { (node, error) in
                             relateOrigin = node
                             print("image error: \(error)")
                             let rawID = node?.id
@@ -1348,7 +1343,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
 //                    }
                     
                     ///* Now have a way to update/delete for images like notes
-                    theo.fetchNode(item.uniqueID, completionBlock: {(node, error) in
+                    APIKeys.shared.theo.fetchNode(item.uniqueID, completionBlock: {(node, error) in
                         print("id node: \(node)")
                         
                         if item.specific == connect.origin {
@@ -1362,14 +1357,14 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         print("item note: \(item.note)")
                         if noteUpdate {
                         
-                            self.theo.updateNode(node!, properties: updatedNoteProperties, completionBlock: {(node, error) in
+                            APIKeys.shared.theo.updateNode(node!, properties: updatedNoteProperties, completionBlock: {(node, error) in
                                     print("updatenote 1 error: \(error)")
                                     semaphore.signal()
                                 })
                             
                         } else if imageUpdate {
                             
-                            self.theo.updateNode(node!, properties: updatedImageProperties, completionBlock: {(node, error) in
+                            APIKeys.shared.theo.updateNode(node!, properties: updatedImageProperties, completionBlock: {(node, error) in
                                 print("updateimage 1 error: \(error)")
                                 semaphore.signal()
                             })
@@ -1406,7 +1401,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         end.setProp("board", propertyValue: "\(self.label.text!)")
                         end.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
                         end.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
-                        theo.createNode(end, labels: ["\(ided)"], completionBlock: { (node, error) in
+                        APIKeys.shared.theo.createNode(end, labels: ["\(ided)"], completionBlock: { (node, error) in
                             relateEnd = node
                             print("note error: \(error)")
                             let rawID = node?.id
@@ -1427,7 +1422,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         end.setProp("board", propertyValue: "\(self.label.text!)")
                         end.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
                         end.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
-                        theo.createNode(end, labels: ["\(ided)"], completionBlock: { (node, error) in
+                        APIKeys.shared.theo.createNode(end, labels: ["\(ided)"], completionBlock: { (node, error) in
                             relateEnd = node
                             print("image error: \(error)")
                             let rawID = node?.id
@@ -1479,7 +1474,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                     //                    }
                 
                     
-                    theo.fetchNode(item.uniqueID, completionBlock: {(node, error) in
+                    APIKeys.shared.theo.fetchNode(item.uniqueID, completionBlock: {(node, error) in
                         print("id node2: \(node)")
                         
                         if item.specific == connect.end {
@@ -1491,14 +1486,14 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                         /////
                         if noteUpdate {
                             
-                            self.theo.updateNode(node!, properties: updatedNoteProperties, completionBlock: {(node, error) in
+                            APIKeys.shared.theo.updateNode(node!, properties: updatedNoteProperties, completionBlock: {(node, error) in
                                     print("updatenote 2 error: \(error)")
                                     semaphore2.signal()
                                 })
                             
                         } else if imageUpdate {
                             
-                            self.theo.updateNode(node!, properties: updatedImageProperties, completionBlock: {(node, error) in
+                            APIKeys.shared.theo.updateNode(node!, properties: updatedImageProperties, completionBlock: {(node, error) in
                                 print("updateimage 2 error: \(error)")
                                 semaphore2.signal()
                             })
@@ -1528,14 +1523,14 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                 print("connectID: \(connect.connection)")
                 print("downloadconnect count: \(ItemFrames.shared.downloadedConnections.count)")
                 if (ItemFrames.shared.downloadedConnections.count == 0) {
-                    theo.createRelationship(relate, completionBlock: {(node, error) in
+                    APIKeys.shared.theo.createRelationship(relate, completionBlock: {(node, error) in
                         print("relate error: \(error)")
                     })
                 } else {
                     
                     
                     if ((ItemFrames.shared.downloadedConnections.contains(where: {($0.connection == connect.connection) && ($0.end == "\(1*relateEnd.id)") && ($0.origin == "\(1*relateOrigin.id)")}) == false)) {
-                            theo.createRelationship(relate, completionBlock: {(node, error) in
+                            APIKeys.shared.theo.createRelationship(relate, completionBlock: {(node, error) in
                                 print("relate error: \(error)")
                         })
                     }
@@ -1592,7 +1587,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                     node.setProp("board", propertyValue: "\(self.label.text!)")
                     node.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
                     node.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
-                    theo.createNode(node, labels: ["\(ided)"], completionBlock: { (node, error) in
+                    APIKeys.shared.theo.createNode(node, labels: ["\(ided)"], completionBlock: { (node, error) in
                         print("note error: \(error)")
                         let rawID = node?.id
                         ///* For some reason this crashed as nil
@@ -1613,7 +1608,7 @@ class DetailViewController: UIViewController, UIPopoverControllerDelegate, UIPop
                     node.setProp("board", propertyValue: "\(self.label.text!)")
                     node.setProp("x coordinate", propertyValue: "\(item.frame.minX)")
                     node.setProp("y coordinate", propertyValue: "\(item.frame.minY)")
-                    theo.createNode(node, labels: ["\(ided)"], completionBlock: { (node, error) in
+                    APIKeys.shared.theo.createNode(node, labels: ["\(ided)"], completionBlock: { (node, error) in
                         print("image error: \(error)")
                         let rawID = node?.id
                         let intID = 1*rawID!

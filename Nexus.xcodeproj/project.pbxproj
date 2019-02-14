@@ -33,6 +33,8 @@
 		FCA7A10B21992B530096E821 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCA7A10A21992B530096E821 /* Reachability.swift */; };
 		FCAEFD5B20B5535700F64F49 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FCAEFD5A20B5535700F64F49 /* GoogleService-Info.plist */; };
 		FCDF45C320CCE6340030FF12 /* EditNameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCDF45C220CCE6340030FF12 /* EditNameController.swift */; };
+		FCFD78B922116F2A005AA8A5 /* LoadingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFD78B822116F2A005AA8A5 /* LoadingViewController.swift */; };
+		FCFD78BB22125F14005AA8A5 /* StartUpSegue.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCFD78BA22125F14005AA8A5 /* StartUpSegue.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,6 +68,8 @@
 		FCA7A10A21992B530096E821 /* Reachability.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reachability.swift; sourceTree = "<group>"; };
 		FCAEFD5A20B5535700F64F49 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		FCDF45C220CCE6340030FF12 /* EditNameController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditNameController.swift; sourceTree = "<group>"; };
+		FCFD78B822116F2A005AA8A5 /* LoadingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingViewController.swift; sourceTree = "<group>"; };
+		FCFD78BA22125F14005AA8A5 /* StartUpSegue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartUpSegue.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -186,7 +190,9 @@
 			isa = PBXGroup;
 			children = (
 				FC31192120A6561100B8E547 /* AppDelegate.swift */,
+				FCFD78B822116F2A005AA8A5 /* LoadingViewController.swift */,
 				FC31192320A6561100B8E547 /* CustomSegue.swift */,
+				FCFD78BA22125F14005AA8A5 /* StartUpSegue.swift */,
 				FC2EA8E621E6AF4D000C5986 /* APIKeys.swift */,
 				FC31192520A6561100B8E547 /* LaunchScreen.storyboard */,
 				FC31192620A6561100B8E547 /* Main.storyboard */,
@@ -413,9 +419,11 @@
 				FC31192B20A6561100B8E547 /* DetailViewController.swift in Sources */,
 				FC31192920A6561100B8E547 /* AddType.swift in Sources */,
 				FCA7A10B21992B530096E821 /* Reachability.swift in Sources */,
+				FCFD78B922116F2A005AA8A5 /* LoadingViewController.swift in Sources */,
 				FC31193120A6561100B8E547 /* Cell.swift in Sources */,
 				FC7E08CA21EEAA3B00968A5E /* TutorialViewController.swift in Sources */,
 				FC31193620A6561100B8E547 /* CustomSegue.swift in Sources */,
+				FCFD78BB22125F14005AA8A5 /* StartUpSegue.swift in Sources */,
 				FC2EDB1520C07C89005ADBE4 /* DownloadItem.swift in Sources */,
 				FC31192A20A6561100B8E547 /* AddTypeCell.swift in Sources */,
 				FC31192C20A6561100B8E547 /* Connection.swift in Sources */,

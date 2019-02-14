@@ -14,18 +14,46 @@ protocol SegueDelegate {
     func delete(from: UITextView, cell: Cell)
 }
 
+/* Represent a board in Master */
 class Cell: UICollectionViewCell, UITextViewDelegate {
     
     @IBOutlet weak var textView: CenteredTextView!
     @IBOutlet weak var deleteBackgroundView: UIVisualEffectView!
     @IBOutlet weak var deleteButton: UIButton!
     
-    
     var delegate: SegueDelegate!
     
+    // MARK: Lifecycle functions
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.textView.delegate = self
+        self.textView.clipsToBounds = true
+        let stencil = UIImage(named: "X")!.withRenderingMode(.alwaysTemplate)
+        deleteButton.setImage(stencil, for: .normal)
+        deleteButton.tintColor = .red
+    }
+    
+    override func layoutSubviews() {
+        self.textView.centerVertically()
+    }
+    
+    @IBAction func deleteButtonTapped(_ sender: Any) {
+        delegate.delete(from: textView, cell: self)
+    }
+    
+    // MARK: UI and UX functions
+    
+    // Hero component for the cell
+    var labelName: String? {
+        didSet {
+            textView.hero.id = labelName
+        }
+    }
+    
+    // Changes UI based on editing status
     var isEditing: Bool = false {
         didSet {
-            
             if isEditing {
                 deleteButton.alpha =  1.0
                 deleteButton.isUserInteractionEnabled = true
@@ -52,31 +80,8 @@ class Cell: UICollectionViewCell, UITextViewDelegate {
         }
     }
     
-    // Hero component for the cell
-    var labelName: String? {
-        didSet {
-            textView.hero.id = labelName
-        }
-    }
-    
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        // Initialization code
-        self.textView.delegate = self
-        self.textView.clipsToBounds = true
-        let stencil = UIImage(named: "X")!.withRenderingMode(.alwaysTemplate)
-        deleteButton.setImage(stencil, for: .normal)
-        deleteButton.tintColor = .red
-    }
-
-    // Placing the centering function in layout makes it work
-    override func layoutSubviews() {
-        self.textView.centerVertically()
-    }
-    
     // Sets up blur view
     func setUp (editing: Bool) {
-        
         self.layer.cornerRadius = 5.0
         self.layer.borderColor = UIColor.white.cgColor
         
@@ -85,7 +90,6 @@ class Cell: UICollectionViewCell, UITextViewDelegate {
             deleteButton.alpha = 1.0
             deleteButton.isUserInteractionEnabled = true
             self.textView.alpha = 0.75
-            
             self.layer.borderColor = UIColor(rgb: 0x34E5FF).cgColor
             self.textView.isUserInteractionEnabled = true
         } else {
@@ -100,16 +104,7 @@ class Cell: UICollectionViewCell, UITextViewDelegate {
         }
     }
     
-    @IBAction func deleteButtonTapped(_ sender: Any) {
-        delegate.delete(from: textView, cell: self)
-    }
-    
-    
-    //override func setSelected(_ selected: Bool, animated: Bool)
-    //    super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
-    //}
+    // MARK: TextView delegate functions
     
     func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
         let delegated = delegate as! MasterViewController
