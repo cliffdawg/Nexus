@@ -9,12 +9,31 @@
 import Foundation
 import UIKit
 
+/* Cell in adding pop-up */
 class AddTypeCell: UITableViewCell {
     
     @IBOutlet weak var add: UILabel!
     
+    override func awakeFromNib() {
+        super.awakeFromNib()
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        add.textColor = UIColor(rgb: 0x34E5FF)
+        for view in subviews {
+            if "\(Mirror(reflecting: view))" == "Mirror for UIButton" {
+                view.removeFromSuperview()
+            }
+        }
+    }
+    
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        super.setSelected(selected, animated: animated)
+    }
+    
+    // Set up the cell
     func configure(added: String) {
-        print("added: \(added)")
         if added == "Add Picture" {
             self.add.text = added
             self.add.textColor = .clear
@@ -33,22 +52,4 @@ class AddTypeCell: UITableViewCell {
         }
     }
     
-    override func awakeFromNib() {
-        super.awakeFromNib()
-    }
-    
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        add.textColor = UIColor(rgb: 0x34E5FF)
-        for view in subviews {
-            print("asdf: \(Mirror(reflecting: view))")
-            if "\(Mirror(reflecting: view))" == "Mirror for UIButton" {
-                view.removeFromSuperview()
-            }
-        }
-    }
-    
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-    }
 }

@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 
-/* Made this so that textView text is centered. */
+/* Use this to center textView text. */
 class CenteredTextView: UITextView {
     override var contentSize: CGSize {
         didSet {

@@ -13,12 +13,13 @@ import Firebase
 /* A connection between two items */
 class Connection {
     
+    // Attributes of the actual connection
     var origin: String!
     var end: String!
     var connection: String!
     var label: UILabel!
     
-    ///// Use these only for pulling data from Neo4j
+    // Uses these only for pulling data from Neo4j
     // Raw data templates from downloading
     var begin: DownloadItem!
     var finish: DownloadItem!
@@ -28,8 +29,6 @@ class Connection {
     // The actual objects created from downloaded data
     var downloadBegin: CustomImage!
     var downloadFinish: CustomImage!
-    /////
-    
     // These are only for locally created objects which haven't been uploaded yet
     var initialBegin: CustomImage!
     var initialFinish: CustomImage!
@@ -38,11 +37,11 @@ class Connection {
         
     }
     
+    // Sets up the connection
     func set(origin: CustomImage!, final: CustomImage!, connect: String!) {
         self.origin = origin.specific
         self.end = final.specific
         self.connection = connect
     }
-
     
 }

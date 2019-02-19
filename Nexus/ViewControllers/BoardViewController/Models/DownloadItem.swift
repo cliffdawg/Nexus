@@ -11,6 +11,7 @@ import Firebase
 import FirebaseStorage
 import FirebaseUI
 
+/* Raw data templates received from database */
 class DownloadItem {
 
     var uniqueID: String!
@@ -30,17 +31,16 @@ class DownloadItem {
         let gsReference = Storage.storage().reference(forURL: imageURL)
         gsReference.getData(maxSize: 1 * 2048 * 2048) { data, error in
             if error != nil {
-                print("error: \(error)")
+                print("Firebase Storage error: \(error)")
             } else {
-            print("downloadImage")
-            let imaged = UIImage(data: data!)! // Convert image to data
+                // Convert data to image
+                let imaged = UIImage(data: data!)!
                 self.image = self.resizeImage(image: imaged, newWidth: CGFloat(ItemFrames.shared.imageDimension)) as! UIImage
-                   
             }
         }
-            //Download firebase image link
-            self.imageRef = imageURL
-        }
+        //Download firebase image link
+        self.imageRef = imageURL
+    }
     
     // Scale the image if needed
     func resizeImage(image: UIImage, newWidth: CGFloat) -> UIImage? {

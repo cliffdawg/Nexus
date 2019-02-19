@@ -25,29 +25,26 @@ class ItemFrames {
     var downloadedConnections = [Connection]()
     var imageDimension = 80.0
     var noteDimension = 100.0
-    
     var orientation = ""
-    
     var rotatingTypeMenu: AddType!
     
     private init() {
         
     }
     
-    // When editing is triggered
+    // MARK: Note actions
+    
+    // When editing is triggered, bring textViews to front
     func bringNotesToFront() {
-        
         ItemFrames.shared.editing = true
         for frame in frames {
             frame.layer.borderWidth = 3.0
             frame.layer.cornerRadius = 5.0
-            
             for subframe in frame.subviews {
                 let viewString = "\(subframe)"
                 let start = viewString.index(viewString.startIndex, offsetBy: 8)
                 let start2 = viewString[start...].index(of: ":")
                 let resulting = viewString[start..<start2!]
-                print("view: \(resulting)")
                 if (resulting == "enteredTextView") {
                     subframe.isUserInteractionEnabled = true
                 }
@@ -55,19 +52,16 @@ class ItemFrames {
         }
     }
     
-    // When editing is finished
+    // When editing is finished, send textViews to back
     func sendNotesToBack() {
-        
         ItemFrames.shared.editing = false
         for frame in frames {
             frame.layer.borderWidth = 0.0
-            
             for subframe in frame.subviews {
                 let viewString = "\(subframe)"
                 let start = viewString.index(viewString.startIndex, offsetBy: 8)
                 let start2 = viewString[start...].index(of: ":")
                 let resulting = viewString[start..<start2!]
-                
                 if (resulting == "enteredTextView") {
                     subframe.isUserInteractionEnabled = false
                 }
@@ -83,56 +77,22 @@ class ItemFrames {
         }
     }
     
-    func removeOtherHighlights(object: CustomImage) {
-        for frame in frames {
-            if ((frame != object) && (frame.bordering == true)) {
-                print("target done")
-                frame.connecting = false
-                for view in frame.subviews{
-                    //print("view: \(view)")
-                    let viewString = "\(view)"
-                    
-                    let start = viewString.index(viewString.startIndex, offsetBy: 8)
-                    let start2 = viewString[start...].index(of: ":")
-                    let resulting = viewString[start..<start2!]
-                    
-                    
-                    if ((resulting == "View") || (resulting == "iew") || (resulting == "enteredTextView")) {
-                       
-                    } else {
-                        let fadeAnimation = AnimationType.rotate(angle: 0)
-                        view.animate(animations: [fadeAnimation], initialAlpha: 0.5, finalAlpha: 0.0, delay: 0.0, duration: 0.5, completion: {
-                            
-                            frame.sendSubview(toBack: view)
-                            frame.bordering = false
-                            
-                            
-                        })
-                    }
-                    
-                }
-            }
-        }
-    }
+    // MARK: Highlights actions
     
+    // Removes all highlights
     func removeAllHighlights() {
         for frame in frames {
-            print("target done")
             frame.connecting = false
             for view in frame.subviews{
-                //print("view: \(view)")
                 let viewString = "\(view)"
-                    
                 let start = viewString.index(viewString.startIndex, offsetBy: 8)
                 let start2 = viewString[start...].index(of: ":")
                 let resulting = viewString[start..<start2!]
-                
-                if ((resulting == "View") || (resulting == "iew") || (resulting == "enteredTextView")) {
-                        
+                if resulting == "View" || resulting == "iew" || resulting == "enteredTextView" {
+                    // Is not highlight overlay
                 } else {
                     let fadeAnimation = AnimationType.rotate(angle: 0)
                     view.animate(animations: [fadeAnimation], initialAlpha: 0.5, finalAlpha: 0.0, delay: 0.0, duration: 0.5, completion: {
-                            
                         frame.sendSubview(toBack: view)
                         frame.bordering = false
                     })
@@ -141,6 +101,33 @@ class ItemFrames {
         }
     }
     
+    // Remove other highlights after moving into another frame
+    func removeOtherHighlights(object: CustomImage) {
+        for frame in frames {
+            // If this highlight isn't the currently active one
+            if frame != object && frame.bordering == true {
+                frame.connecting = false
+                for view in frame.subviews{
+                    let viewString = "\(view)"
+                    let start = viewString.index(viewString.startIndex, offsetBy: 8)
+                    let start2 = viewString[start...].index(of: ":")
+                    let resulting = viewString[start..<start2!]
+                    if resulting == "View" || resulting == "iew" || resulting == "enteredTextView" {
+                       // Is not a highlight overlay
+                    } else {
+                        let fadeAnimation = AnimationType.rotate(angle: 0)
+                        view.animate(animations: [fadeAnimation], initialAlpha: 0.5, finalAlpha: 0.0, delay: 0.0, duration: 0.5, completion: {
+                            frame.sendSubview(toBack: view)
+                            frame.bordering = false
+                        })
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: Delete actions
+    
     func setupDeleteMode() {
         for frame in frames {
             frame.setupDelete()
@@ -148,27 +135,25 @@ class ItemFrames {
     }
     
     func exitDeleteMode() {
-        
         ItemFrames.shared.deleting = false
         for frame in frames {
             for subframe in frame.subviews {
                 let viewString = "\(subframe)"
-                print("view: \(viewString)")
                 let start = viewString.index(viewString.startIndex, offsetBy: 8)
                 let start2 = viewString[start...].index(of: ":")
                 let resulting = viewString[start..<start2!]
-                print("resulting: \(resulting)")
-                if (resulting == "n") {
+                // Removes the delete X's
+                if resulting == "n" {
                     let fadeAnimation = AnimationType.rotate(angle: 0)
                     subframe.animate(animations: [fadeAnimation], initialAlpha: 0.5, finalAlpha: 0.0, delay: 0.0, duration: 0.5, completion: {
                             subframe.removeFromSuperview()
                     })
                 }
             }
-//        let zoomAnimation = AnimationType.zoom(scale: 0.5)
-//        button.animate(animations: [zoomAnimation], initialAlpha: 0.0, finalAlpha: 1.0, delay: 0.0, duration: 0.5, completion: { })
         }
     }
+    
+    // MARK: Orientation actions
     
     // Sets up initial orientation of views before any rotations occur with them
     func initialOrientation(direction: String, view: UIView) {
@@ -180,159 +165,109 @@ class ItemFrames {
         }
     }
     
+    // Rotates items in accordance with phone
     func rotate(toOrientation: String, sender: Any) {
         
-        ///*
-        print("rotate frames: \(controllerViews)")
-        
         if toOrientation == "toRight" && ItemFrames.shared.orientation != "right" {
-            //
-            print("toRight")
             for item in frames {
                 item.transform = CGAffineTransform(rotationAngle: -CGFloat.pi/2)
                 let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
-                item.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
-
-                })
-                
+                item.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {})
             }
             for connect in connections {
                 connect.label.transform = CGAffineTransform(rotationAngle: -CGFloat.pi/2)
                 let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
-                connect.label.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
-                    
-                })
+                connect.label.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {})
             }
             for view in controllerViews {
                 view.transform = CGAffineTransform(rotationAngle: -CGFloat.pi/2)
                 let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
-                view.animate(animations: [rotateAnimation], initialAlpha: view.alpha, finalAlpha: view.alpha, delay: 0.0, duration: 0.25, completion: {
-                    
-                })
-                
+                view.animate(animations: [rotateAnimation], initialAlpha: view.alpha, finalAlpha: view.alpha, delay: 0.0, duration: 0.25, completion: {})
             }
             if rotatingTypeMenu != nil {
                 rotatingTypeMenu.view.transform = CGAffineTransform(rotationAngle: -CGFloat.pi/2)
                 let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
-                rotatingTypeMenu.view.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
-                    
-                })
+                rotatingTypeMenu.view.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {})
             }
             
             ItemFrames.shared.orientation = "right"
         }
         if toOrientation == "toLeft" && ItemFrames.shared.orientation != "left" {
-            //
-            print("toLeft")
             for item in frames {
                 item.transform = CGAffineTransform(rotationAngle: CGFloat.pi/2)
-                
                 let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
-                item.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
-
-                })
-            
+                item.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {})
             }
             for connect in connections {
-                // sometimes gets nil error here
                 connect.label.transform = CGAffineTransform(rotationAngle: CGFloat.pi/2)
                 let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
-                connect.label.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
-                    
-                })
+                connect.label.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {})
             }
             for view in controllerViews {
                 view.transform = CGAffineTransform(rotationAngle: CGFloat.pi/2)
                 let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
-                view.animate(animations: [rotateAnimation], initialAlpha: view.alpha, finalAlpha: view.alpha, delay: 0.0, duration: 0.25, completion: {
-                    
-                })
-                
+                view.animate(animations: [rotateAnimation], initialAlpha: view.alpha, finalAlpha: view.alpha, delay: 0.0, duration: 0.25, completion: {})
             }
             if rotatingTypeMenu != nil {
                 rotatingTypeMenu.view.transform = CGAffineTransform(rotationAngle: CGFloat.pi/2)
                 let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
-                rotatingTypeMenu.view.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
-                    
-                })
+                rotatingTypeMenu.view.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {})
             }
             
             ItemFrames.shared.orientation = "left"
         }
         if toOrientation == "backFromRight" && ItemFrames.shared.orientation != "" {
-            //
-            print("backFromRight")
             for item in frames {
                 item.transform = CGAffineTransform(rotationAngle: 0)
                 let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
-                item.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
-
-                })
-            
+                item.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {})
             }
             for connect in connections {
                 connect.label.transform = CGAffineTransform(rotationAngle: 0)
                 let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
-                connect.label.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
-                    
-                })
+                connect.label.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {})
             }
             for view in controllerViews {
                 view.transform = CGAffineTransform(rotationAngle: 0)
                 let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
-                view.animate(animations: [rotateAnimation], initialAlpha: view.alpha, finalAlpha: view.alpha, delay: 0.0, duration: 0.25, completion: {
-                    
-                })
-                
+                view.animate(animations: [rotateAnimation], initialAlpha: view.alpha, finalAlpha: view.alpha, delay: 0.0, duration: 0.25, completion: {})
             }
             if rotatingTypeMenu != nil {
                 rotatingTypeMenu.view.transform = CGAffineTransform(rotationAngle: 0)
                 let rotateAnimation = AnimationType.rotate(angle: -CGFloat.pi/2)
-                rotatingTypeMenu.view.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
-                    
-                })
+                rotatingTypeMenu.view.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {})
             }
             
             ItemFrames.shared.orientation = ""
         }
         if toOrientation == "backFromLeft"  && ItemFrames.shared.orientation != "" {
-            //
-            print("backFromLeft")
             for item in frames {
                 item.transform = CGAffineTransform(rotationAngle: 0)
                 let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
-                item.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
-
-                })
-                
+                item.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {})
             }
             for connect in connections {
                 connect.label.transform = CGAffineTransform(rotationAngle: 0)
                 let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
-                connect.label.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
-                    
-                })
+                connect.label.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {})
             }
             for view in controllerViews {
                 view.transform = CGAffineTransform(rotationAngle: 0)
                 let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
-                view.animate(animations: [rotateAnimation], initialAlpha: view.alpha, finalAlpha: view.alpha, delay: 0.0, duration: 0.25, completion: {
-                    
-                })
-                
+                view.animate(animations: [rotateAnimation], initialAlpha: view.alpha, finalAlpha: view.alpha, delay: 0.0, duration: 0.25, completion: {})
             }
             if rotatingTypeMenu != nil {
                 rotatingTypeMenu.view.transform = CGAffineTransform(rotationAngle: 0)
                 let rotateAnimation = AnimationType.rotate(angle: CGFloat.pi/2)
-                rotatingTypeMenu.view.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {
-                    
-                })
+                rotatingTypeMenu.view.animate(animations: [rotateAnimation], initialAlpha: 1.0, finalAlpha: 1.0, delay: 0.0, duration: 0.25, completion: {})
             }
                 
             ItemFrames.shared.orientation = ""
-            
         }
+        
     }
+    
+    // MARK: TextView actions
     
     // Scale textView font to fit inside it
     func updateTextFont(oneTextView: UITextView, fontSize: Int) {
@@ -347,13 +282,11 @@ class ItemFrames {
         var expectFont = oneTextView.font
         // Decreases until it fits in textView
         if (expectSize.height > textViewSize.height) {
-            print("1")
             while (oneTextView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat(MAXFLOAT))).height > textViewSize.height) {
                 expectFont = oneTextView.font!.withSize(oneTextView.font!.pointSize - 1)
                 oneTextView.font = expectFont
             }
         } else {
-            print("2")
             // Increases until it reaches the default font size
             while (oneTextView.sizeThatFits(CGSize(width: fixedWidth, height: CGFloat(MAXFLOAT))).height < textViewSize.height && Int((oneTextView.font?.pointSize)!) < fontSize) {
                 expectFont = oneTextView.font

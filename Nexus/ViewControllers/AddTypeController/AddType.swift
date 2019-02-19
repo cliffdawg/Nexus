@@ -19,9 +19,10 @@ class AddType: UITableViewController {
     let adds = ["Add Picture", "Add Note", "Create Connection", "Re-position Element", "Edit Element", "Delete Element"]
     var delegate2: ChooseAddDelegate!
     
+    // MARK: Lifecycle functions
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
     }
     
     override func didReceiveMemoryWarning() {
@@ -33,7 +34,7 @@ class AddType: UITableViewController {
         view.superview?.layer.cornerRadius = 5.0
     }
     
-    // MARK: - Table view data source
+    // MARK: TableView delegate functions
     
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
@@ -46,22 +47,19 @@ class AddType: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "adding", for: indexPath) as? AddTypeCell
         cell?.configure(added: adds[indexPath.row])
-        
         return cell!
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
         let cell = self.tableView.cellForRow(at: indexPath) as? AddTypeCell
         let cellText: String = (cell?.add.text)!
         delegate2.chooseAdd(chosenAdd: cellText)
         dismiss(animated: true, completion: nil)
-
     }
     
-    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat
-    {
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50.0
     }
+    
 }
 

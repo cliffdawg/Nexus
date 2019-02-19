@@ -16,7 +16,6 @@ enum CustomSegueAnimation {
     case CornerRotate
 }
 
-// MARK: Segue class
 /* Utilizing this for the clip-rotate animation */
 class CustomSegue: UIStoryboardSegue {
     
@@ -122,7 +121,9 @@ class CustomSegue: UIStoryboardSegue {
         }, completion: { finished in
             let fromVC: UIViewController = self.source
             let toVC: UIViewController = self.destination
-            fromVC.present(toVC, animated: false, completion: nil)
+            fromVC.present(toVC, animated: false, completion: {
+                fromVC.view.alpha = 0.0
+            })
         })
     }
 }
@@ -214,7 +215,6 @@ class CustomUnwindSegue: UIStoryboardSegue {
         fromViewController.view.layer.position = CGPoint.zero
         
         let containerView = fromViewController.view.superview
-        //////////////
         toViewController.view.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi / 2))
         containerView?.addSubview(toViewController.view)
         
@@ -222,8 +222,6 @@ class CustomUnwindSegue: UIStoryboardSegue {
             fromViewController.view.transform = CGAffineTransform(rotationAngle: CGFloat(Double.pi / 2))
             toViewController.view.transform = CGAffineTransform.identity
         }, completion: { finished in
-//            let fromVC = self.source
-//            fromVC.dismiss(animated: false, completion: nil)
             let fromVC: UIViewController = self.source
             let toVC: UIViewController = self.destination
             fromVC.present(toVC, animated: false, completion: nil)

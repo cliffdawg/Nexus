@@ -14,7 +14,6 @@ import IQKeyboardManagerSwift
 import Hero
 import Theo
 
-
 /* Stores all of the current board topics, loads from Core Data. */
 class MasterViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate, UITextFieldDelegate, SegueDelegate {
 
@@ -80,6 +79,7 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
         }
         
         self.setUpOrientation()
+        
     }
     
     // Tracks the editing status of the boards and updates options based on it
@@ -126,7 +126,8 @@ class MasterViewController: UIViewController, UICollectionViewDelegate, UICollec
         }
     }
     
-    // MARK: Construction functions
+    // MARK: Initialization functions
+    
     
     // As it scrolls, clip the gradient to the edges
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

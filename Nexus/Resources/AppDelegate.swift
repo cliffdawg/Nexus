@@ -30,28 +30,18 @@ extension String {
 class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDelegate {
 
     var window: UIWindow?
-
-    ///
     var restrictRotation: UIInterfaceOrientationMask = .portrait
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         FirebaseApp.configure()
         IQKeyboardManager.sharedManager().enable = true
-        print("IQKeyboard")
         Reachability.shared.reachabilityManager?.startListening()
         return true
     }
 
-    ///
     func application(_ application: UIApplication, supportedInterfaceOrientationsFor window: UIWindow?) -> UIInterfaceOrientationMask
     {
-//        switch UIDevice.current.orientation {
-//
-//        }
-        
-        print("return orientation")
-        //ItemFrames.shared.rotate()
         return self.restrictRotation
     }
     
@@ -59,31 +49,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         Reachability.shared.reachabilityManager?.startListening()
     }
     
-    //
-    // Now test what happens for unsecure network
+    // Check connection received by reachability
     func checkConnection() {
         
         let task = DispatchWorkItem {
-            print("TASK RUN")
             if Reachability.shared.reachabilityManager?.networkReachabilityStatus == Alamofire.NetworkReachabilityManager.NetworkReachabilityStatus.reachable(NetworkReachabilityManager.ConnectionType.ethernetOrWiFi) {
                     if Reachability.shared.warningBanner.isDisplaying == false {
                         Reachability.shared.dangerBanner.dismiss()
                         Reachability.shared.warningBanner.show()
-                        }
+                    }
                 }
             return
         }
         
-        // execute task in 5 seconds
+        // Execute task in 5 seconds
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 5, execute: {
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now(), execute: task)
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 0.1, execute: {
                 task.cancel()
-                print("task canceled?: \(task.isCancelled)")
             })
-            
         })
-        
         
         let strURL = APIKeys.shared.baseURL
         Alamofire.request(strURL,
@@ -91,33 +76,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
                           parameters: nil)
             .validate()
             .responseJSON { response in
-                // Put an async await for the response
+                // Put an async-await for the response
                 print("Check connection response: \(response)")
                 guard response.result.isSuccess else {
                     
                     // TODO: Refactor everything and make neat
-                    print("Alamofire error: \(String(describing: response.result.error!))")
                     if String(describing: response.result.error!).trunc(length: 65) == """
                         Error Domain=NSURLErrorDomain Code=-1001 "The request timed out."
                         """ {
-                            print("Unsecure parsed")
                             if task.isCancelled == false {
-                                print("Not secure")
+                                // Not Secure
                                 Reachability.shared.dangerBanner.dismiss()
                                 Reachability.shared.warningBanner.show()
                             }
                         } else if String(describing: response.result.error!).trunc(length: 117) == "responseValidationFailed(reason: Alamofire.AFError.ResponseValidationFailureReason.unacceptableStatusCode(code: 401))" {
-                            print("Internet")
+                            // Internet available
                             task.cancel()
-                        // Connectivity alerts for successes are obsolete
-//                            Reachability.shared.warningBanner.dismiss()
-//                            Reachability.shared.dangerBanner.dismiss()
-//                            Reachability.shared.successBanner.show()
                     }
                     return
-                }
+            }
         }
-        
     }
     
     func applicationWillResignActive(_ application: UIApplication) {
@@ -151,12 +129,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
         return urls[urls.count-1] as NSURL
     }()
     
-    
     lazy var managedObjectModel: NSManagedObjectModel = {
         let modelURL = Bundle.main.url(forResource: "Nexus", withExtension: "momd")!
         return NSManagedObjectModel(contentsOf: modelURL)!
     }()
-    
     
     lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
         
@@ -183,7 +159,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
     
     
     lazy var managedObjectContext: NSManagedObjectContext = {
-        
         let coordinator = self.persistentStoreCoordinator
         var managedObjectContext = NSManagedObjectContext(concurrencyType: .mainQueueConcurrencyType)
         managedObjectContext.persistentStoreCoordinator = coordinator
@@ -197,7 +172,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UISplitViewControllerDele
             do {
                 try managedObjectContext.save()
             } catch {
-                
                 let nserror = error as NSError
                 NSLog("Unresolved error \(nserror), \(nserror.userInfo)")
                 abort()

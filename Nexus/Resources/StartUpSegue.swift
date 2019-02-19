@@ -16,8 +16,7 @@ enum StarUpCustomSegueAnimation {
     case CornerRotate
 }
 
-// MARK: Segue class
-/* Utilizing this for the clip-rotate animation */
+/* Utilizing this for the slide-down animation */
 class StartUpCustomSegue: UIStoryboardSegue {
     
     var animationType = CustomSegueAnimation.SwipeDown
