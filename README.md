@@ -1,4 +1,4 @@
-# Nexus
+# flipBoards
 
 ![alt text](https://github.com/cliffdawg/Nexus/blob/master/Nexus/Nexus/Resources/Assets.xcassets/Nexus.imageset/cliff.png)
 
