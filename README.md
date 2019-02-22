@@ -1,6 +1,6 @@
 # Nexus
 
-![alt text](https://github.com/cliffdawg/Nexus/Nexus/Resources/Assets.xcassets/Nexus.imageset/cliff.png)
+![alt text](https://github.com/cliffdawg/Nexus/blob/master/Nexus/Nexus/Resources/Assets.xcassets/Nexus.imageset/cliff.png)
 
 A dynamic, interaction-enabled corkboard-type iOS app that places special emphasis on the connections/relationships between items.
 
