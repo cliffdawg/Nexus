@@ -1,4 +1,4 @@
-# flipBoards
+# Smorgasboards
 
 
 <img src="https://github.com/cliffdawg/Nexus/blob/master/Nexus/Resources/Assets.xcassets/Nexus.imageset/cliff.png" width="250">
